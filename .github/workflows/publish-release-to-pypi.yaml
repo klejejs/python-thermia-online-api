@@ -7,7 +7,7 @@ on:
       - released
 
 jobs:
-  publish_release:
+  build-and-upload-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
