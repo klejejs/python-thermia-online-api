@@ -1,5 +1,5 @@
-from api.ThermiaAPI import ThermiaAPI
-from model.WaterHeater import ThermiaWaterHeater
+from ThermiaOnlineAPI.api.ThermiaAPI import ThermiaAPI
+from ThermiaOnlineAPI.model.WaterHeater import ThermiaWaterHeater
 
 class Thermia():
     def __init__(self, username, password):

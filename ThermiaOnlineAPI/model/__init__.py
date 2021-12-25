@@ -1,0 +1,1 @@
+"""Water Heater Model"""
