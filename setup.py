@@ -8,7 +8,7 @@ long_description = (current_directory / "README.md").read_text()
 setup(
   name='ThermiaOnlineAPI',
   packages=['ThermiaOnlineAPI', 'ThermiaOnlineAPI.api', 'ThermiaOnlineAPI.model'],
-  version='1.4',
+  version='1.5',
   license='GPL-3.0',
   description='A Python API for Thermia heat pumps using https://online.thermia.se',
   long_description=long_description,
