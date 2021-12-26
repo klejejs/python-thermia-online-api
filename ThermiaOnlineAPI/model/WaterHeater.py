@@ -14,6 +14,7 @@ class ThermiaWaterHeater():
         self.__api_interface = api_interface
         self.__info = None
         self.__status = None
+        self.__temperature_state = None
         self.__operation_mode_state = None
 
         self.refetch_data()
@@ -21,16 +22,19 @@ class ThermiaWaterHeater():
     def refetch_data(self):
         self.__info = self.__api_interface.get_device_info(self.__device_data)
         self.__status = self.__api_interface.get_device_status(self.__device_data)
+        self.__temperature_state = self.__api_interface.get_temperature_status(self.__device_data)
         self.__operation_mode_state = self.__api_interface.get_operation_mode(self.__device_data)
 
     def set_temperature(self, temperature: int):
         LOGGER.info("Setting temperature to " + str(temperature))
         self.__api_interface.set_temperature(self, temperature)
+        self.__status["heatingEffect"] = temperature # update local state before refetching data
         self.refetch_data()
 
     def set_operation_mode(self, mode: str):
         LOGGER.info("Setting operation mode to " + str(mode))
         self.__api_interface.set_operation_mode(self, mode)
+        self.__operation_mode_state["current"] = mode # update local state before refetching data
         self.refetch_data()
 
     @property
@@ -76,6 +80,18 @@ class ThermiaWaterHeater():
     @property
     def heat_temperature(self):
         return self.__status.get("heatingEffect")
+
+    @property
+    def heat_min_temperature_value(self):
+        return self.__temperature_state.get("minValue")
+
+    @property
+    def heat_max_temperature_value(self):
+        return self.__temperature_state.get("maxValue")
+
+    @property
+    def heat_temperature_step(self):
+        return self.__temperature_state.get("step")
 
     @property
     def operation_mode(self):

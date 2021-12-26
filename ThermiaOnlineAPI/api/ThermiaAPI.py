@@ -10,9 +10,9 @@ DEFAULT_REQUEST_HEADERS = {"Authorization": "Bearer %s", "Content-Type": "applic
 
 THERMIA_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
 
-SET_REGISTER_VALUES = {
-    "set_temperature": 50,
-    "set_operation_mode": 51,
+REGISTER_VALUES = {
+    "temperature": 50,
+    "operation_mode": 51,
 }
 
 class ThermiaAPI():
@@ -32,7 +32,7 @@ class ThermiaAPI():
         request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
         status = request.status_code
         LOGGER.info("Fetching devices. " + str(status))
-        
+
         if status != 200:
             LOGGER.error("Error fetching devices. " + str(status))
             return []
@@ -65,6 +65,28 @@ class ThermiaAPI():
 
         return request.json()
 
+    def get_temperature_status(self, device):
+        self.__check_token_validity()
+
+        url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device['id']) + "/Groups/REG_GROUP_TEMPERATURES"
+        request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
+        status = request.status_code
+
+        if status != 200:
+            LOGGER.error("Error in getting device's operation mode. " + str(status))
+            return None
+
+        data = [d for d in request.json() if d['registerIndex'] == REGISTER_VALUES['temperature']]
+
+        if len(data) == 0:
+            return None
+
+        return {
+            "minValue": data[0]['minValue'],
+            "maxValue": data[0]['maxValue'],
+            "step": data[0]['step'],
+        }
+
     def get_operation_mode(self, device):
         self.__check_token_validity()
 
@@ -76,10 +98,13 @@ class ThermiaAPI():
             LOGGER.error("Error in getting device's operation mode. " + str(status))
             return None
 
-        data = request.json()[0]
+        data = [d for d in request.json() if d['registerIndex'] == REGISTER_VALUES['operation_mode']]
 
-        current_operation_mode = int(data.get("registerValue"))
-        operation_modes_data = data.get("valueNames")
+        if len(data) == 0:
+            return None
+
+        current_operation_mode = int(data[0].get("registerValue"))
+        operation_modes_data = data[0].get("valueNames")
 
         if operation_modes_data is not None:
             operation_modes = list(map(lambda values: values.get("name").split("REG_VALUE_OPERATION_MODE_")[1], operation_modes_data))
@@ -91,13 +116,13 @@ class ThermiaAPI():
         return None
 
     def set_temperature(self, device: ThermiaWaterHeater, temperature):
-        self.__set_register_value(device, SET_REGISTER_VALUES["set_temperature"], temperature)
+        self.__set_register_value(device, REGISTER_VALUES["temperature"], temperature)
 
     def set_operation_mode(self, device: ThermiaWaterHeater, mode):
         operation_mode_int = device.available_operation_modes.index(mode)
-        self.__set_register_value(device, SET_REGISTER_VALUES["set_operation_mode"], operation_mode_int)
+        self.__set_register_value(device, REGISTER_VALUES["operation_mode"], operation_mode_int)
 
-    def __set_register_value(self, device: ThermiaWaterHeater, register_index: SET_REGISTER_VALUES, register_value: int):
+    def __set_register_value(self, device: ThermiaWaterHeater, register_index: REGISTER_VALUES, register_value: int):
         self.__check_token_validity()
 
         url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device.id) + "/Registers"

@@ -20,8 +20,13 @@ print("Outdoor Temperature: " + str(water_heater.outdoor_temperature))
 print("Is Hot Water Active: " + str(water_heater.is_hot_water_active))
 print("Hot Water Temperature: " + str(water_heater.hot_water_temperature))
 print("Heat Temperature: " + str(water_heater.heat_temperature))
+print("Heat Min Temperature Value: " + str(water_heater.heat_min_temperature_value))
+print("Heat Max Temperature Value: " + str(water_heater.heat_max_temperature_value))
+print("Heat Temperature Step: " + str(water_heater.heat_temperature_step))
 print("Operation Mode: " + str(water_heater.operation_mode))
 print("Available Operation Modes: " + str(water_heater.available_operation_modes))
+
+print("\n")
 
 water_heater.set_temperature(19)
 water_heater.set_operation_mode("COMPRESSOR")
