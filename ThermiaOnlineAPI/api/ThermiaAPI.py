@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 import requests
 
-from ..model.WaterHeater import ThermiaWaterHeater
+from ..model.HeatPump import ThermiaHeatPump
 
 LOGGER = logging.getLogger(__name__)
 
@@ -115,14 +115,14 @@ class ThermiaAPI():
 
         return None
 
-    def set_temperature(self, device: ThermiaWaterHeater, temperature):
+    def set_temperature(self, device: ThermiaHeatPump, temperature):
         self.__set_register_value(device, REGISTER_VALUES["temperature"], temperature)
 
-    def set_operation_mode(self, device: ThermiaWaterHeater, mode):
+    def set_operation_mode(self, device: ThermiaHeatPump, mode):
         operation_mode_int = device.available_operation_modes.index(mode)
         self.__set_register_value(device, REGISTER_VALUES["operation_mode"], operation_mode_int)
 
-    def __set_register_value(self, device: ThermiaWaterHeater, register_index: REGISTER_VALUES, register_value: int):
+    def __set_register_value(self, device: ThermiaHeatPump, register_index: REGISTER_VALUES, register_value: int):
         self.__check_token_validity()
 
         url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device.id) + "/Registers"

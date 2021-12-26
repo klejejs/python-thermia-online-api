@@ -1,17 +1,17 @@
 from ThermiaOnlineAPI.api.ThermiaAPI import ThermiaAPI
-from ThermiaOnlineAPI.model.WaterHeater import ThermiaWaterHeater
+from ThermiaOnlineAPI.model.HeatPump import ThermiaHeatPump
 
 class Thermia():
     def __init__(self, username, password):
         self.api_interface = ThermiaAPI(username, password)
         self.connected = self.api_interface.authenticated
-        self.water_heaters = self.__get_water_heaters()
+        self.heat_pumps = self.__get_heat_pumps()
 
-    def __get_water_heaters(self):
+    def __get_heat_pumps(self):
         devices = self.api_interface.get_devices()
-        water_heaters = []
+        heat_pumps = []
 
         for device in devices:
-            water_heaters.append(ThermiaWaterHeater(device, self.api_interface))
+            heat_pumps.append(ThermiaHeatPump(device, self.api_interface))
 
-        return water_heaters
+        return heat_pumps

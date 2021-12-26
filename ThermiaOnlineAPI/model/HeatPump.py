@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-class ThermiaWaterHeater():
+class ThermiaHeatPump():
     def __init__(self, device_data: json, api_interface: "ThermiaAPI"):
         self.__device_data = device_data
         self.__api_interface = api_interface

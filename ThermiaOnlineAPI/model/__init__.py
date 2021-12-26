@@ -1,1 +1,1 @@
-"""Water Heater Model"""
+"""Heat Pump Model"""
