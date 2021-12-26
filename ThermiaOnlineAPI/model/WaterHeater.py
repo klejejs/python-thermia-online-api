@@ -27,14 +27,14 @@ class ThermiaWaterHeater():
 
     def set_temperature(self, temperature: int):
         LOGGER.info("Setting temperature to " + str(temperature))
-        self.__api_interface.set_temperature(self, temperature)
         self.__status["heatingEffect"] = temperature # update local state before refetching data
+        self.__api_interface.set_temperature(self, temperature)
         self.refetch_data()
 
     def set_operation_mode(self, mode: str):
         LOGGER.info("Setting operation mode to " + str(mode))
-        self.__api_interface.set_operation_mode(self, mode)
         self.__operation_mode_state["current"] = mode # update local state before refetching data
+        self.__api_interface.set_operation_mode(self, mode)
         self.refetch_data()
 
     @property
