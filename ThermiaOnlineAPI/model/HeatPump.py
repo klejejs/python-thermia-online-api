@@ -59,7 +59,10 @@ class ThermiaHeatPump():
 
     @property
     def indoor_temperature(self):
-        return self.__status.get("indoorTemperature")
+        if self.has_indoor_temp_sensor:
+            return self.__status.get("indoorTemperature")
+        else:
+            return self.heat_temperature
 
     @property
     def is_outdoor_temp_sensor_functioning(self):
