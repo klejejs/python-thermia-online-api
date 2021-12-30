@@ -10,11 +10,6 @@ DEFAULT_REQUEST_HEADERS = {"Authorization": "Bearer %s", "Content-Type": "applic
 
 THERMIA_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
 
-REGISTER_VALUES = {
-    "temperature": 50,
-    "operation_mode": 51,
-}
-
 class ThermiaAPI():
     def __init__(self, email, password):
         self.__email = email
@@ -65,32 +60,40 @@ class ThermiaAPI():
 
         return request.json()
 
-    def get_temperature_status(self, device):
+    def get_temperature_status(self, device: ThermiaHeatPump):
         self.__check_token_validity()
 
-        url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device['id']) + "/Groups/REG_GROUP_TEMPERATURES"
+        url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device.id) + "/Groups/REG_GROUP_TEMPERATURES"
         request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
         status = request.status_code
 
         if status != 200:
-            LOGGER.error("Error in getting device's operation mode. " + str(status))
+            LOGGER.error("Error in getting device's temperature status. " + str(status))
             return None
 
-        data = [d for d in request.json() if d['registerIndex'] == REGISTER_VALUES['temperature']]
+        device_temperature_register_index = device.get_register_indexes()["temperature"]
+        if device_temperature_register_index is None:
+            LOGGER.error("Error in getting device's temperature status. No temperature register index.")
+            return None
+
+        data = [d for d in request.json() if d['registerIndex'] == device_temperature_register_index]
 
         if len(data) == 0:
+            LOGGER.error("Error in getting device's temperature status. Could not find temperature by register.")
             return None
+
+        data = data[0]
 
         return {
-            "minValue": data[0]['minValue'],
-            "maxValue": data[0]['maxValue'],
-            "step": data[0]['step'],
+            "minValue": data['minValue'],
+            "maxValue": data['maxValue'],
+            "step": data['step'],
         }
 
-    def get_operation_mode(self, device):
+    def get_operation_mode(self, device: ThermiaHeatPump):
         self.__check_token_validity()
 
-        url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device['id']) + "/Groups/REG_GROUP_OPERATIONAL_OPERATION"
+        url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device.id) + "/Groups/REG_GROUP_OPERATIONAL_OPERATION"
         request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
         status = request.status_code
 
@@ -98,13 +101,18 @@ class ThermiaAPI():
             LOGGER.error("Error in getting device's operation mode. " + str(status))
             return None
 
-        data = [d for d in request.json() if d['registerIndex'] == REGISTER_VALUES['operation_mode']]
+        data = [d for d in request.json() if d['registerName'] == "REG_OPERATIONMODE"]
 
         if len(data) == 0:
+            LOGGER.error("Error in getting device's operation mode. Could not find operation mode by register name.")
             return None
 
-        current_operation_mode = int(data[0].get("registerValue"))
-        operation_modes_data = data[0].get("valueNames")
+        data = data[0]
+
+        device.set_register_index_operation_mode(data['registerIndex'])
+
+        current_operation_mode = int(data.get("registerValue"))
+        operation_modes_data = data.get("valueNames")
 
         if operation_modes_data is not None:
             operation_modes = list(map(lambda values: values.get("name").split("REG_VALUE_OPERATION_MODE_")[1], operation_modes_data))
@@ -116,13 +124,24 @@ class ThermiaAPI():
         return None
 
     def set_temperature(self, device: ThermiaHeatPump, temperature):
-        self.__set_register_value(device, REGISTER_VALUES["temperature"], temperature)
+        device_temperature_register_index = device.get_register_indexes()["temperature"]
+        if device_temperature_register_index is None:
+            LOGGER.error("Error setting device's temperature. No temperature register index.")
+            return
+
+        self.__set_register_value(device, device_temperature_register_index, temperature)
 
     def set_operation_mode(self, device: ThermiaHeatPump, mode):
         operation_mode_int = device.available_operation_modes.index(mode)
-        self.__set_register_value(device, REGISTER_VALUES["operation_mode"], operation_mode_int)
 
-    def __set_register_value(self, device: ThermiaHeatPump, register_index: REGISTER_VALUES, register_value: int):
+        device_operation_mode_register_index = device.get_register_indexes()["operation_mode"]
+        if device_operation_mode_register_index is None:
+            LOGGER.error("Error setting device's operation mode. No operation mode register index.")
+            return
+        
+        self.__set_register_value(device, device_operation_mode_register_index, operation_mode_int)
+
+    def __set_register_value(self, device: ThermiaHeatPump, register_index: int, register_value: int):
         self.__check_token_validity()
 
         url = self.configuration['apiBaseUrl'] + "/api/v1/Registers/Installations/" + str(device.id) + "/Registers"

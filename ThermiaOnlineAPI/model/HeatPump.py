@@ -8,6 +8,11 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+DEFAULT_REGISTER_INDEXES = {
+    "temperature": None,
+    "operation_mode": None,
+}
+
 class ThermiaHeatPump():
     def __init__(self, device_data: json, api_interface: "ThermiaAPI"):
         self.__device_data = device_data
@@ -16,14 +21,25 @@ class ThermiaHeatPump():
         self.__status = None
         self.__temperature_state = None
         self.__operation_mode_state = None
+        
+        self.__register_indexes = DEFAULT_REGISTER_INDEXES
 
         self.refetch_data()
 
     def refetch_data(self):
         self.__info = self.__api_interface.get_device_info(self.__device_data)
         self.__status = self.__api_interface.get_device_status(self.__device_data)
-        self.__temperature_state = self.__api_interface.get_temperature_status(self.__device_data)
-        self.__operation_mode_state = self.__api_interface.get_operation_mode(self.__device_data)
+        
+        self.__register_indexes["temperature"] = self.__status.get("heatingEffectRegisters", [None, None])[1]
+        
+        self.__temperature_state = self.__api_interface.get_temperature_status(self)
+        self.__operation_mode_state = self.__api_interface.get_operation_mode(self)
+
+    def get_register_indexes(self):
+        return self.__register_indexes
+
+    def set_register_index_operation_mode(self, register_index: int):
+        self.__register_indexes["operation_mode"] = register_index
 
     def set_temperature(self, temperature: int):
         LOGGER.info("Setting temperature to " + str(temperature))
@@ -86,20 +102,30 @@ class ThermiaHeatPump():
 
     @property
     def heat_min_temperature_value(self):
-        return self.__temperature_state.get("minValue")
+        if self.__temperature_state is None:
+            return None
+        return self.__temperature_state.get("minValue", None)
 
     @property
     def heat_max_temperature_value(self):
-        return self.__temperature_state.get("maxValue")
+        if self.__temperature_state is None:
+            return None
+        return self.__temperature_state.get("maxValue", None)
 
     @property
     def heat_temperature_step(self):
-        return self.__temperature_state.get("step")
+        if self.__temperature_state is None:
+            return None
+        return self.__temperature_state.get("step", None)
 
     @property
     def operation_mode(self):
-        return self.__operation_mode_state["current"]
+        if self.__operation_mode_state is None:
+            return None
+        return self.__operation_mode_state.get("current", None)
 
     @property
     def available_operation_modes(self):
-        return self.__operation_mode_state["available"]
+        if self.__operation_mode_state is None:
+            return None
+        return self.__operation_mode_state.get("available", [])

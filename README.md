@@ -1,5 +1,9 @@
 # Thermia Online API
-### A Python API for Thermia heat pumps using https://online.thermia.se 
+### A Python API for Thermia heat pumps using https://online.thermia.se
+
+## Confirmed heat pumps that API supports:
+* Thermia Diplomat / Diplomat Duo
+* Thermia iTec (still to be confirmed)
 
 ## Available properties within ThermiaHeatPump class:
 | Property | Description |
