@@ -6,4 +6,5 @@ __pycache__/
 
 # PyPi
 MANIFEST
+build/
 dist/

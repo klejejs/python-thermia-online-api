@@ -7,7 +7,10 @@ current_directory = Path(__file__).parent
 long_description = (current_directory / "README.md").read_text()
 
 version = sys.argv[3:]
-if not version:
+if version:
+  version = str(version[0])
+  sys.argv.remove(version)
+else:
   raise Exception("Version is not set")
 
 setup(
