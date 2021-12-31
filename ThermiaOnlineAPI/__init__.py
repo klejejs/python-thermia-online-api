@@ -1,4 +1,5 @@
 from ThermiaOnlineAPI.api.ThermiaAPI import ThermiaAPI
+from ThermiaOnlineAPI.exceptions import AuthenticationException, NetworkException
 from ThermiaOnlineAPI.model.HeatPump import ThermiaHeatPump
 
 
