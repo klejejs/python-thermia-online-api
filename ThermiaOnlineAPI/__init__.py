@@ -1,13 +1,18 @@
 from ThermiaOnlineAPI.api.ThermiaAPI import ThermiaAPI
 from ThermiaOnlineAPI.model.HeatPump import ThermiaHeatPump
 
-class Thermia():
+
+class Thermia:
     def __init__(self, username, password):
+        self._username = username
+        self._password = password
+
         self.api_interface = ThermiaAPI(username, password)
         self.connected = self.api_interface.authenticated
-        self.heat_pumps = self.__get_heat_pumps()
 
-    def __get_heat_pumps(self):
+        self.heat_pumps = self.fetch_heat_pumps()
+
+    def fetch_heat_pumps(self) -> list[ThermiaHeatPump]:
         devices = self.api_interface.get_devices()
         heat_pumps = []
 
@@ -15,3 +20,7 @@ class Thermia():
             heat_pumps.append(ThermiaHeatPump(device, self.api_interface))
 
         return heat_pumps
+
+    def update_data(self) -> None:
+        for heat_pump in self.heat_pumps:
+            heat_pump.update_data()

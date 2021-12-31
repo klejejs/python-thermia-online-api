@@ -13,7 +13,8 @@ DEFAULT_REGISTER_INDEXES = {
     "operation_mode": None,
 }
 
-class ThermiaHeatPump():
+
+class ThermiaHeatPump:
     def __init__(self, device_data: json, api_interface: "ThermiaAPI"):
         self.__device_data = device_data
         self.__api_interface = api_interface
@@ -21,17 +22,19 @@ class ThermiaHeatPump():
         self.__status = None
         self.__temperature_state = None
         self.__operation_mode_state = None
-        
+
         self.__register_indexes = DEFAULT_REGISTER_INDEXES
 
-        self.refetch_data()
+        self.update_data()
 
-    def refetch_data(self):
+    def update_data(self):
         self.__info = self.__api_interface.get_device_info(self.__device_data)
         self.__status = self.__api_interface.get_device_status(self.__device_data)
-        
-        self.__register_indexes["temperature"] = self.__status.get("heatingEffectRegisters", [None, None])[1]
-        
+
+        self.__register_indexes["temperature"] = self.__status.get(
+            "heatingEffectRegisters", [None, None]
+        )[1]
+
         self.__temperature_state = self.__api_interface.get_temperature_status(self)
         self.__operation_mode_state = self.__api_interface.get_operation_mode(self)
 
@@ -43,15 +46,19 @@ class ThermiaHeatPump():
 
     def set_temperature(self, temperature: int):
         LOGGER.info("Setting temperature to " + str(temperature))
-        self.__status["heatingEffect"] = temperature # update local state before refetching data
+        self.__status[
+            "heatingEffect"
+        ] = temperature  # update local state before refetching data
         self.__api_interface.set_temperature(self, temperature)
-        self.refetch_data()
+        self.update_data()
 
     def set_operation_mode(self, mode: str):
         LOGGER.info("Setting operation mode to " + str(mode))
-        self.__operation_mode_state["current"] = mode # update local state before refetching data
+        self.__operation_mode_state[
+            "current"
+        ] = mode  # update local state before refetching data
         self.__api_interface.set_operation_mode(self, mode)
-        self.refetch_data()
+        self.update_data()
 
     @property
     def name(self):

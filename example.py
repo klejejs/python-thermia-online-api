@@ -15,7 +15,10 @@ print("Is Online: " + str(heat_pump.is_online))
 print("Last Online: " + str(heat_pump.last_online))
 print("Has Indoor Temp Sensor: " + str(heat_pump.has_indoor_temp_sensor))
 print("Indoor Temperature: " + str(heat_pump.indoor_temperature))
-print("Is Outdoor Temp Sensor Functioning: " + str(heat_pump.is_outdoor_temp_sensor_functioning))
+print(
+    "Is Outdoor Temp Sensor Functioning: "
+    + str(heat_pump.is_outdoor_temp_sensor_functioning)
+)
 print("Outdoor Temperature: " + str(heat_pump.outdoor_temperature))
 print("Is Hot Water Active: " + str(heat_pump.is_hot_water_active))
 print("Hot Water Temperature: " + str(heat_pump.hot_water_temperature))

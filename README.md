@@ -3,7 +3,13 @@
 
 ## Confirmed heat pumps that API supports:
 * Thermia Diplomat / Diplomat Duo
-* Thermia iTec (still to be confirmed)
+* Thermia iTec
+
+## Available functions in Thermia class:
+| Function | Description |
+| --- | --- |
+| `fetch_heat_pumps` | Fetches all heat pumps from Thermia Online API and their data |
+| `update_data` | Updates all heat pump data |
 
 ## Available properties within ThermiaHeatPump class:
 | Property | Description |
@@ -28,6 +34,6 @@
 ## Available functions within ThermiaHeatPump class:
 | Function | Description |
 | --- | --- |
-| `refetch_data` | Refetch all data from Thermia for Heat Pump |
+| `update_data` | Refetch all data from Thermia for Heat Pump |
 | `set_temperature` | Set the target temperature for the Heat Pump |
 | `set_operation_mode` | Set the operation mode for the Heat Pump |
