@@ -79,7 +79,7 @@ class ThermiaAPI():
         data = [d for d in request.json() if d['registerIndex'] == device_temperature_register_index]
 
         if len(data) == 0:
-            LOGGER.error("Error in getting device's temperature status. Could not find temperature by register.")
+            # Temperature status not supported
             return None
 
         data = data[0]
@@ -104,7 +104,7 @@ class ThermiaAPI():
         data = [d for d in request.json() if d['registerName'] == "REG_OPERATIONMODE"]
 
         if len(data) == 0:
-            LOGGER.error("Error in getting device's operation mode. Could not find operation mode by register name.")
+            # Operation mode not supported
             return None
 
         data = data[0]
