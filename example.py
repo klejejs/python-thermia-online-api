@@ -7,7 +7,7 @@ thermia = Thermia(USERNAME, PASSWORD)
 
 print("Connected: " + str(thermia.connected))
 
-heat_pump = thermia.heat_pumps[0]
+heat_pump = thermia.fetch_heat_pumps()[0]
 
 print("Name: " + heat_pump.name)
 print("Id: " + str(heat_pump.id))
@@ -30,6 +30,8 @@ print("Operation Mode: " + str(heat_pump.operation_mode))
 print("Available Operation Modes: " + str(heat_pump.available_operation_modes))
 
 print("\n")
+
+thermia.update_data()
 
 heat_pump.set_temperature(19)
 heat_pump.set_operation_mode("COMPRESSOR")

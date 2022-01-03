@@ -9,11 +9,6 @@ from ..model.HeatPump import ThermiaHeatPump
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_REQUEST_HEADERS = {
-    "Authorization": "Bearer %s",
-    "Content-Type": "application/json",
-}
-
 THERMIA_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
 THERMIA_INSTALLATION_PATH = "/api/v1/Registers/Installations/"
 
@@ -25,6 +20,11 @@ class ThermiaAPI:
         self.__token = None
         self.__token_valid_to = None
 
+        self.__default_request_headers = {
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json",
+        }
+
         self.configuration = self.__fetch_configuration()
         self.authenticated = self.__authenticate()
 
@@ -32,7 +32,7 @@ class ThermiaAPI:
         self.__check_token_validity()
 
         url = self.configuration["apiBaseUrl"] + "/api/v1/InstallationsInfo/own"
-        request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
+        request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
         LOGGER.info("Fetching devices. " + str(status))
 
@@ -50,7 +50,7 @@ class ThermiaAPI:
             + "/api/v1/installations/"
             + str(device["id"])
         )
-        request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
+        request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
         if status != 200:
@@ -68,7 +68,7 @@ class ThermiaAPI:
             + str(device["id"])
             + "/status"
         )
-        request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
+        request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
         if status != 200:
@@ -86,7 +86,7 @@ class ThermiaAPI:
             + str(device.id)
             + "/Groups/REG_GROUP_TEMPERATURES"
         )
-        request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
+        request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
         if status != 200:
@@ -127,7 +127,7 @@ class ThermiaAPI:
             + str(device.id)
             + "/Groups/REG_GROUP_OPERATIONAL_OPERATION"
         )
-        request = requests.get(url, headers=DEFAULT_REQUEST_HEADERS)
+        request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
         if status != 200:
@@ -208,7 +208,7 @@ class ThermiaAPI:
             "clientUuid": "api-client-uuid",
         }
 
-        request = requests.post(url, headers=DEFAULT_REQUEST_HEADERS, json=body)
+        request = requests.post(url, headers=self.__default_request_headers, json=body)
 
         status = request.status_code
         if status != 200:
@@ -259,9 +259,10 @@ class ThermiaAPI:
         self.__token = auth_data.get("token")
         self.__token_valid_to = token_valid_to
 
-        auth = DEFAULT_REQUEST_HEADERS.get("Authorization")
-        auth = auth % self.__token
-        DEFAULT_REQUEST_HEADERS["Authorization"] = auth
+        self.__default_request_headers = {
+            "Authorization": "Bearer " + self.__token,
+            "Content-Type": "application/json",
+        }
 
         LOGGER.info("Authentication was successful, token set.")
         return True
