@@ -17,6 +17,7 @@
 | `name` | Name of the Heat Pump |
 | `id` | Unique ID of the Heat Pump Thermia generates |
 | `is_online` | Boolean value indicating if the Heat Pump is online or not |
+| `model` | Model of the Heat Pump |
 | `last_online` | DateTime string indicating the last time the Heat Pump was online |
 | `has_indoor_temperature_sensor` | Boolean value indicating if the Heat Pump has an indoor temperature sensor |
 | `indoor_temperature` | Indoor temperature in Celsius, if `has_indoor_temperature_sensor` is False, this value is the same as `heat_temperature` |

@@ -13,6 +13,7 @@ print("Name: " + heat_pump.name)
 print("Id: " + str(heat_pump.id))
 print("Is Online: " + str(heat_pump.is_online))
 print("Last Online: " + str(heat_pump.last_online))
+print("Model: " + str(heat_pump.model))
 print("Has Indoor Temp Sensor: " + str(heat_pump.has_indoor_temp_sensor))
 print("Indoor Temperature: " + str(heat_pump.indoor_temperature))
 print(

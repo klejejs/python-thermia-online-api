@@ -77,6 +77,10 @@ class ThermiaHeatPump:
         return self.__info.get("lastOnline")
 
     @property
+    def model(self):
+        return self.__device_data.get("profile", {}).get("thermiaName")
+
+    @property
     def has_indoor_temp_sensor(self):
         return self.__status.get("hasIndoorTempSensor")
 
