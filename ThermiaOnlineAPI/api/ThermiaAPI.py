@@ -42,14 +42,23 @@ class ThermiaAPI:
 
         return request.json()
 
-    def get_device_info(self, device):
+    def get_device_by_id(self, device_id: str):
         self.__check_token_validity()
 
-        url = (
-            self.configuration["apiBaseUrl"]
-            + "/api/v1/installations/"
-            + str(device["id"])
-        )
+        devices = self.get_devices()
+
+        device = [d for d in devices if str(d["id"]) == device_id]
+
+        if len(device) != 1:
+            LOGGER.error("Error getting device by id: " + str(device_id))
+            return None
+
+        return device[0]
+
+    def get_device_info(self, device_id: str):
+        self.__check_token_validity()
+
+        url = self.configuration["apiBaseUrl"] + "/api/v1/installations/" + device_id
         request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
@@ -59,13 +68,13 @@ class ThermiaAPI:
 
         return request.json()
 
-    def get_device_status(self, device):
+    def get_device_status(self, device_id: str):
         self.__check_token_validity()
 
         url = (
             self.configuration["apiBaseUrl"]
             + "/api/v1/installationstatus/"
-            + str(device["id"])
+            + device_id
             + "/status"
         )
         request = requests.get(url, headers=self.__default_request_headers)
@@ -163,6 +172,42 @@ class ThermiaAPI:
 
         return None
 
+    def get_hot_water_switch_state(self, device: ThermiaHeatPump):
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + THERMIA_INSTALLATION_PATH
+            + str(device.id)
+            + "/Groups/REG_GROUP_HOT_WATER"
+        )
+        request = requests.get(url, headers=self.__default_request_headers)
+        status = request.status_code
+
+        if status != 200:
+            LOGGER.error("Error in getting device's operation mode. " + str(status))
+            return None
+
+        data = [
+            d for d in request.json() if d["registerName"] == "REG_HOT_WATER_STATUS"
+        ]
+
+        if len(data) == 0:
+            # Hot water switch not supported
+            return None
+
+        data = data[0]
+
+        device.set_register_index_hot_water_switch(data["registerIndex"])
+
+        current_switch_state = int(data.get("registerValue"))
+        switch_states_data = data.get("valueNames")
+
+        if switch_states_data is not None and len(switch_states_data) == 2:
+            return current_switch_state
+
+        return None
+
     def set_temperature(self, device: ThermiaHeatPump, temperature):
         device_temperature_register_index = device.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
@@ -189,6 +234,22 @@ class ThermiaAPI:
 
         self.__set_register_value(
             device, device_operation_mode_register_index, operation_mode_int
+        )
+
+    def set_hot_water_switch_state(
+        self, device: ThermiaHeatPump, state: int
+    ):  # 0 - off, 1 - on
+        device_hot_water_switch_state_register_index = device.get_register_indexes()[
+            "hot_water_switch"
+        ]
+        if device_hot_water_switch_state_register_index is None:
+            LOGGER.error(
+                "Error setting device's hot water switch state. No hot water switch register index."
+            )
+            return
+
+        self.__set_register_value(
+            device, device_hot_water_switch_state_register_index, state
         )
 
     def __set_register_value(

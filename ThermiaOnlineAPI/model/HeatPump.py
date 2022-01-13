@@ -11,25 +11,31 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_REGISTER_INDEXES = {
     "temperature": None,
     "operation_mode": None,
+    "hot_water_switch": None,
 }
 
 
 class ThermiaHeatPump:
     def __init__(self, device_data: json, api_interface: "ThermiaAPI"):
-        self.__device_data = device_data
+        self.__device_id = str(device_data["id"])
         self.__api_interface = api_interface
+
         self.__info = None
         self.__status = None
+        self.__device_data = None
+
         self.__temperature_state = None
         self.__operation_mode_state = None
+        self.__hot_water_switch_state = None
 
         self.__register_indexes = DEFAULT_REGISTER_INDEXES
 
         self.update_data()
 
     def update_data(self):
-        self.__info = self.__api_interface.get_device_info(self.__device_data)
-        self.__status = self.__api_interface.get_device_status(self.__device_data)
+        self.__info = self.__api_interface.get_device_info(self.__device_id)
+        self.__status = self.__api_interface.get_device_status(self.__device_id)
+        self.__device_data = self.__api_interface.get_device_by_id(self.__device_id)
 
         self.__register_indexes["temperature"] = self.__status.get(
             "heatingEffectRegisters", [None, None]
@@ -37,12 +43,18 @@ class ThermiaHeatPump:
 
         self.__temperature_state = self.__api_interface.get_temperature_status(self)
         self.__operation_mode_state = self.__api_interface.get_operation_mode(self)
+        self.__hot_water_switch_state = self.__api_interface.get_hot_water_switch_state(
+            self
+        )
 
     def get_register_indexes(self):
         return self.__register_indexes
 
     def set_register_index_operation_mode(self, register_index: int):
         self.__register_indexes["operation_mode"] = register_index
+
+    def set_register_index_hot_water_switch(self, register_index: int):
+        self.__register_indexes["hot_water_switch"] = register_index
 
     def set_temperature(self, temperature: int):
         LOGGER.info("Setting temperature to " + str(temperature))
@@ -54,10 +66,24 @@ class ThermiaHeatPump:
 
     def set_operation_mode(self, mode: str):
         LOGGER.info("Setting operation mode to " + str(mode))
+
         self.__operation_mode_state[
             "current"
         ] = mode  # update local state before refetching data
         self.__api_interface.set_operation_mode(self, mode)
+        self.update_data()
+
+    def set_hot_water_switch_state(self, state: int):
+        LOGGER.info("Setting hot water switch to " + str(state))
+
+        if self.__hot_water_switch_state is None:
+            LOGGER.error("Hot water switch not available")
+            return
+
+        self.__hot_water_switch_state = (
+            state  # update local state before refetching data
+        )
+        self.__api_interface.set_hot_water_switch_state(self, state)
         self.update_data()
 
     @property
@@ -140,3 +166,15 @@ class ThermiaHeatPump:
         if self.__operation_mode_state is None:
             return None
         return self.__operation_mode_state.get("available", [])
+
+    @property
+    def is_hot_water_switch_available(self):
+        return self.__hot_water_switch_state is not None
+
+    @property
+    def hot_water_switch_state(self):
+        return self.__hot_water_switch_state
+
+    @property
+    def active_alarm_count(self):
+        return self.__device_data.get("status", {}).get("activeAlarms", None)

@@ -27,8 +27,18 @@ print("Heat Temperature: " + str(heat_pump.heat_temperature))
 print("Heat Min Temperature Value: " + str(heat_pump.heat_min_temperature_value))
 print("Heat Max Temperature Value: " + str(heat_pump.heat_max_temperature_value))
 print("Heat Temperature Step: " + str(heat_pump.heat_temperature_step))
+print("Active Alarm Count: " + str(heat_pump.active_alarm_count))
+
+print("\n")
+
 print("Operation Mode: " + str(heat_pump.operation_mode))
 print("Available Operation Modes: " + str(heat_pump.available_operation_modes))
+
+print("\n")
+
+print("Is Hot Water Switch Available: " + str(heat_pump.is_hot_water_switch_available))
+if heat_pump.is_hot_water_switch_available:
+    print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))
 
 print("\n")
 
@@ -36,7 +46,11 @@ thermia.update_data()
 
 heat_pump.set_temperature(19)
 heat_pump.set_operation_mode("COMPRESSOR")
+if heat_pump.is_hot_water_switch_available:
+    heat_pump.set_hot_water_switch_state(1)
 
 print("Heat Temperature: " + str(heat_pump.heat_temperature))
 print("Operation Mode: " + str(heat_pump.operation_mode))
 print("Available Operation Modes: " + str(heat_pump.available_operation_modes))
+if heat_pump.is_hot_water_switch_available:
+    print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))

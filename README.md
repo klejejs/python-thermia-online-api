@@ -1,9 +1,12 @@
 # Thermia Online API
 ### A Python API for Thermia heat pumps using https://online.thermia.se
 
-## Confirmed heat pumps that API supports:
+## Confirmed Thermia profiles that API supports:
 * Thermia Diplomat / Diplomat Duo
 * Thermia iTec
+
+## Confirmed Thermia models that API supports:
+* Danfoss DHP-AQ 9
 
 ## Available functions in Thermia class:
 | Function | Description |
@@ -31,6 +34,8 @@
 | `heat_temperature_step` | Step value for temperature setting |
 | `operation_mode` | Current operation mode of the Heat Pump |
 | `available_operation_modes` | List of available operation modes for the Heat Pump |
+| `is_hot_water_switch_available` | Boolean value indicating if the Heat Pump has a hot water switch |
+| `active_alarm_count` | Number of active alarms on the Heat Pump |
 
 ## Available functions within ThermiaHeatPump class:
 | Function | Description |
@@ -38,3 +43,4 @@
 | `update_data` | Refetch all data from Thermia for Heat Pump |
 | `set_temperature` | Set the target temperature for the Heat Pump |
 | `set_operation_mode` | Set the operation mode for the Heat Pump |
+| `set_hot_water_switch_state` | Set the hot water switch state to 0 (off) or 1 (on) for the Heat Pump |
