@@ -7,7 +7,7 @@ from ..exceptions.AuthenticationException import AuthenticationException
 from ..exceptions.NetworkException import NetworkException
 from ..model.HeatPump import ThermiaHeatPump
 
-LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 THERMIA_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
 THERMIA_INSTALLATION_PATH = "/api/v1/Registers/Installations/"
@@ -34,10 +34,9 @@ class ThermiaAPI:
         url = self.configuration["apiBaseUrl"] + "/api/v1/InstallationsInfo/own"
         request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
-        LOGGER.info("Fetching devices. " + str(status))
 
         if status != 200:
-            LOGGER.error("Error fetching devices. " + str(status))
+            _LOGGER.error("Error fetching devices. " + str(status))
             return []
 
         return request.json()
@@ -50,7 +49,7 @@ class ThermiaAPI:
         device = [d for d in devices if str(d["id"]) == device_id]
 
         if len(device) != 1:
-            LOGGER.error("Error getting device by id: " + str(device_id))
+            _LOGGER.error("Error getting device by id: " + str(device_id))
             return None
 
         return device[0]
@@ -63,7 +62,7 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            LOGGER.error("Error fetching device info. " + str(status))
+            _LOGGER.error("Error fetching device info. " + str(status))
             return None
 
         return request.json()
@@ -81,7 +80,7 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            LOGGER.error("Error fetching device status. " + str(status))
+            _LOGGER.error("Error fetching device status. " + str(status))
             return None
 
         return request.json()
@@ -99,12 +98,14 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            LOGGER.error("Error in getting device's temperature status. " + str(status))
+            _LOGGER.error(
+                "Error in getting device's temperature status. " + str(status)
+            )
             return None
 
         device_temperature_register_index = device.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
-            LOGGER.error(
+            _LOGGER.error(
                 "Error in getting device's temperature status. No temperature register index."
             )
             return None
@@ -140,7 +141,7 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            LOGGER.error("Error in getting device's operation mode. " + str(status))
+            _LOGGER.error("Error in getting device's operation mode. " + str(status))
             return None
 
         data = [d for d in request.json() if d["registerName"] == "REG_OPERATIONMODE"]
@@ -185,7 +186,7 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            LOGGER.error("Error in getting device's operation mode. " + str(status))
+            _LOGGER.error("Error in getting device's operation mode. " + str(status))
             return None
 
         data = [
@@ -211,7 +212,7 @@ class ThermiaAPI:
     def set_temperature(self, device: ThermiaHeatPump, temperature):
         device_temperature_register_index = device.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
-            LOGGER.error(
+            _LOGGER.error(
                 "Error setting device's temperature. No temperature register index."
             )
             return
@@ -227,7 +228,7 @@ class ThermiaAPI:
             "operation_mode"
         ]
         if device_operation_mode_register_index is None:
-            LOGGER.error(
+            _LOGGER.error(
                 "Error setting device's operation mode. No operation mode register index."
             )
             return
@@ -243,7 +244,7 @@ class ThermiaAPI:
             "hot_water_switch"
         ]
         if device_hot_water_switch_state_register_index is None:
-            LOGGER.error(
+            _LOGGER.error(
                 "Error setting device's hot water switch state. No hot water switch register index."
             )
             return
@@ -273,7 +274,7 @@ class ThermiaAPI:
 
         status = request.status_code
         if status != 200:
-            LOGGER.error(
+            _LOGGER.error(
                 "Error setting register "
                 + str(register_index)
                 + " value. "
@@ -285,7 +286,7 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            LOGGER.error("Error fetching API configuration. " + str(status))
+            _LOGGER.error("Error fetching API configuration. " + str(status))
             raise NetworkException("Error fetching API configuration.", status)
 
         return request.json()
@@ -302,7 +303,7 @@ class ThermiaAPI:
         status = request_auth.status_code
 
         if status != 200:
-            LOGGER.error(
+            _LOGGER.error(
                 "Authentication request failed, please check credentials. "
                 + str(status)
             )
@@ -311,7 +312,7 @@ class ThermiaAPI:
             )
 
         auth_data = request_auth.json()
-        LOGGER.debug(str(auth_data))
+        _LOGGER.debug(str(auth_data))
 
         token_valid_to = auth_data.get("tokenValidToUtc").split(".")[0]
         datetime_object = datetime.strptime(token_valid_to, "%Y-%m-%dT%H:%M:%S")
@@ -325,7 +326,7 @@ class ThermiaAPI:
             "Content-Type": "application/json",
         }
 
-        LOGGER.info("Authentication was successful, token set.")
+        _LOGGER.info("Authentication was successful, token set.")
         return True
 
     def __check_token_validity(self):
@@ -333,5 +334,5 @@ class ThermiaAPI:
             self.__token_valid_to is None
             or self.__token_valid_to < datetime.now().timestamp()
         ):
-            LOGGER.info("Token expired, reauthenticating.")
+            _LOGGER.info("Token expired, reauthenticating.")
             self.authenticated = self.__authenticate()
