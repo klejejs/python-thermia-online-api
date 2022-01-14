@@ -28,6 +28,8 @@ class ThermiaHeatPump:
         self.__operation_mode_state = None
         self.__hot_water_switch_state = None
 
+        self.__alarms = None
+
         self.__register_indexes = DEFAULT_REGISTER_INDEXES
 
         self.update_data()
@@ -46,6 +48,8 @@ class ThermiaHeatPump:
         self.__hot_water_switch_state = self.__api_interface.get_hot_water_switch_state(
             self
         )
+
+        self.__alarms = self.__api_interface.get_all_alarms(self.__device_id)
 
     def get_register_indexes(self):
         return self.__register_indexes
@@ -85,6 +89,12 @@ class ThermiaHeatPump:
         )
         self.__api_interface.set_hot_water_switch_state(self, state)
         self.update_data()
+
+    def __get_active_alarms(self):
+        active_alarms = filter(
+            lambda alarm: alarm.get("isActiveAlarm", False) is True, self.__alarms
+        )
+        return list(active_alarms)
 
     @property
     def name(self):
@@ -177,4 +187,11 @@ class ThermiaHeatPump:
 
     @property
     def active_alarm_count(self):
-        return self.__device_data.get("status", {}).get("activeAlarms", None)
+        active_alarms = self.__get_active_alarms()
+        return len(list(active_alarms))
+
+    @property
+    def active_alarms(self):
+        active_alarms = self.__get_active_alarms()
+        active_alarm_texts = map(lambda alarm: alarm.get("eventTitle"), active_alarms)
+        return list(active_alarm_texts)

@@ -28,6 +28,8 @@ print("Heat Min Temperature Value: " + str(heat_pump.heat_min_temperature_value)
 print("Heat Max Temperature Value: " + str(heat_pump.heat_max_temperature_value))
 print("Heat Temperature Step: " + str(heat_pump.heat_temperature_step))
 print("Active Alarm Count: " + str(heat_pump.active_alarm_count))
+if heat_pump.active_alarm_count > 0:
+    print("Active Alarms: " + str(heat_pump.active_alarms))
 
 print("\n")
 

@@ -36,6 +36,7 @@
 | `available_operation_modes` | List of available operation modes for the Heat Pump |
 | `is_hot_water_switch_available` | Boolean value indicating if the Heat Pump has a hot water switch |
 | `active_alarm_count` | Number of active alarms on the Heat Pump |
+| `active_alarms` | List of titles of active alarms on the Heat Pump |
 
 ## Available functions within ThermiaHeatPump class:
 | Function | Description |

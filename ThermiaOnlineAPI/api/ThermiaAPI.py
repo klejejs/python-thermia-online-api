@@ -85,6 +85,24 @@ class ThermiaAPI:
 
         return request.json()
 
+    def get_all_alarms(self, device_id: str):
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/installation/"
+            + str(device_id)
+            + "/events?onlyActiveAlarms=false"
+        )
+        request = requests.get(url, headers=self.__default_request_headers)
+        status = request.status_code
+
+        if status != 200:
+            _LOGGER.error("Error in getting device's alarms. " + str(status))
+            return None
+
+        return request.json()
+
     def get_temperature_status(self, device: ThermiaHeatPump):
         self.__check_token_validity()
 
