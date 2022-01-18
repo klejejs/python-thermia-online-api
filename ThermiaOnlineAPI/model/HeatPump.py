@@ -175,7 +175,19 @@ class ThermiaHeatPump:
     def available_operation_modes(self):
         if self.__operation_mode_state is None:
             return None
-        return self.__operation_mode_state.get("available", [])
+        return list(self.__operation_mode_state.get("available", {}).values())
+
+    @property
+    def available_operation_mode_map(self):
+        if self.__operation_mode_state is None:
+            return None
+        return self.__operation_mode_state.get("available", {})
+
+    @property
+    def is_operation_mode_read_only(self):
+        if self.__operation_mode_state is None:
+            return None
+        return self.__operation_mode_state.get("isReadOnly", None)
 
     @property
     def is_hot_water_switch_available(self):

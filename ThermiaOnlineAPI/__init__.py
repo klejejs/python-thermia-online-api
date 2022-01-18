@@ -4,11 +4,11 @@ from ThermiaOnlineAPI.model.HeatPump import ThermiaHeatPump
 
 
 class Thermia:
-    def __init__(self, username, password):
+    def __init__(self, username, password, api_type="classic"):
         self._username = username
         self._password = password
 
-        self.api_interface = ThermiaAPI(username, password)
+        self.api_interface = ThermiaAPI(username, password, api_type)
         self.connected = self.api_interface.authenticated
 
         self.heat_pumps = self.fetch_heat_pumps()

@@ -1,9 +1,9 @@
 from ThermiaOnlineAPI import Thermia
 
-USERNAME = 'username'
-PASSWORD = 'password'
+USERNAME = "demo"
+PASSWORD = "demo"
 
-thermia = Thermia(USERNAME, PASSWORD)
+thermia = Thermia(USERNAME, PASSWORD, "classic")
 
 print("Connected: " + str(thermia.connected))
 
@@ -35,6 +35,8 @@ print("\n")
 
 print("Operation Mode: " + str(heat_pump.operation_mode))
 print("Available Operation Modes: " + str(heat_pump.available_operation_modes))
+print("Available Operation Modes Map: " + str(heat_pump.available_operation_mode_map))
+print("Is Operation Mode Read Only: " + str(heat_pump.is_operation_mode_read_only))
 
 print("\n")
 

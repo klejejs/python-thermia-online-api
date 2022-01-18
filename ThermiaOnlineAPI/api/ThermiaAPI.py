@@ -1,4 +1,5 @@
 import logging
+from collections import ChainMap
 from datetime import datetime
 import requests
 
@@ -9,12 +10,19 @@ from ..model.HeatPump import ThermiaHeatPump
 
 _LOGGER = logging.getLogger(__name__)
 
-THERMIA_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
+THERMIA_CLASSIC_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
+THERMIA_GENESIS_API_CONFIG_URL = "https://online-genesis.thermia.se/api/configuration"
+
 THERMIA_INSTALLATION_PATH = "/api/v1/Registers/Installations/"
+
+THERMIA_API_CONFIG_URLS_BY_API_TYPE = {
+    "classic": THERMIA_CLASSIC_API_CONFIG_URL,
+    "genesis": THERMIA_GENESIS_API_CONFIG_URL,
+}
 
 
 class ThermiaAPI:
-    def __init__(self, email, password):
+    def __init__(self, email, password, api_type):
         self.__email = email
         self.__password = password
         self.__token = None
@@ -24,6 +32,11 @@ class ThermiaAPI:
             "Authorization": "Bearer ",
             "Content-Type": "application/json",
         }
+
+        if api_type not in THERMIA_API_CONFIG_URLS_BY_API_TYPE:
+            raise ValueError("Unknown device type: " + api_type)
+
+        self.__api_config_url = THERMIA_API_CONFIG_URLS_BY_API_TYPE[api_type]
 
         self.configuration = self.__fetch_configuration()
         self.authenticated = self.__authenticate()
@@ -164,7 +177,7 @@ class ThermiaAPI:
 
         data = [d for d in request.json() if d["registerName"] == "REG_OPERATIONMODE"]
 
-        if len(data) == 0:
+        if len(data) != 1:
             # Operation mode not supported
             return None
 
@@ -172,21 +185,34 @@ class ThermiaAPI:
 
         device.set_register_index_operation_mode(data["registerIndex"])
 
-        current_operation_mode = int(data.get("registerValue"))
+        current_operation_mode_value = int(data.get("registerValue"))
         operation_modes_data = data.get("valueNames")
 
         if operation_modes_data is not None:
-            operation_modes = list(
-                map(
-                    lambda values: values.get("name").split(
+            operation_modes_map = map(
+                lambda values: {
+                    values.get("value"): values.get("name").split(
                         "REG_VALUE_OPERATION_MODE_"
                     )[1],
-                    operation_modes_data,
-                )
+                },
+                operation_modes_data,
             )
+            operation_modes_list = list(operation_modes_map)
+            operation_modes = ChainMap(*operation_modes_list)
+
+            current_operation_mode = [
+                name
+                for value, name in operation_modes.items()
+                if value == current_operation_mode_value
+            ]
+            if len(current_operation_mode) != 1:
+                # Something has gone wrong or operation mode not supported
+                return None
+
             return {
-                "current": operation_modes[current_operation_mode],
+                "current": current_operation_mode[0],
                 "available": operation_modes,
+                "isReadOnly": data["isReadOnly"],
             }
 
         return None
@@ -240,7 +266,23 @@ class ThermiaAPI:
         )
 
     def set_operation_mode(self, device: ThermiaHeatPump, mode):
-        operation_mode_int = device.available_operation_modes.index(mode)
+        if device.is_operation_mode_read_only:
+            _LOGGER.error(
+                "Error setting device's operation mode. Operation mode is read only."
+            )
+            return
+
+        operation_mode_int = None
+
+        for value, name in device.available_operation_mode_map.items():
+            if name == mode:
+                operation_mode_int = value
+
+        if operation_mode_int is None:
+            _LOGGER.error(
+                "Error setting device's operation mode. Invalid operation mode."
+            )
+            return
 
         device_operation_mode_register_index = device.get_register_indexes()[
             "operation_mode"
@@ -300,7 +342,7 @@ class ThermiaAPI:
             )
 
     def __fetch_configuration(self):
-        request = requests.get(THERMIA_API_CONFIG_URL)
+        request = requests.get(self.__api_config_url)
         status = request.status_code
 
         if status != 200:

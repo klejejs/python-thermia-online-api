@@ -8,6 +8,13 @@
 ## Confirmed Thermia models that API supports:
 * Danfoss DHP-AQ 9
 
+## Supported APIs:
+* `generic`, default, online access url is https://online.thermia.se
+* `genesis`, online access url is https://online-genesis.thermia.se
+
+## How to use api:
+See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/example.py) file
+
 ## Available functions in Thermia class:
 | Function | Description |
 | --- | --- |
@@ -34,6 +41,8 @@
 | `heat_temperature_step` | Step value for temperature setting |
 | `operation_mode` | Current operation mode of the Heat Pump |
 | `available_operation_modes` | List of available operation modes for the Heat Pump |
+| `available_operation_mode_map` | Dictionary mapping operation mode names to their values |
+| `is_operation_mode_read_only` | Boolean value indicating if the Heat Pump operation mode is read-only |
 | `is_hot_water_switch_available` | Boolean value indicating if the Heat Pump has a hot water switch |
 | `active_alarm_count` | Number of active alarms on the Heat Pump |
 | `active_alarms` | List of titles of active alarms on the Heat Pump |
