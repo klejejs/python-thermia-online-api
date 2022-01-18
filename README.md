@@ -9,7 +9,7 @@
 * Danfoss DHP-AQ 9
 
 ## Supported APIs:
-* `generic`, default, online access url is https://online.thermia.se
+* `classic`, default, online access url is https://online.thermia.se
 * `genesis`, online access url is https://online-genesis.thermia.se
 
 ## How to use api:
