@@ -39,13 +39,35 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 | `heat_min_temperature_value` | Minimum temperature value possible for Heat Pump to set |
 | `heat_max_temperature_value` | Maximum temperature value possible for Heat Pump to set |
 | `heat_temperature_step` | Step value for temperature setting |
+| --- | --- |
+| Other temperatures | |
+| `supply_line_temperature` | Supply line temperature in Celsius |
+| `desired_supply_line_temperature` | Desired supply line temperature in Celsius |
+| `return_line_temperature` | Return line temperature in Celsius |
+| `brine_out_temperature` | Brine out temperature in Celsius |
+| `brine_in_temperature` | Brine in temperature in Celsius |
+| `cooling_tank_temperature` | Cooling tank temperature in Celsius |
+| `cooling_supply_line_temperature` | Cooling supply line temperature in Celsius |
+| --- | --- |
+| Operational Times | |
+| `compressor_operational_time` | Compressor operational time in hours |
+| `hot_water_operational_time` | Hot water operational time in hours |
+| `auxiliary_heater_1_operational_time` | Auxiliary heater 1 operational time in hours |
+| `auxiliary_heater_2_operational_time` | Auxiliary heater 2 operational time in hours |
+| `auxiliary_heater_3_operational_time` | Auxiliary heater 3 operational time in hours |
+| --- | --- |
+| Alarms data | |
+| `active_alarm_count` | Number of active alarms on the Heat Pump |
+| `active_alarms` | List of titles of active alarms on the Heat Pump |
+| --- | --- |
+| Operation Mode data | |
 | `operation_mode` | Current operation mode of the Heat Pump |
 | `available_operation_modes` | List of available operation modes for the Heat Pump |
 | `available_operation_mode_map` | Dictionary mapping operation mode names to their values |
+| --- | --- |
+| Hot Water data | |
 | `is_operation_mode_read_only` | Boolean value indicating if the Heat Pump operation mode is read-only |
 | `is_hot_water_switch_available` | Boolean value indicating if the Heat Pump has a hot water switch |
-| `active_alarm_count` | Number of active alarms on the Heat Pump |
-| `active_alarms` | List of titles of active alarms on the Heat Pump |
 
 ## Available functions within ThermiaHeatPump class:
 | Function | Description |

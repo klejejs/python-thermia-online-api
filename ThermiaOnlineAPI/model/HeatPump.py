@@ -3,10 +3,31 @@ import logging
 
 from typing import TYPE_CHECKING
 
+from ThermiaOnlineAPI.const import (
+    OPERATIONAL_TIME_REGISTERS,
+    REG_BRINE_IN,
+    REG_BRINE_OUT,
+    REG_COOL_SENSOR_SUPPLY,
+    REG_COOL_SENSOR_TANK,
+    REG_DESIRED_SUPPLY_LINE,
+    REG_DESIRED_SYS_SUPPLY_LINE_TEMP,
+    REG_OPER_DATA_RETURN,
+    REG_OPER_TIME_COMPRESSOR,
+    REG_OPER_TIME_HOT_WATER,
+    REG_OPER_TIME_IMM1,
+    REG_OPER_TIME_IMM2,
+    REG_OPER_TIME_IMM3,
+    REG_RETURN_LINE,
+    REG_SUPPLY_LINE,
+    TEMPERATURE_REGISTERS,
+)
+
+from ..utils.utils import get_dict_value_safe
+
 if TYPE_CHECKING:
     from ..api.ThermiaAPI import ThermiaAPI
 
-LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_REGISTER_INDEXES = {
     "temperature": None,
@@ -24,9 +45,11 @@ class ThermiaHeatPump:
         self.__status = None
         self.__device_data = None
 
-        self.__temperature_state = None
-        self.__operation_mode_state = None
-        self.__hot_water_switch_state = None
+        # GROUPS
+        self.__group_temperatures = None
+        self.__group_operational_time = None
+        self.__group_operational_operation = None
+        self.__group_hot_water = None
 
         self.__alarms = None
 
@@ -43,11 +66,16 @@ class ThermiaHeatPump:
             "heatingEffectRegisters", [None, None]
         )[1]
 
-        self.__temperature_state = self.__api_interface.get_temperature_status(self)
-        self.__operation_mode_state = self.__api_interface.get_operation_mode(self)
-        self.__hot_water_switch_state = self.__api_interface.get_hot_water_switch_state(
-            self
+        self.__group_temperatures = self.__api_interface.get__group_temperatures(
+            self.__device_id
         )
+        self.__group_operational_time = (
+            self.__api_interface.get__group_operational_time(self.__device_id)
+        )
+        self.__group_operational_operation = (
+            self.__api_interface.get_group_operational_operation(self)
+        )
+        self.__group_hot_water = self.__api_interface.get_group_hot_water(self)
 
         self.__alarms = self.__api_interface.get_all_alarms(self.__device_id)
 
@@ -61,7 +89,7 @@ class ThermiaHeatPump:
         self.__register_indexes["hot_water_switch"] = register_index
 
     def set_temperature(self, temperature: int):
-        LOGGER.info("Setting temperature to " + str(temperature))
+        _LOGGER.info("Setting temperature to " + str(temperature))
         self.__status[
             "heatingEffect"
         ] = temperature  # update local state before refetching data
@@ -69,26 +97,86 @@ class ThermiaHeatPump:
         self.update_data()
 
     def set_operation_mode(self, mode: str):
-        LOGGER.info("Setting operation mode to " + str(mode))
+        _LOGGER.info("Setting operation mode to " + str(mode))
 
-        self.__operation_mode_state[
+        self.__group_operational_operation[
             "current"
         ] = mode  # update local state before refetching data
         self.__api_interface.set_operation_mode(self, mode)
         self.update_data()
 
     def set_hot_water_switch_state(self, state: int):
-        LOGGER.info("Setting hot water switch to " + str(state))
+        _LOGGER.info("Setting hot water switch to " + str(state))
 
-        if self.__hot_water_switch_state is None:
-            LOGGER.error("Hot water switch not available")
+        if self.__group_hot_water is None:
+            _LOGGER.error("Hot water switch not available")
             return
 
-        self.__hot_water_switch_state = (
-            state  # update local state before refetching data
-        )
+        self.__group_hot_water = state  # update local state before refetching data
         self.__api_interface.set_hot_water_switch_state(self, state)
         self.update_data()
+
+    def __get_heat_temperature_data(self):
+        device_temperature_register_index = self.get_register_indexes()["temperature"]
+        if device_temperature_register_index is None:
+            _LOGGER.error(
+                "Error in getting device's temperature status. No temperature register index."
+            )
+            return None
+
+        if self.__group_temperatures is None:
+            return None
+
+        data = [
+            d
+            for d in self.__group_temperatures
+            if d["registerIndex"] == device_temperature_register_index
+        ]
+
+        if len(data) != 1:
+            # Temperature status not supported
+            return None
+
+        data = data[0]
+
+        return {
+            "minValue": data["minValue"],
+            "maxValue": data["maxValue"],
+            "step": data["step"],
+        }
+
+    def __get_temperature_data_by_register_name(
+        self, register_name: TEMPERATURE_REGISTERS
+    ):
+        return self.__get_data_from_group_by_register_name(
+            self.__group_temperatures, register_name
+        )
+
+    def __get_operational_time_data_by_register_name(
+        self, register_name: OPERATIONAL_TIME_REGISTERS
+    ):
+        return self.__get_data_from_group_by_register_name(
+            self.__group_operational_time, register_name
+        )
+
+    def __get_data_from_group_by_register_name(self, group, register_name: str):
+        if group is None:
+            return None
+
+        data = [d for d in group if d["registerName"] == register_name]
+
+        if len(data) != 1:
+            # Temperature status not supported
+            return None
+
+        data = data[0]
+
+        return {
+            "minValue": data["minValue"],
+            "maxValue": data["maxValue"],
+            "step": data["step"],
+            "value": data["registerValue"],
+        }
 
     def __get_active_alarms(self):
         active_alarms = filter(
@@ -143,59 +231,159 @@ class ThermiaHeatPump:
     def hot_water_temperature(self):
         return self.__status.get("hotWaterTemperature")
 
+    ###########################################################################
+    # Heat temperature data
+    ###########################################################################
+
     @property
     def heat_temperature(self):
         return self.__status.get("heatingEffect")
 
     @property
     def heat_min_temperature_value(self):
-        if self.__temperature_state is None:
-            return None
-        return self.__temperature_state.get("minValue", None)
+        return get_dict_value_safe(self.__get_heat_temperature_data(), "minValue")
 
     @property
     def heat_max_temperature_value(self):
-        if self.__temperature_state is None:
-            return None
-        return self.__temperature_state.get("maxValue", None)
+        return get_dict_value_safe(self.__get_heat_temperature_data(), "maxValue")
 
     @property
     def heat_temperature_step(self):
-        if self.__temperature_state is None:
-            return None
-        return self.__temperature_state.get("step", None)
+        return get_dict_value_safe(self.__get_heat_temperature_data(), "step")
+
+    ###########################################################################
+    # Other temperature data
+    ###########################################################################
+
+    @property
+    def supply_line_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_SUPPLY_LINE), "value"
+        )
+
+    @property
+    def desired_supply_line_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_DESIRED_SUPPLY_LINE),
+            "value",
+        ) or get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(
+                REG_DESIRED_SYS_SUPPLY_LINE_TEMP
+            ),
+            "value",
+        )
+
+    @property
+    def return_line_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_RETURN_LINE), "value"
+        ) or get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_OPER_DATA_RETURN), "value"
+        )
+
+    @property
+    def brine_out_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_BRINE_OUT), "value"
+        )
+
+    @property
+    def brine_in_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_BRINE_IN), "value"
+        )
+
+    @property
+    def cooling_tank_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_COOL_SENSOR_TANK), "value"
+        )
+
+    @property
+    def cooling_supply_line_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_COOL_SENSOR_SUPPLY),
+            "value",
+        )
+
+    ###########################################################################
+    # Operational time data
+    ###########################################################################
+
+    @property
+    def compressor_operational_time(self):
+        return get_dict_value_safe(
+            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_COMPRESSOR),
+            "value",
+        )
+
+    @property
+    def hot_water_operational_time(self):
+        return get_dict_value_safe(
+            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_HOT_WATER),
+            "value",
+        )
+
+    @property
+    def auxiliary_heater_1_operational_time(self):
+        return get_dict_value_safe(
+            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM1),
+            "value",
+        )
+
+    @property
+    def auxiliary_heater_2_operational_time(self):
+        return get_dict_value_safe(
+            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM2),
+            "value",
+        )
+
+    @property
+    def auxiliary_heater_3_operational_time(self):
+        return get_dict_value_safe(
+            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM3),
+            "value",
+        )
+
+    ###########################################################################
+    # Operation mode data
+    ###########################################################################
 
     @property
     def operation_mode(self):
-        if self.__operation_mode_state is None:
-            return None
-        return self.__operation_mode_state.get("current", None)
+        return get_dict_value_safe(self.__group_operational_operation, "current")
 
     @property
     def available_operation_modes(self):
-        if self.__operation_mode_state is None:
-            return None
-        return list(self.__operation_mode_state.get("available", {}).values())
+        return list(
+            get_dict_value_safe(
+                self.__group_operational_operation, "available", {}
+            ).values()
+        )
 
     @property
     def available_operation_mode_map(self):
-        if self.__operation_mode_state is None:
-            return None
-        return self.__operation_mode_state.get("available", {})
+        return get_dict_value_safe(self.__group_operational_operation, "available", {})
 
     @property
     def is_operation_mode_read_only(self):
-        if self.__operation_mode_state is None:
-            return None
-        return self.__operation_mode_state.get("isReadOnly", None)
+        return get_dict_value_safe(self.__group_operational_operation, "isReadOnly")
+
+    ###########################################################################
+    # Hot water switch data
+    ###########################################################################
 
     @property
     def is_hot_water_switch_available(self):
-        return self.__hot_water_switch_state is not None
+        return self.__group_hot_water is not None
 
     @property
     def hot_water_switch_state(self):
-        return self.__hot_water_switch_state
+        return self.__group_hot_water
+
+    ###########################################################################
+    # Alarm data
+    ###########################################################################
 
     @property
     def active_alarm_count(self):

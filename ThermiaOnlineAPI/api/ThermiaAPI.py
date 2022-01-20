@@ -3,22 +3,22 @@ from collections import ChainMap
 from datetime import datetime
 import requests
 
+from ThermiaOnlineAPI.const import (
+    REG_GROUP_HOT_WATER,
+    REG_GROUP_OPERATIONAL_OPERATION,
+    REG_GROUP_OPERATIONAL_TIME,
+    REG_GROUP_TEMPERATURES,
+    REGISTER_GROUPS,
+    THERMIA_API_CONFIG_URLS_BY_API_TYPE,
+    THERMIA_INSTALLATION_PATH,
+)
+
 
 from ..exceptions.AuthenticationException import AuthenticationException
 from ..exceptions.NetworkException import NetworkException
 from ..model.HeatPump import ThermiaHeatPump
 
 _LOGGER = logging.getLogger(__name__)
-
-THERMIA_CLASSIC_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
-THERMIA_GENESIS_API_CONFIG_URL = "https://online-genesis.thermia.se/api/configuration"
-
-THERMIA_INSTALLATION_PATH = "/api/v1/Registers/Installations/"
-
-THERMIA_API_CONFIG_URLS_BY_API_TYPE = {
-    "classic": THERMIA_CLASSIC_API_CONFIG_URL,
-    "genesis": THERMIA_GENESIS_API_CONFIG_URL,
-}
 
 
 class ThermiaAPI:
@@ -116,66 +116,18 @@ class ThermiaAPI:
 
         return request.json()
 
-    def get_temperature_status(self, device: ThermiaHeatPump):
-        self.__check_token_validity()
+    def get__group_temperatures(self, device_id: str):
+        return self.__get_register_group(device_id, REG_GROUP_TEMPERATURES)
 
-        url = (
-            self.configuration["apiBaseUrl"]
-            + THERMIA_INSTALLATION_PATH
-            + str(device.id)
-            + "/Groups/REG_GROUP_TEMPERATURES"
+    def get__group_operational_time(self, device_id: str):
+        return self.__get_register_group(device_id, REG_GROUP_OPERATIONAL_TIME)
+
+    def get_group_operational_operation(self, device: ThermiaHeatPump):
+        register_data = self.__get_register_group(
+            device.id, REG_GROUP_OPERATIONAL_OPERATION
         )
-        request = requests.get(url, headers=self.__default_request_headers)
-        status = request.status_code
 
-        if status != 200:
-            _LOGGER.error(
-                "Error in getting device's temperature status. " + str(status)
-            )
-            return None
-
-        device_temperature_register_index = device.get_register_indexes()["temperature"]
-        if device_temperature_register_index is None:
-            _LOGGER.error(
-                "Error in getting device's temperature status. No temperature register index."
-            )
-            return None
-
-        data = [
-            d
-            for d in request.json()
-            if d["registerIndex"] == device_temperature_register_index
-        ]
-
-        if len(data) == 0:
-            # Temperature status not supported
-            return None
-
-        data = data[0]
-
-        return {
-            "minValue": data["minValue"],
-            "maxValue": data["maxValue"],
-            "step": data["step"],
-        }
-
-    def get_operation_mode(self, device: ThermiaHeatPump):
-        self.__check_token_validity()
-
-        url = (
-            self.configuration["apiBaseUrl"]
-            + THERMIA_INSTALLATION_PATH
-            + str(device.id)
-            + "/Groups/REG_GROUP_OPERATIONAL_OPERATION"
-        )
-        request = requests.get(url, headers=self.__default_request_headers)
-        status = request.status_code
-
-        if status != 200:
-            _LOGGER.error("Error in getting device's operation mode. " + str(status))
-            return None
-
-        data = [d for d in request.json() if d["registerName"] == "REG_OPERATIONMODE"]
+        data = [d for d in register_data if d["registerName"] == "REG_OPERATIONMODE"]
 
         if len(data) != 1:
             # Operation mode not supported
@@ -217,25 +169,10 @@ class ThermiaAPI:
 
         return None
 
-    def get_hot_water_switch_state(self, device: ThermiaHeatPump):
-        self.__check_token_validity()
+    def get_group_hot_water(self, device: ThermiaHeatPump):
+        register_data = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
 
-        url = (
-            self.configuration["apiBaseUrl"]
-            + THERMIA_INSTALLATION_PATH
-            + str(device.id)
-            + "/Groups/REG_GROUP_HOT_WATER"
-        )
-        request = requests.get(url, headers=self.__default_request_headers)
-        status = request.status_code
-
-        if status != 200:
-            _LOGGER.error("Error in getting device's operation mode. " + str(status))
-            return None
-
-        data = [
-            d for d in request.json() if d["registerName"] == "REG_HOT_WATER_STATUS"
-        ]
+        data = [d for d in register_data if d["registerName"] == "REG_HOT_WATER_STATUS"]
 
         if len(data) == 0:
             # Hot water switch not supported
@@ -312,6 +249,30 @@ class ThermiaAPI:
         self.__set_register_value(
             device, device_hot_water_switch_state_register_index, state
         )
+
+    def __get_register_group(self, device_id: str, register_group: REGISTER_GROUPS):
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + THERMIA_INSTALLATION_PATH
+            + str(device_id)
+            + "/Groups/"
+            + register_group
+        )
+        request = requests.get(url, headers=self.__default_request_headers)
+        status = request.status_code
+
+        if status != 200:
+            _LOGGER.error(
+                "Error in getting device's register group: "
+                + register_group
+                + ", Status: "
+                + str(status)
+            )
+            return None
+
+        return request.json()
 
     def __set_register_value(
         self, device: ThermiaHeatPump, register_index: int, register_value: int
@@ -394,5 +355,5 @@ class ThermiaAPI:
             self.__token_valid_to is None
             or self.__token_valid_to < datetime.now().timestamp()
         ):
-            _LOGGER.info("Token expired, reauthenticating.")
+            _LOGGER.info("Token expired, re-authenticating.")
             self.authenticated = self.__authenticate()
