@@ -10,8 +10,10 @@ from ThermiaOnlineAPI.const import (
     REG_COOL_SENSOR_SUPPLY,
     REG_COOL_SENSOR_TANK,
     REG_DESIRED_SUPPLY_LINE,
+    REG_DESIRED_SUPPLY_LINE_TEMP,
     REG_DESIRED_SYS_SUPPLY_LINE_TEMP,
     REG_OPER_DATA_RETURN,
+    REG_OPER_DATA_SUPPLY_MA_SA,
     REG_OPER_TIME_COMPRESSOR,
     REG_OPER_TIME_HOT_WATER,
     REG_OPER_TIME_IMM1,
@@ -225,7 +227,9 @@ class ThermiaHeatPump:
 
     @property
     def is_hot_water_active(self):
-        return self.__status.get("isHotwaterActive")
+        return self.__status.get("isHotwaterActive") or self.__status.get(
+            "isHotWaterActive"
+        )
 
     @property
     def hot_water_temperature(self):
@@ -259,18 +263,30 @@ class ThermiaHeatPump:
     def supply_line_temperature(self):
         return get_dict_value_safe(
             self.__get_temperature_data_by_register_name(REG_SUPPLY_LINE), "value"
+        ) or get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(REG_OPER_DATA_SUPPLY_MA_SA),
+            "value",
         )
 
     @property
     def desired_supply_line_temperature(self):
-        return get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_DESIRED_SUPPLY_LINE),
-            "value",
-        ) or get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(
-                REG_DESIRED_SYS_SUPPLY_LINE_TEMP
-            ),
-            "value",
+        return (
+            get_dict_value_safe(
+                self.__get_temperature_data_by_register_name(REG_DESIRED_SUPPLY_LINE),
+                "value",
+            )
+            or get_dict_value_safe(
+                self.__get_temperature_data_by_register_name(
+                    REG_DESIRED_SUPPLY_LINE_TEMP
+                ),
+                "value",
+            )
+            or get_dict_value_safe(
+                self.__get_temperature_data_by_register_name(
+                    REG_DESIRED_SYS_SUPPLY_LINE_TEMP
+                ),
+                "value",
+            )
         )
 
     @property
