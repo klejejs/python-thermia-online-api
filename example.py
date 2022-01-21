@@ -45,6 +45,18 @@ print(
 
 print("\n")
 
+print("Operational status")
+print("Operational status: " + str(heat_pump.operational_status))
+print(
+    "Available operational statuses: " + str(heat_pump.available_operational_statuses)
+)
+print(
+    "Available operational statuses map: "
+    + str(heat_pump.available_operational_statuses_map)
+)
+
+print("\n")
+
 print("Operational Times")
 print("Compressor Operational Time: " + str(heat_pump.compressor_operational_time))
 print("Hot Water Operational Time: " + str(heat_pump.hot_water_operational_time))

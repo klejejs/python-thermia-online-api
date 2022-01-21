@@ -49,6 +49,7 @@ class ThermiaHeatPump:
 
         # GROUPS
         self.__group_temperatures = None
+        self.__group_operational_status = None
         self.__group_operational_time = None
         self.__group_operational_operation = None
         self.__group_hot_water = None
@@ -70,6 +71,9 @@ class ThermiaHeatPump:
 
         self.__group_temperatures = self.__api_interface.get__group_temperatures(
             self.__device_id
+        )
+        self.__group_operational_status = (
+            self.__api_interface.get__group_operational_status(self.__device_id)
         )
         self.__group_operational_time = (
             self.__api_interface.get__group_operational_time(self.__device_id)
@@ -321,6 +325,26 @@ class ThermiaHeatPump:
             self.__get_temperature_data_by_register_name(REG_COOL_SENSOR_SUPPLY),
             "value",
         )
+
+    ###########################################################################
+    # Operational status data
+    ###########################################################################
+
+    @property
+    def operational_status(self):
+        return get_dict_value_safe(self.__group_operational_status, "current")
+
+    @property
+    def available_operational_statuses(self):
+        return list(
+            get_dict_value_safe(
+                self.__group_operational_status, "available", {}
+            ).values()
+        )
+
+    @property
+    def available_operational_statuses_map(self):
+        return get_dict_value_safe(self.__group_operational_status, "available", {})
 
     ###########################################################################
     # Operational time data

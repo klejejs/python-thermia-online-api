@@ -49,6 +49,11 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 | `cooling_tank_temperature` | Cooling tank temperature in Celsius |
 | `cooling_supply_line_temperature` | Cooling supply line temperature in Celsius |
 | --- | --- |
+| Operational status | |
+| `operational_status` | Operational status of the Heat Pump |
+| `available_operational_statuses` | List of available operational statuses |
+| `available_operational_statuses_map` | Dictionary mapping operational status names to their values |
+| --- | --- |
 | Operational Times | |
 | `compressor_operational_time` | Compressor operational time in hours |
 | `hot_water_operational_time` | Hot water operational time in hours |
