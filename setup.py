@@ -20,6 +20,7 @@ setup(
         "ThermiaOnlineAPI.api",
         "ThermiaOnlineAPI.exceptions",
         "ThermiaOnlineAPI.model",
+        "ThermiaOnlineAPI.utils",
     ],
     version=version,
     license="GPL-3.0",
