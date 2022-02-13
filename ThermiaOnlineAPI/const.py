@@ -94,3 +94,9 @@ OPERATIONAL_TIME_REGISTERS = [
     REG_OPER_TIME_COMPRESSOR,
     REG_OPER_TIME_HOT_WATER,
 ]
+
+###############################################################################
+# Other
+###############################################################################
+
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"

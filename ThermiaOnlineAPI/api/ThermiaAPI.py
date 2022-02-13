@@ -117,6 +117,50 @@ class ThermiaAPI:
 
         return request.json()
 
+    def get_historical_data_registers(self, device_id: str):
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/DataHistory/installation/"
+            + str(device_id)
+        )
+        request = requests.get(url, headers=self.__default_request_headers)
+        status = request.status_code
+
+        if status != 200:
+            _LOGGER.error("Error in historical data registers. " + str(status))
+            return None
+
+        return request.json()
+
+    def get_historical_data(
+        self, device_id: str, register_id, start_date_str, end_date_str
+    ):
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/datahistory/installation/"
+            + str(device_id)
+            + "/register/"
+            + str(register_id)
+            + "/minute?periodStart="
+            + start_date_str
+            + "&periodEnd="
+            + end_date_str
+        )
+        request = requests.get(url, headers=self.__default_request_headers)
+        status = request.status_code
+
+        if status != 200:
+            _LOGGER.error(
+                "Error in historical data for specific register. " + str(status)
+            )
+            return None
+
+        return request.json()
+
     def get__group_temperatures(self, device_id: str):
         return self.__get_register_group(device_id, REG_GROUP_TEMPERATURES)
 

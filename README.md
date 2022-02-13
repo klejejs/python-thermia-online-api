@@ -73,11 +73,19 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 | Hot Water data | |
 | `is_operation_mode_read_only` | Boolean value indicating if the Heat Pump operation mode is read-only |
 | `is_hot_water_switch_available` | Boolean value indicating if the Heat Pump has a hot water switch |
+| --- | --- |
+| Historical data | |
+| `historical_data_registers` | List of available registers to use for historical data fetching |
 
 ## Available functions within ThermiaHeatPump class:
 | Function | Description |
 | --- | --- |
 | `update_data` | Refetch all data from Thermia for Heat Pump |
+| --- | --- |
+| Change heat pump state | |
 | `set_temperature` | Set the target temperature for the Heat Pump |
 | `set_operation_mode` | Set the operation mode for the Heat Pump |
 | `set_hot_water_switch_state` | Set the hot water switch state to 0 (off) or 1 (on) for the Heat Pump |
+| --- | --- |
+| Fetch historical data | |
+| `get_historical_data_for_register` | Fetch historical data by using register name from `historical_data_registers` together with start_time and end_time of the data in Python datatime format. Returns list of dictionaries which contains data in format `{ "time": datetime, "value": int }` |

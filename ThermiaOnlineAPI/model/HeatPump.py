@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import logging
 
@@ -22,6 +23,7 @@ from ThermiaOnlineAPI.const import (
     REG_RETURN_LINE,
     REG_SUPPLY_LINE,
     TEMPERATURE_REGISTERS,
+    DATETIME_FORMAT,
 )
 
 from ..utils.utils import get_dict_value_safe
@@ -55,6 +57,7 @@ class ThermiaHeatPump:
         self.__group_hot_water = None
 
         self.__alarms = None
+        self.__historical_data_registers_map = None
 
         self.__register_indexes = DEFAULT_REGISTER_INDEXES
 
@@ -192,6 +195,19 @@ class ThermiaHeatPump:
             lambda alarm: alarm.get("isActiveAlarm", False) is True, self.__alarms
         )
         return list(active_alarms)
+
+    def __set_historical_data_registers(self):
+        data = self.__api_interface.get_historical_data_registers(self.__device_id)
+
+        data_map = {}
+
+        if data is not None and data.get("registers") is not None:
+            registers = data["registers"]
+
+            for register in registers:
+                data_map[register["registerName"]] = register["registerId"]
+
+        self.__historical_data_registers_map = data_map
 
     @property
     def name(self):
@@ -438,3 +454,48 @@ class ThermiaHeatPump:
         active_alarms = self.__get_active_alarms()
         active_alarm_texts = map(lambda alarm: alarm.get("eventTitle"), active_alarms)
         return list(active_alarm_texts)
+
+    ###########################################################################
+    # Historical data
+    ###########################################################################
+
+    @property
+    def historical_data_registers(self):
+        if self.__historical_data_registers_map is None:
+            self.__set_historical_data_registers()
+
+        return list(self.__historical_data_registers_map.keys())
+
+    def get_historical_data_for_register(
+        self, register_name, start_date: datetime, end_date: datetime
+    ):
+        if self.__historical_data_registers_map is None:
+            self.__set_historical_data_registers()
+
+        register_id = self.__historical_data_registers_map.get(register_name)
+
+        if register_id is None:
+            _LOGGER.error("Register name is not supported: " + str(register_name))
+            return None
+
+        historical_data = self.__api_interface.get_historical_data(
+            self.__device_id,
+            register_id,
+            start_date.strftime(DATETIME_FORMAT),
+            end_date.strftime(DATETIME_FORMAT),
+        )
+
+        if historical_data is None or historical_data.get("data") is None:
+            return []
+
+        return list(
+            map(
+                lambda entry: {
+                    "time": datetime.strptime(
+                        entry["at"].split(".")[0], DATETIME_FORMAT
+                    ),
+                    "value": int(entry["val"]),
+                },
+                historical_data["data"],
+            )
+        )

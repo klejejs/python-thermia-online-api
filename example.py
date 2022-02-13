@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from ThermiaOnlineAPI import Thermia
 
 USERNAME = "demo"
@@ -94,6 +95,22 @@ print("Hot Water data")
 print("Is Hot Water Switch Available: " + str(heat_pump.is_hot_water_switch_available))
 if heat_pump.is_hot_water_switch_available:
     print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))
+
+print("\n")
+
+print(
+    "Available historical data registers: " + str(heat_pump.historical_data_registers)
+)
+print(
+    "Historical data for outdoor temperature during past 24h: "
+    + str(
+        heat_pump.get_historical_data_for_register(
+            "REG_OUTDOOR_TEMPERATURE",
+            datetime.now() - timedelta(days=1),
+            datetime.now(),
+        )
+    )
+)
 
 print("\n")
 
