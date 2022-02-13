@@ -383,7 +383,6 @@ class ThermiaAPI:
             )
 
         auth_data = request_auth.json()
-        _LOGGER.debug(str(auth_data))
 
         token_valid_to = auth_data.get("tokenValidToUtc").split(".")[0]
         datetime_object = datetime.strptime(token_valid_to, "%Y-%m-%dT%H:%M:%S")

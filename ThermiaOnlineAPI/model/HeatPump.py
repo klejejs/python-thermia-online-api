@@ -123,6 +123,9 @@ class ThermiaHeatPump:
         self.update_data()
 
     def __get_heat_temperature_data(self):
+        if not self.is_online:
+            return None  # Device is offline
+
         device_temperature_register_index = self.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
             _LOGGER.error(
