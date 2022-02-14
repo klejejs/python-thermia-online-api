@@ -1,3 +1,5 @@
+from typing import List
+
 from ThermiaOnlineAPI.api.ThermiaAPI import ThermiaAPI
 from ThermiaOnlineAPI.exceptions import AuthenticationException, NetworkException
 from ThermiaOnlineAPI.model.HeatPump import ThermiaHeatPump
@@ -13,7 +15,7 @@ class Thermia:
 
         self.heat_pumps = self.fetch_heat_pumps()
 
-    def fetch_heat_pumps(self) -> list[ThermiaHeatPump]:
+    def fetch_heat_pumps(self) -> List[ThermiaHeatPump]:
         devices = self.api_interface.get_devices()
         heat_pumps = []
 
