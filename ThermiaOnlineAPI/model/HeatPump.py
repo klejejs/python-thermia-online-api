@@ -215,7 +215,7 @@ class ThermiaHeatPump:
 
     @property
     def id(self):
-        return self.__info.get("id")
+        return self.__device_id
 
     @property
     def is_online(self):
