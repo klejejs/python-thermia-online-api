@@ -31,8 +31,6 @@ from ..utils.utils import get_dict_value_safe
 if TYPE_CHECKING:
     from ..api.ThermiaAPI import ThermiaAPI
 
-_LOGGER = logging.getLogger(__name__)
-
 DEFAULT_REGISTER_INDEXES = {
     "temperature": None,
     "operation_mode": None,
@@ -44,6 +42,8 @@ class ThermiaHeatPump:
     def __init__(self, device_data: json, api_interface: "ThermiaAPI"):
         self.__device_id = str(device_data["id"])
         self.__api_interface = api_interface
+
+        self._LOGGER = logging.getLogger(__name__ + "." + self.__device_id)
 
         self.__info = None
         self.__status = None
@@ -98,7 +98,7 @@ class ThermiaHeatPump:
         self.__register_indexes["hot_water_switch"] = register_index
 
     def set_temperature(self, temperature: int):
-        _LOGGER.info("Setting temperature to " + str(temperature))
+        self._LOGGER.info("Setting temperature to " + str(temperature))
         self.__status[
             "heatingEffect"
         ] = temperature  # update local state before refetching data
@@ -106,7 +106,7 @@ class ThermiaHeatPump:
         self.update_data()
 
     def set_operation_mode(self, mode: str):
-        _LOGGER.info("Setting operation mode to " + str(mode))
+        self._LOGGER.info("Setting operation mode to " + str(mode))
 
         self.__group_operational_operation[
             "current"
@@ -115,10 +115,10 @@ class ThermiaHeatPump:
         self.update_data()
 
     def set_hot_water_switch_state(self, state: int):
-        _LOGGER.info("Setting hot water switch to " + str(state))
+        self._LOGGER.info("Setting hot water switch to " + str(state))
 
         if self.__group_hot_water is None:
-            _LOGGER.error("Hot water switch not available")
+            self._LOGGER.error("Hot water switch not available")
             return
 
         self.__group_hot_water = state  # update local state before refetching data
@@ -126,12 +126,9 @@ class ThermiaHeatPump:
         self.update_data()
 
     def __get_heat_temperature_data(self):
-        if not self.is_online:
-            return None  # Device is offline
-
         device_temperature_register_index = self.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
-            _LOGGER.error(
+            self._LOGGER.error(
                 "Error in getting device's temperature status. No temperature register index."
             )
             return None
@@ -475,7 +472,7 @@ class ThermiaHeatPump:
         register_id = self.__historical_data_registers_map.get(register_name)
 
         if register_id is None:
-            _LOGGER.error("Register name is not supported: " + str(register_name))
+            self._LOGGER.error("Register name is not supported: " + str(register_name))
             return None
 
         historical_data = self.__api_interface.get_historical_data(
