@@ -128,9 +128,6 @@ class ThermiaHeatPump:
     def __get_heat_temperature_data(self):
         device_temperature_register_index = self.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
-            self._LOGGER.error(
-                "Error in getting device's temperature status. No temperature register index."
-            )
             return None
 
         if self.__group_temperatures is None:
