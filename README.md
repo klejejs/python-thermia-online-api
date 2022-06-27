@@ -8,6 +8,12 @@
 ## Confirmed Thermia models that API supports:
 * Danfoss DHP-AQ 9
 
+## Regarding unsupported models
+I am willing to do my best to support them, but as there turns out to be many different Thermia models and configurations, it is hard for me to implement all functionalities and test them thoroughly.
+Thus, I have created a `debug()` function that runs when `example.py` is executed and creates a `debug.txt` file which has data about your heat pump and all its supported features. If you want to submit a bug or feature request, please include the debug file as it will make my development much easier.
+
+**Note:** I have done my best to remove the sensitive parts from debugging, but I do not guarantee that no sensitive data is printed to the debug file. I have no intention of using it maliciously, but if you post the file publicly on GitHub, please make sure you remove anything you feel might be suspicious of sharing.
+
 ## Supported APIs:
 * `classic`, default, online access url is https://online.thermia.se
 * `genesis`, online access url is https://online-genesis.thermia.se
@@ -18,8 +24,8 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 ## Available functions in Thermia class:
 | Function | Description |
 | --- | --- |
-| `fetch_heat_pumps` | Fetches all heat pumps from Thermia Online API and their data |
-| `update_data` | Updates all heat pump data |
+| `fetch_heat_pumps()` | Fetches all heat pumps from Thermia Online API and their data |
+| `update_data()` | Updates all heat pump data |
 
 ## Available properties within ThermiaHeatPump class:
 | Property | Description |
@@ -80,12 +86,15 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 ## Available functions within ThermiaHeatPump class:
 | Function | Description |
 | --- | --- |
-| `update_data` | Refetch all data from Thermia for Heat Pump |
+| `update_data()` | Refetch all data from Thermia for Heat Pump |
 | --- | --- |
 | Change heat pump state | |
-| `set_temperature` | Set the target temperature for the Heat Pump |
-| `set_operation_mode` | Set the operation mode for the Heat Pump |
-| `set_hot_water_switch_state` | Set the hot water switch state to 0 (off) or 1 (on) for the Heat Pump |
+| `set_temperature()` | Set the target temperature for the Heat Pump |
+| `set_operation_mode()` | Set the operation mode for the Heat Pump |
+| `set_hot_water_switch_state()` | Set the hot water switch state to 0 (off) or 1 (on) for the Heat Pump |
 | --- | --- |
 | Fetch historical data | |
-| `get_historical_data_for_register` | Fetch historical data by using register name from `historical_data_registers` together with start_time and end_time of the data in Python datatime format. Returns list of dictionaries which contains data in format `{ "time": datetime, "value": int }` |
+| `get_historical_data_for_register()` | Fetch historical data by using register name from `historical_data_registers` together with start_time and end_time of the data in Python datatime format. Returns list of dictionaries which contains data in format `{ "time": datetime, "value": int }` |
+| --- | --- |
+| Fetch debug data | |
+| `debug()` | Fetch debug data from Thermia API and save it to `debug.txt` file |

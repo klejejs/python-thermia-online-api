@@ -1,6 +1,8 @@
 from datetime import datetime
 import json
 import logging
+import sys
+from ..utils.utils import pretty_print_except
 
 from typing import TYPE_CHECKING
 
@@ -65,8 +67,10 @@ class ThermiaHeatPump:
 
     def update_data(self):
         self.__info = self.__api_interface.get_device_info(self.__device_id)
-        self.__status = self.__api_interface.get_device_status(self.__device_id)
-        self.__device_data = self.__api_interface.get_device_by_id(self.__device_id)
+        self.__status = self.__api_interface.get_device_status(
+            self.__device_id)
+        self.__device_data = self.__api_interface.get_device_by_id(
+            self.__device_id)
 
         self.__register_indexes["temperature"] = self.__status.get(
             "heatingEffectRegisters", [None, None]
@@ -76,7 +80,8 @@ class ThermiaHeatPump:
             self.__device_id
         )
         self.__group_operational_status = (
-            self.__api_interface.get__group_operational_status(self.__device_id)
+            self.__api_interface.get__group_operational_status(
+                self.__device_id)
         )
         self.__group_operational_time = (
             self.__api_interface.get__group_operational_time(self.__device_id)
@@ -126,7 +131,8 @@ class ThermiaHeatPump:
         self.update_data()
 
     def __get_heat_temperature_data(self):
-        device_temperature_register_index = self.get_register_indexes()["temperature"]
+        device_temperature_register_index = self.get_register_indexes()[
+            "temperature"]
         if device_temperature_register_index is None:
             return None
 
@@ -186,12 +192,14 @@ class ThermiaHeatPump:
 
     def __get_active_alarms(self):
         active_alarms = filter(
-            lambda alarm: alarm.get("isActiveAlarm", False) is True, self.__alarms
+            lambda alarm: alarm.get(
+                "isActiveAlarm", False) is True, self.__alarms
         )
         return list(active_alarms)
 
     def __set_historical_data_registers(self):
-        data = self.__api_interface.get_historical_data_registers(self.__device_id)
+        data = self.__api_interface.get_historical_data_registers(
+            self.__device_id)
 
         data_map = {}
 
@@ -279,9 +287,11 @@ class ThermiaHeatPump:
     @property
     def supply_line_temperature(self):
         return get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_SUPPLY_LINE), "value"
+            self.__get_temperature_data_by_register_name(
+                REG_SUPPLY_LINE), "value"
         ) or get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_OPER_DATA_SUPPLY_MA_SA),
+            self.__get_temperature_data_by_register_name(
+                REG_OPER_DATA_SUPPLY_MA_SA),
             "value",
         )
 
@@ -289,7 +299,8 @@ class ThermiaHeatPump:
     def desired_supply_line_temperature(self):
         return (
             get_dict_value_safe(
-                self.__get_temperature_data_by_register_name(REG_DESIRED_SUPPLY_LINE),
+                self.__get_temperature_data_by_register_name(
+                    REG_DESIRED_SUPPLY_LINE),
                 "value",
             )
             or get_dict_value_safe(
@@ -309,15 +320,18 @@ class ThermiaHeatPump:
     @property
     def return_line_temperature(self):
         return get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_RETURN_LINE), "value"
+            self.__get_temperature_data_by_register_name(
+                REG_RETURN_LINE), "value"
         ) or get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_OPER_DATA_RETURN), "value"
+            self.__get_temperature_data_by_register_name(
+                REG_OPER_DATA_RETURN), "value"
         )
 
     @property
     def brine_out_temperature(self):
         return get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_BRINE_OUT), "value"
+            self.__get_temperature_data_by_register_name(
+                REG_BRINE_OUT), "value"
         )
 
     @property
@@ -329,13 +343,15 @@ class ThermiaHeatPump:
     @property
     def cooling_tank_temperature(self):
         return get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_COOL_SENSOR_TANK), "value"
+            self.__get_temperature_data_by_register_name(
+                REG_COOL_SENSOR_TANK), "value"
         )
 
     @property
     def cooling_supply_line_temperature(self):
         return get_dict_value_safe(
-            self.__get_temperature_data_by_register_name(REG_COOL_SENSOR_SUPPLY),
+            self.__get_temperature_data_by_register_name(
+                REG_COOL_SENSOR_SUPPLY),
             "value",
         )
 
@@ -366,35 +382,40 @@ class ThermiaHeatPump:
     @property
     def compressor_operational_time(self):
         return get_dict_value_safe(
-            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_COMPRESSOR),
+            self.__get_operational_time_data_by_register_name(
+                REG_OPER_TIME_COMPRESSOR),
             "value",
         )
 
     @property
     def hot_water_operational_time(self):
         return get_dict_value_safe(
-            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_HOT_WATER),
+            self.__get_operational_time_data_by_register_name(
+                REG_OPER_TIME_HOT_WATER),
             "value",
         )
 
     @property
     def auxiliary_heater_1_operational_time(self):
         return get_dict_value_safe(
-            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM1),
+            self.__get_operational_time_data_by_register_name(
+                REG_OPER_TIME_IMM1),
             "value",
         )
 
     @property
     def auxiliary_heater_2_operational_time(self):
         return get_dict_value_safe(
-            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM2),
+            self.__get_operational_time_data_by_register_name(
+                REG_OPER_TIME_IMM2),
             "value",
         )
 
     @property
     def auxiliary_heater_3_operational_time(self):
         return get_dict_value_safe(
-            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM3),
+            self.__get_operational_time_data_by_register_name(
+                REG_OPER_TIME_IMM3),
             "value",
         )
 
@@ -446,7 +467,8 @@ class ThermiaHeatPump:
     @property
     def active_alarms(self):
         active_alarms = self.__get_active_alarms()
-        active_alarm_texts = map(lambda alarm: alarm.get("eventTitle"), active_alarms)
+        active_alarm_texts = map(
+            lambda alarm: alarm.get("eventTitle"), active_alarms)
         return list(active_alarm_texts)
 
     ###########################################################################
@@ -469,7 +491,8 @@ class ThermiaHeatPump:
         register_id = self.__historical_data_registers_map.get(register_name)
 
         if register_id is None:
-            self._LOGGER.error("Register name is not supported: " + str(register_name))
+            self._LOGGER.error(
+                "Register name is not supported: " + str(register_name))
             return None
 
         historical_data = self.__api_interface.get_historical_data(
@@ -493,3 +516,53 @@ class ThermiaHeatPump:
                 historical_data["data"],
             )
         )
+
+    ###########################################################################
+    # Print debug data
+    ###########################################################################
+
+    def debug(self):
+        print("Creating debug file")
+
+        original_stdout = sys.stdout
+        f = open("debug.txt", "w")
+        sys.stdout = f
+
+        print("########## DEBUG START ##########")
+
+        print("self.__info:")
+        pretty_print_except(self.__info, ["address", "macAddress", "ownerId",
+                            "retailerAccess", "retailerId", "timeZoneId", "id", "hasUserAccount"])
+
+        print("self.__status:")
+        pretty_print_except(self.__status)
+
+        print("self.__device_data:")
+        pretty_print_except(self.__device_data, [
+                            "macAddress", "owner", "retailerAccess", "retailerId", "id", "status"])
+
+        print("self.__group_temperatures:")
+        pretty_print_except(self.__group_temperatures)
+
+        installation_profile_id = self.__info.get("installationProfileId")
+
+        if installation_profile_id is not None:
+            all_available_groups = self.__api_interface.get_all_available_groups(
+                installation_profile_id)
+            if all_available_groups is not None:
+                print("All available groups:")
+                pretty_print_except(all_available_groups)
+
+                for group in all_available_groups:
+                    group_name = group.get("name")
+                    if group_name is not None:
+                        print("Group " + group_name + ":")
+                        group_data = self.__api_interface.get_register_group_json(
+                            self.__device_id, group_name)
+                        pretty_print_except(group_data)
+
+        print("########## DEBUG END ##########")
+
+        sys.stdout = original_stdout
+        f.close()
+        print("Debug file created")

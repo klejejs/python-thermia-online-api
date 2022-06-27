@@ -8,3 +8,6 @@ __pycache__/
 MANIFEST
 build/
 dist/
+
+# Debug file
+debug.txt

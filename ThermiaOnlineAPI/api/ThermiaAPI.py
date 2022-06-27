@@ -45,7 +45,8 @@ class ThermiaAPI:
     def get_devices(self):
         self.__check_token_validity()
 
-        url = self.configuration["apiBaseUrl"] + "/api/v1/InstallationsInfo/own"
+        url = self.configuration["apiBaseUrl"] + \
+            "/api/v1/InstallationsInfo/own"
         request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
@@ -71,7 +72,8 @@ class ThermiaAPI:
     def get_device_info(self, device_id: str):
         self.__check_token_validity()
 
-        url = self.configuration["apiBaseUrl"] + "/api/v1/installations/" + device_id
+        url = self.configuration["apiBaseUrl"] + \
+            "/api/v1/installations/" + device_id
         request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
@@ -155,8 +157,25 @@ class ThermiaAPI:
 
         if status != 200:
             _LOGGER.error(
-                "Error in historical data for specific register. " + str(status)
+                "Error in historical data for specific register. " +
+                str(status)
             )
+            return None
+
+        return request.json()
+
+    def get_all_available_groups(self, installation_profile_id: int):
+        self.__check_token_validity()
+
+        url = self.configuration["apiBaseUrl"] + \
+            "/api/v1/installationprofiles/" + \
+            str(installation_profile_id) + "/groups"
+
+        request = requests.get(url, headers=self.__default_request_headers)
+        status = request.status_code
+
+        if status != 200:
+            _LOGGER.error("Error in getting available groups. " + str(status))
             return None
 
         return request.json()
@@ -221,7 +240,8 @@ class ThermiaAPI:
             device.id, REG_GROUP_OPERATIONAL_OPERATION
         )
 
-        data = [d for d in register_data if d["registerName"] == "REG_OPERATIONMODE"]
+        data = [d for d in register_data if d["registerName"]
+                == "REG_OPERATIONMODE"]
 
         if len(data) != 1:
             # Operation mode not supported
@@ -264,9 +284,11 @@ class ThermiaAPI:
         return None
 
     def get_group_hot_water(self, device: ThermiaHeatPump):
-        register_data = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
+        register_data = self.__get_register_group(
+            device.id, REG_GROUP_HOT_WATER)
 
-        data = [d for d in register_data if d["registerName"] == "REG_HOT_WATER_STATUS"]
+        data = [d for d in register_data if d["registerName"]
+                == "REG_HOT_WATER_STATUS"]
 
         if len(data) == 0:
             # Hot water switch not supported
@@ -285,7 +307,8 @@ class ThermiaAPI:
         return None
 
     def set_temperature(self, device: ThermiaHeatPump, temperature):
-        device_temperature_register_index = device.get_register_indexes()["temperature"]
+        device_temperature_register_index = device.get_register_indexes()[
+            "temperature"]
         if device_temperature_register_index is None:
             _LOGGER.error(
                 "Error setting device's temperature. No temperature register index."
@@ -344,6 +367,9 @@ class ThermiaAPI:
             device, device_hot_water_switch_state_register_index, state
         )
 
+    def get_register_group_json(self, device_id: str, register_group):
+        return self.__get_register_group(device_id, register_group)
+
     def __get_register_group(self, device_id: str, register_group: REGISTER_GROUPS):
         self.__check_token_validity()
 
@@ -385,7 +411,8 @@ class ThermiaAPI:
             "clientUuid": "api-client-uuid",
         }
 
-        request = requests.post(url, headers=self.__default_request_headers, json=body)
+        request = requests.post(
+            url, headers=self.__default_request_headers, json=body)
 
         status = request.status_code
         if status != 200:
@@ -429,7 +456,8 @@ class ThermiaAPI:
         auth_data = request_auth.json()
 
         token_valid_to = auth_data.get("tokenValidToUtc").split(".")[0]
-        datetime_object = datetime.strptime(token_valid_to, "%Y-%m-%dT%H:%M:%S")
+        datetime_object = datetime.strptime(
+            token_valid_to, "%Y-%m-%dT%H:%M:%S")
         token_valid_to = datetime_object.timestamp()
 
         self.__token = auth_data.get("token")
