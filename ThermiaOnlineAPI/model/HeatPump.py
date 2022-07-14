@@ -10,6 +10,7 @@ from ThermiaOnlineAPI.const import (
     OPERATIONAL_TIME_REGISTERS,
     REG_BRINE_IN,
     REG_BRINE_OUT,
+    REG_ACTUAL_POOL_TEMP,
     REG_COOL_SENSOR_SUPPLY,
     REG_COOL_SENSOR_TANK,
     REG_DESIRED_SUPPLY_LINE,
@@ -334,6 +335,13 @@ class ThermiaHeatPump:
                 REG_BRINE_OUT), "value"
         )
 
+    @property
+    def pool_temperature(self):
+        return get_dict_value_safe(
+            self.__get_temperature_data_by_register_name(
+                REG_ACTUAL_POOL_TEMP), "value"
+        )
+        
     @property
     def brine_in_temperature(self):
         return get_dict_value_safe(
