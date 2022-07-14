@@ -334,12 +334,14 @@ class ThermiaHeatPump:
             self.__get_temperature_data_by_register_name(
                 REG_BRINE_OUT), "value"
         )
+
     @property
     def pool_temperature(self):
         return get_dict_value_safe(
             self.__get_temperature_data_by_register_name(
                 REG_ACTUAL_POOL_TEMP), "value"
         )
+        
     @property
     def brine_in_temperature(self):
         return get_dict_value_safe(
