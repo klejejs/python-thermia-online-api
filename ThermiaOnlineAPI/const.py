@@ -4,6 +4,7 @@
 
 THERMIA_CLASSIC_API_CONFIG_URL = "https://online.thermia.se/api/configuration"
 THERMIA_GENESIS_API_CONFIG_URL = "https://online-genesis.thermia.se/api/configuration"
+THERMIA_GENESIS_API_AUTH_URL = "https://thermialogin.b2clogin.com/thermialogin.onmicrosoft.com/b2c_1a_signuporsigninonline/"
 
 THERMIA_INSTALLATION_PATH = "/api/v1/Registers/Installations/"
 

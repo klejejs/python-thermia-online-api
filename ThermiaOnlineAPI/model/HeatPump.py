@@ -114,9 +114,10 @@ class ThermiaHeatPump:
     def set_operation_mode(self, mode: str):
         self._LOGGER.info("Setting operation mode to " + str(mode))
 
-        self.__group_operational_operation[
-            "current"
-        ] = mode  # update local state before refetching data
+        if not self.__group_operational_operation is None:
+            self.__group_operational_operation[
+                "current"
+            ] = mode  # update local state before refetching data
         self.__api_interface.set_operation_mode(self, mode)
         self.update_data()
 

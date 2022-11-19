@@ -11,3 +11,11 @@ dist/
 
 # Debug file
 debug.txt
+/.vs/VSWorkspaceState.json
+/.vs/slnx.sqlite
+/.vs/PythonSettings.json
+/.vs/python-thermia-online-api/v17/.suo
+/.vs/python-thermia-online-api/v17
+/.vs/python-thermia-online-api/FileContentIndex/read.lock
+/.vs/python-thermia-online-api/FileContentIndex/42724ed3-08c6-4109-bd61-481f8fb2e2e8.vsidx
+/.vs/python-thermia-online-api/FileContentIndex

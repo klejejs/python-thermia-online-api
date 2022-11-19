@@ -1,7 +1,13 @@
 import logging
 from collections import ChainMap
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
+import urllib.parse
+import json
+from base64 import urlsafe_b64encode, urlsafe_b64decode
+import hashlib
+import random
+import string
 
 from ThermiaOnlineAPI.const import (
     REG_GROUP_HOT_WATER,
@@ -12,6 +18,7 @@ from ThermiaOnlineAPI.const import (
     REGISTER_GROUPS,
     THERMIA_API_CONFIG_URLS_BY_API_TYPE,
     THERMIA_INSTALLATION_PATH,
+    THERMIA_GENESIS_API_AUTH_URL,
 )
 
 
@@ -28,6 +35,9 @@ class ThermiaAPI:
         self.__password = password
         self.__token = None
         self.__token_valid_to = None
+        self.__api_type = api_type
+        self.__refresh_token_valid_to = None
+        self.__refresh_token = None
 
         self.__default_request_headers = {
             "Authorization": "Bearer ",
@@ -41,6 +51,17 @@ class ThermiaAPI:
 
         self.configuration = self.__fetch_configuration()
         self.authenticated = self.__authenticate()
+
+    def base64UrlEncode(self, data):
+        return urlsafe_b64encode(data).rstrip(b'=')
+
+    def base64UrlDecode(self, base64Url):
+        return urlsafe_b64decode(base64Url + '=' * (4 - len(base64Url) % 4))
+
+    def generate_Challenge(self, length):
+        characters = string.ascii_letters + string.digits
+        challenge = ''.join(random.choice(characters) for i in range(length))
+        return challenge
 
     def get_devices(self):
         self.__check_token_validity()
@@ -433,7 +454,7 @@ class ThermiaAPI:
 
         return request.json()
 
-    def __authenticate(self):
+    def __authenticatice_Classic(self):
         auth_url = self.configuration["authApiBaseUrl"] + "/api/v1/Jwt/login"
         json = {
             "userName": self.__email,
@@ -471,10 +492,119 @@ class ThermiaAPI:
         _LOGGER.info("Authentication was successful, token set.")
         return True
 
+    def __authenticate(self, refresh=False):
+        if self.__api_type == "genesis":
+            return self.__authenticate_Genesis(refresh)
+        else:
+            return self.__authenticatice_Classic()
+
+
+    def __authenticate_Genesis(self,refresh):
+        if(refresh):
+            Headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
+        
+            _data = "client_id=09ea4903-9e95-45fe-ae1f-e3b7d32fa385&redirect_uri=https%3A%2F%2Fonline-genesis.thermia.se%2Flogin&scope=09ea4903-9e95-45fe-ae1f-e3b7d32fa385"
+            _data += "&refresh_token=" + self.__refresh_token
+            _data += "&grant_type=refresh_token"
+
+            uri = THERMIA_GENESIS_API_AUTH_URL + "oauth2/v2.0/token"
+            
+            request_token = requests.post(uri, headers=Headers, data=_data)
+        else:
+            code_Challenge = self.generate_Challenge(43)
+
+            request_auth = requests.get(THERMIA_GENESIS_API_AUTH_URL + "oauth2/v2.0/authorize",
+                {"client_id":"09ea4903-9e95-45fe-ae1f-e3b7d32fa385",
+                "scope":"09ea4903-9e95-45fe-ae1f-e3b7d32fa385",
+                "redirect_uri":"https://online-genesis.thermia.se/login",
+                "response_type":"code", 
+                "code_challenge":str(self.base64UrlEncode(hashlib.sha256(code_Challenge.encode('utf-8')).digest()),'utf-8'),
+                "code_challenge_method":"S256"
+                }
+            )
+            
+            stateCode = ""
+            csrf_token = ""
+            
+            a = request_auth.text
+
+            if request_auth.status_code == 200:
+                csrf_token = a[a.find('"csrf":"')+8:a.find('"',a.find('"csrf":"')+8)]
+                stateCode = a[a.find('StateProperties=')+16:a.find('"',a.find('StateProperties=')+16)]
+            else:
+                _LOGGER.error("Error fetching API authorization. " + str(request_auth.reason))
+                raise NetworkException("Error fetching API authorization.", request_auth.reason)
+            
+
+            Headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
+            Headers["X-Csrf-Token"] = csrf_token
+
+            _data = "request_type=RESPONSE&signInName=" + urllib.parse.quote(self.__email) + "&password=" + self.__password
+
+            uri = THERMIA_GENESIS_API_AUTH_URL + "SelfAsserted?tx=StateProperties="
+            uri += stateCode + "&p=B2C_1A_SignUpOrSigninOnline"
+            request_self_asserted = requests.post(uri, headers=Headers, data=_data, cookies=request_auth.cookies)
+
+            if request_self_asserted.status_code !=200 or '{"status":"400"' in request_self_asserted.text: #authentication failed
+                _LOGGER.error("Error in API authencation. Wrong credentials " + str(request_self_asserted.text))
+                raise NetworkException("Error in API authencation. Wrong credentials", request_self_asserted.text)
+
+            Cookies = request_self_asserted.cookies
+            cookie_obj = requests.cookies.create_cookie(name="x-ms-cpim-csrf",value=request_auth.cookies.get("x-ms-cpim-csrf"))
+            Cookies.set_cookie(cookie_obj)
+            
+            uri = THERMIA_GENESIS_API_AUTH_URL + "api/CombinedSigninAndSignup/confirmed?csrf_token="
+            uri += csrf_token + "&p=B2C_1A_SignUpOrSigninOnline"
+            uri += "&tx=StateProperties=" + stateCode
+            uri += "&p=B2C_1A_SignUpOrSigninOnline"
+
+            request_confirmed = requests.get(uri,cookies=Cookies)
+
+            Headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
+            
+
+            _data = "client_id=09ea4903-9e95-45fe-ae1f-e3b7d32fa385&redirect_uri=https%3A%2F%2Fonline-genesis.thermia.se%2Flogin&scope=09ea4903-9e95-45fe-ae1f-e3b7d32fa385"
+            _data += "&code=" + request_confirmed.url.split("code=")[1]
+            _data += "&code_verifier=" + code_Challenge
+            _data += "&grant_type=authorization_code"
+
+            uri = THERMIA_GENESIS_API_AUTH_URL + "oauth2/v2.0/token"
+            
+            request_token = requests.post(uri, headers=Headers, data=_data)
+
+            status = 200
+
+            if status != 200:
+                _LOGGER.error(
+                    "Authentication request failed, please check credentials. "
+                    + str(status)
+                )
+                raise AuthenticationException(
+                    "Authentication request failed, please check credentials.", status
+                )
+
+        token_data = json.loads(request_token.text)
+
+        self.__token = token_data["access_token"]
+        self.__token_valid_to = token_data["expires_on"]
+        #refresh token valid for 24h
+        self.__refresh_token_valid_to = (datetime.now() + timedelta(days=1)).timestamp()
+        self.__refresh_token = token_data.get("refresh_token")
+
+        self.__default_request_headers = {
+            "Authorization": "Bearer " + self.__token,
+            "Content-Type": "application/json",
+        }
+
+        _LOGGER.info("Authentication was successful, token set.")
+        return True
+
+
     def __check_token_validity(self):
         if (
             self.__token_valid_to is None
             or self.__token_valid_to < datetime.now().timestamp()
         ):
             _LOGGER.info("Token expired, re-authenticating.")
-            self.authenticated = self.__authenticate()
+            self.authenticated = self.__authenticate((self.__refresh_token_valid_to > datetime.now().timestamp()))
+            
