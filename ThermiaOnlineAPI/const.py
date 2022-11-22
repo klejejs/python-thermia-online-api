@@ -33,14 +33,6 @@ REG_GROUP_OPERATIONAL_TIME = "REG_GROUP_OPERATIONAL_TIME"
 REG_GROUP_OPERATIONAL_OPERATION = "REG_GROUP_OPERATIONAL_OPERATION"
 REG_GROUP_HOT_WATER = "REG_GROUP_HOT_WATER"
 
-REGISTER_GROUPS = [
-    REG_GROUP_TEMPERATURES,
-    REG_GROUP_OPERATIONAL_STATUS,
-    REG_GROUP_OPERATIONAL_TIME,
-    REG_GROUP_OPERATIONAL_OPERATION,
-    REG_GROUP_HOT_WATER,
-]
-
 ###############################################################################
 # Temperature registers
 ###############################################################################

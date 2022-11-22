@@ -88,6 +88,11 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 | --- | --- |
 | `update_data()` | Refetch all data from Thermia for Heat Pump |
 | --- | --- |
+| `get_all_available_register_groups()` | Return a list of all available register groups for the heat pump |
+| `get_available_registers_for_group(register_group)` | Return a list of all available registers for specified register group |
+| `get_register_data_by_register_group_and_name(register_group, register_name)` | Return data for specified register group and name |
+| `set_register_data_by_register_group_and_name(register_group, register_name, value)` | Set register value for specified register group and name |
+| --- | --- |
 | Change heat pump state | |
 | `set_temperature()` | Set the target temperature for the Heat Pump |
 | `set_operation_mode()` | Set the operation mode for the Heat Pump |

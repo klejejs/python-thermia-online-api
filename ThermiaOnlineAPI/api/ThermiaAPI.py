@@ -2,7 +2,6 @@ import logging
 from collections import ChainMap
 from datetime import datetime, timedelta
 import requests
-import urllib.parse
 import json
 import hashlib
 
@@ -12,7 +11,6 @@ from ThermiaOnlineAPI.const import (
     REG_GROUP_OPERATIONAL_STATUS,
     REG_GROUP_OPERATIONAL_TIME,
     REG_GROUP_TEMPERATURES,
-    REGISTER_GROUPS,
     THERMIA_API_CONFIG_URLS_BY_API_TYPE,
     THERMIA_API_TYPE_CLASSIC,
     THERMIA_AZURE_AUTH_URL,
@@ -377,7 +375,12 @@ class ThermiaAPI:
     def get_register_group_json(self, device_id: str, register_group):
         return self.__get_register_group(device_id, register_group)
 
-    def __get_register_group(self, device_id: str, register_group: REGISTER_GROUPS):
+    def set_register_value(
+        self, device: ThermiaHeatPump, register_index: int, value: int
+    ):
+        self.__set_register_value(device, register_index, value)
+
+    def __get_register_group(self, device_id: str, register_group: str):
         self.__check_token_validity()
 
         url = (
