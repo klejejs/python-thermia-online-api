@@ -129,6 +129,61 @@ class ThermiaHeatPump:
         self.__api_interface.set_hot_water_switch_state(self, state)
         self.update_data()
 
+    def get_all_available_register_groups(self):
+        installation_profile_id = self.__info.get("installationProfileId")
+        register_groups = self.__api_interface.get_all_available_groups(
+            installation_profile_id
+        )
+
+        if register_groups is None:
+            return []
+
+        return list(map(lambda x: x["name"], register_groups))
+
+    def get_available_registers_for_group(self, register_group: str):
+        registers_for_group = self.__api_interface.get_register_group_json(
+            self.__device_id, register_group
+        )
+
+        if registers_for_group is None:
+            return []
+
+        return list(map(lambda x: x["registerName"], registers_for_group))
+
+    def get_register_data_by_register_group_and_name(
+        self, register_group: str, register_name: str
+    ):
+        register_group = self.__api_interface.get_register_group_json(
+            self.__device_id, register_group
+        )
+
+        if register_group is None:
+            self._LOGGER.error("No register group found for group: " + register_group)
+            return None
+
+        return self.__get_data_from_group_by_register_name(
+            register_group, register_name
+        )
+
+    def set_register_data_by_register_group_and_name(
+        self, register_group: str, register_name: str, value: int
+    ):
+        register_data = self.get_register_data_by_register_group_and_name(
+            register_group, register_name
+        )
+
+        if register_data is None:
+            self._LOGGER.error(
+                "No register group found for group: "
+                + register_group
+                + " and register: "
+                + register_name
+            )
+            return None
+
+        self.__api_interface.set_register_value(self, register_data["id"], value)
+        self.update_data()
+
     def __get_heat_temperature_data(self):
         device_temperature_register_index = self.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
@@ -176,12 +231,14 @@ class ThermiaHeatPump:
         data = [d for d in group if d["registerName"] == register_name]
 
         if len(data) != 1:
-            # Temperature status not supported
+            # Register not in the group
             return None
 
         data = data[0]
 
         return {
+            "id": data["registerIndex"],
+            "isReadOnly": data["isReadOnly"],
             "minValue": data["minValue"],
             "maxValue": data["maxValue"],
             "step": data["step"],
