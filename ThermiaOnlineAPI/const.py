@@ -7,10 +7,21 @@ THERMIA_GENESIS_API_CONFIG_URL = "https://online-genesis.thermia.se/api/configur
 
 THERMIA_INSTALLATION_PATH = "/api/v1/Registers/Installations/"
 
+THERMIA_API_TYPE_CLASSIC = "classic"
+THERMIA_API_TYPE_GENESIS = "genesis"
+
 THERMIA_API_CONFIG_URLS_BY_API_TYPE = {
-    "classic": THERMIA_CLASSIC_API_CONFIG_URL,
-    "genesis": THERMIA_GENESIS_API_CONFIG_URL,
+    THERMIA_API_TYPE_CLASSIC: THERMIA_CLASSIC_API_CONFIG_URL,
+    THERMIA_API_TYPE_GENESIS: THERMIA_GENESIS_API_CONFIG_URL,
 }
+
+###############################################################################
+# Azure AD configuration
+###############################################################################
+
+THERMIA_AZURE_AUTH_URL = "https://thermialogin.b2clogin.com/thermialogin.onmicrosoft.com/b2c_1a_signuporsigninonline"
+THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE = "09ea4903-9e95-45fe-ae1f-e3b7d32fa385"
+THERMIA_AZURE_AUTH_REDIRECT_URI = "https://online-genesis.thermia.se/login"
 
 ###############################################################################
 # Register groups

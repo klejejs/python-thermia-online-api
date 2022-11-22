@@ -1,4 +1,7 @@
 import json
+from base64 import urlsafe_b64encode
+import random
+import string
 
 
 def get_dict_value_safe(dictionary, key, default=None):
@@ -21,3 +24,13 @@ def pretty_print_except(json_object, except_keys=[]):
         if key in json_object_copy:
             del json_object_copy[key]
     pretty_print(json_object_copy)
+
+
+def base64_url_encode(data):
+    return urlsafe_b64encode(data).rstrip(b"=")
+
+
+def generate_challenge(length):
+    characters = string.ascii_letters + string.digits
+    challenge = "".join(random.choice(characters) for _ in range(length))
+    return challenge

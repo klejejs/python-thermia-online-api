@@ -11,3 +11,6 @@ dist/
 
 # Debug file
 debug.txt
+
+# Visual Studio related files
+/.vs/*
