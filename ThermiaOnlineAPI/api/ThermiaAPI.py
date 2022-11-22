@@ -4,10 +4,7 @@ from datetime import datetime, timedelta
 import requests
 import urllib.parse
 import json
-from base64 import urlsafe_b64encode, urlsafe_b64decode
 import hashlib
-import random
-import string
 
 from ThermiaOnlineAPI.const import (
     REG_GROUP_HOT_WATER,
@@ -17,14 +14,18 @@ from ThermiaOnlineAPI.const import (
     REG_GROUP_TEMPERATURES,
     REGISTER_GROUPS,
     THERMIA_API_CONFIG_URLS_BY_API_TYPE,
+    THERMIA_API_TYPE_CLASSIC,
+    THERMIA_AZURE_AUTH_URL,
+    THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+    THERMIA_AZURE_AUTH_REDIRECT_URI,
     THERMIA_INSTALLATION_PATH,
-    THERMIA_GENESIS_API_AUTH_URL,
 )
 
 
 from ..exceptions.AuthenticationException import AuthenticationException
 from ..exceptions.NetworkException import NetworkException
 from ..model.HeatPump import ThermiaHeatPump
+from ..utils import utils
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,22 +53,10 @@ class ThermiaAPI:
         self.configuration = self.__fetch_configuration()
         self.authenticated = self.__authenticate()
 
-    def base64UrlEncode(self, data):
-        return urlsafe_b64encode(data).rstrip(b'=')
-
-    def base64UrlDecode(self, base64Url):
-        return urlsafe_b64decode(base64Url + '=' * (4 - len(base64Url) % 4))
-
-    def generate_Challenge(self, length):
-        characters = string.ascii_letters + string.digits
-        challenge = ''.join(random.choice(characters) for i in range(length))
-        return challenge
-
     def get_devices(self):
         self.__check_token_validity()
 
-        url = self.configuration["apiBaseUrl"] + \
-            "/api/v1/InstallationsInfo/own"
+        url = self.configuration["apiBaseUrl"] + "/api/v1/InstallationsInfo/own"
         request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
@@ -93,8 +82,7 @@ class ThermiaAPI:
     def get_device_info(self, device_id: str):
         self.__check_token_validity()
 
-        url = self.configuration["apiBaseUrl"] + \
-            "/api/v1/installations/" + device_id
+        url = self.configuration["apiBaseUrl"] + "/api/v1/installations/" + device_id
         request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
@@ -178,8 +166,7 @@ class ThermiaAPI:
 
         if status != 200:
             _LOGGER.error(
-                "Error in historical data for specific register. " +
-                str(status)
+                "Error in historical data for specific register. " + str(status)
             )
             return None
 
@@ -188,9 +175,12 @@ class ThermiaAPI:
     def get_all_available_groups(self, installation_profile_id: int):
         self.__check_token_validity()
 
-        url = self.configuration["apiBaseUrl"] + \
-            "/api/v1/installationprofiles/" + \
-            str(installation_profile_id) + "/groups"
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/installationprofiles/"
+            + str(installation_profile_id)
+            + "/groups"
+        )
 
         request = requests.get(url, headers=self.__default_request_headers)
         status = request.status_code
@@ -261,8 +251,7 @@ class ThermiaAPI:
             device.id, REG_GROUP_OPERATIONAL_OPERATION
         )
 
-        data = [d for d in register_data if d["registerName"]
-                == "REG_OPERATIONMODE"]
+        data = [d for d in register_data if d["registerName"] == "REG_OPERATIONMODE"]
 
         if len(data) != 1:
             # Operation mode not supported
@@ -305,11 +294,9 @@ class ThermiaAPI:
         return None
 
     def get_group_hot_water(self, device: ThermiaHeatPump):
-        register_data = self.__get_register_group(
-            device.id, REG_GROUP_HOT_WATER)
+        register_data = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
 
-        data = [d for d in register_data if d["registerName"]
-                == "REG_HOT_WATER_STATUS"]
+        data = [d for d in register_data if d["registerName"] == "REG_HOT_WATER_STATUS"]
 
         if len(data) == 0:
             # Hot water switch not supported
@@ -328,8 +315,7 @@ class ThermiaAPI:
         return None
 
     def set_temperature(self, device: ThermiaHeatPump, temperature):
-        device_temperature_register_index = device.get_register_indexes()[
-            "temperature"]
+        device_temperature_register_index = device.get_register_indexes()["temperature"]
         if device_temperature_register_index is None:
             _LOGGER.error(
                 "Error setting device's temperature. No temperature register index."
@@ -432,8 +418,7 @@ class ThermiaAPI:
             "clientUuid": "api-client-uuid",
         }
 
-        request = requests.post(
-            url, headers=self.__default_request_headers, json=body)
+        request = requests.post(url, headers=self.__default_request_headers, json=body)
 
         status = request.status_code
         if status != 200:
@@ -454,8 +439,186 @@ class ThermiaAPI:
 
         return request.json()
 
-    def __authenticatice_Classic(self):
+    def __authenticate(self):
+        try:
+            result = self.__authenticate_azure()
+        except Exception as e:
+            _LOGGER.warn("Error authenticating with Azure auth." + str(e))
+
+        if not result and self.__api_type == THERMIA_API_TYPE_CLASSIC:
+            return self.__authenticate_legacy()
+
+        return result
+
+    def __authenticate_azure(self):
+        # Azure auth URLs
+        azure_auth_authorize_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/authorize"
+        azure_auth_get_token_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/token"
+        azure_self_asserted_url = THERMIA_AZURE_AUTH_URL + "/SelfAsserted"
+        azure_auth_confirm_url = (
+            THERMIA_AZURE_AUTH_URL + "/api/CombinedSigninAndSignup/confirmed"
+        )
+
+        # Azure default headers
+        azure_auth_request_headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        }
+
+        refresh_azure_token = self.__refresh_token_valid_to and (
+            self.__refresh_token_valid_to > datetime.now().timestamp()
+        )
+
+        if refresh_azure_token:  # Refresh token
+            request_token__data = {
+                "client_id": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+                "redirect_uri": THERMIA_AZURE_AUTH_REDIRECT_URI,
+                "scope": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+                "refresh_token": self.__refresh_token,
+                "grant_type": "refresh_token",
+            }
+
+            request_token = requests.post(
+                azure_auth_get_token_url,
+                headers=azure_auth_request_headers,
+                data=request_token__data,
+            )
+        else:
+            code_challenge = utils.generate_challenge(43)
+
+            request_auth__data = {
+                "client_id": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+                "scope": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+                "redirect_uri": THERMIA_AZURE_AUTH_REDIRECT_URI,
+                "response_type": "code",
+                "code_challenge": str(
+                    utils.base64_url_encode(
+                        hashlib.sha256(code_challenge.encode("utf-8")).digest()
+                    ),
+                    "utf-8",
+                ),
+                "code_challenge_method": "S256",
+            }
+
+            request_auth = requests.get(azure_auth_authorize_url, request_auth__data)
+
+            state_code = ""
+            csrf_token = ""
+
+            if request_auth.status_code == 200:
+                settings_string = [
+                    i
+                    for i in request_auth.text.splitlines()
+                    if i.startswith("var SETTINGS = ")
+                ]
+                if len(settings_string) > 0:
+                    settings = json.loads(settings_string[0][15:-1])
+
+                    state_code = str(settings["transId"]).split("=")[1]
+                    csrf_token = settings["csrf"]
+            else:
+                _LOGGER.error(
+                    "Error fetching authorization API. " + str(request_auth.reason)
+                )
+                raise NetworkException(
+                    "Error fetching authorization API.", request_auth.reason
+                )
+
+            request_self_asserted__data = {
+                "request_type": "RESPONSE",
+                "signInName": self.__email,
+                "password": self.__password,
+            }
+
+            request_self_asserted__query_params = {
+                "tx": "StateProperties=" + state_code,
+                "p": "B2C_1A_SignUpOrSigninOnline",
+            }
+
+            request_self_asserted = requests.post(
+                azure_self_asserted_url,
+                cookies=request_auth.cookies,
+                data=request_self_asserted__data,
+                headers={**azure_auth_request_headers, "X-Csrf-Token": csrf_token},
+                params=request_self_asserted__query_params,
+            )
+
+            if (
+                request_self_asserted.status_code != 200
+                or '{"status":"400"' in request_self_asserted.text
+            ):  # authentication failed
+                _LOGGER.error(
+                    "Error in API authencation. Wrong credentials "
+                    + str(request_self_asserted.text)
+                )
+                raise NetworkException(
+                    "Error in API authencation. Wrong credentials",
+                    request_self_asserted.text,
+                )
+
+            request_confirmed__cookies = request_self_asserted.cookies
+            cookie_obj = requests.cookies.create_cookie(
+                name="x-ms-cpim-csrf", value=request_auth.cookies.get("x-ms-cpim-csrf")
+            )
+            request_confirmed__cookies.set_cookie(cookie_obj)
+
+            request_confirmed__params = {
+                "csrf_token": csrf_token,
+                "tx": "StateProperties=" + state_code,
+                "p": "B2C_1A_SignUpOrSigninOnline",
+            }
+
+            request_confirmed = requests.get(
+                azure_auth_confirm_url,
+                cookies=request_confirmed__cookies,
+                params=request_confirmed__params,
+            )
+
+            request_token__data = {
+                "client_id": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+                "redirect_uri": THERMIA_AZURE_AUTH_REDIRECT_URI,
+                "scope": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+                "code": request_confirmed.url.split("code=")[1],
+                "code_verifier": code_challenge,
+                "grant_type": "authorization_code",
+            }
+
+            request_token = requests.post(
+                azure_auth_get_token_url,
+                headers=azure_auth_request_headers,
+                data=request_token__data,
+            )
+
+            if request_token.status_code != 200:
+                _LOGGER.error(
+                    "Authentication request failed, please check credentials. "
+                    + str(request_token.status_code)
+                )
+                raise AuthenticationException(
+                    "Authentication request failed, please check credentials.",
+                    request_token.status_code,
+                )
+
+        token_data = json.loads(request_token.text)
+
+        self.__token = token_data["access_token"]
+        self.__token_valid_to = token_data["expires_on"]
+
+        # refresh token valid for 24h
+        self.__refresh_token_valid_to = (datetime.now() + timedelta(days=1)).timestamp()
+        self.__refresh_token = token_data.get("refresh_token")
+
+        self.__default_request_headers = {
+            "Authorization": "Bearer " + self.__token,
+            "Content-Type": "application/json",
+        }
+
+        _LOGGER.info("Authentication was successful, token set.")
+
+        return True
+
+    def __authenticate_legacy(self):
         auth_url = self.configuration["authApiBaseUrl"] + "/api/v1/Jwt/login"
+
         json = {
             "userName": self.__email,
             "password": self.__password,
@@ -477,8 +640,7 @@ class ThermiaAPI:
         auth_data = request_auth.json()
 
         token_valid_to = auth_data.get("tokenValidToUtc").split(".")[0]
-        datetime_object = datetime.strptime(
-            token_valid_to, "%Y-%m-%dT%H:%M:%S")
+        datetime_object = datetime.strptime(token_valid_to, "%Y-%m-%dT%H:%M:%S")
         token_valid_to = datetime_object.timestamp()
 
         self.__token = auth_data.get("token")
@@ -490,115 +652,8 @@ class ThermiaAPI:
         }
 
         _LOGGER.info("Authentication was successful, token set.")
+
         return True
-
-    def __authenticate(self, refresh=False):
-        if self.__api_type == "genesis":
-            return self.__authenticate_Genesis(refresh)
-        else:
-            return self.__authenticatice_Classic()
-
-
-    def __authenticate_Genesis(self,refresh):
-        if(refresh):
-            Headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
-        
-            _data = "client_id=09ea4903-9e95-45fe-ae1f-e3b7d32fa385&redirect_uri=https%3A%2F%2Fonline-genesis.thermia.se%2Flogin&scope=09ea4903-9e95-45fe-ae1f-e3b7d32fa385"
-            _data += "&refresh_token=" + self.__refresh_token
-            _data += "&grant_type=refresh_token"
-
-            uri = THERMIA_GENESIS_API_AUTH_URL + "oauth2/v2.0/token"
-            
-            request_token = requests.post(uri, headers=Headers, data=_data)
-        else:
-            code_Challenge = self.generate_Challenge(43)
-
-            request_auth = requests.get(THERMIA_GENESIS_API_AUTH_URL + "oauth2/v2.0/authorize",
-                {"client_id":"09ea4903-9e95-45fe-ae1f-e3b7d32fa385",
-                "scope":"09ea4903-9e95-45fe-ae1f-e3b7d32fa385",
-                "redirect_uri":"https://online-genesis.thermia.se/login",
-                "response_type":"code", 
-                "code_challenge":str(self.base64UrlEncode(hashlib.sha256(code_Challenge.encode('utf-8')).digest()),'utf-8'),
-                "code_challenge_method":"S256"
-                }
-            )
-            
-            stateCode = ""
-            csrf_token = ""
-            
-            a = request_auth.text
-
-            if request_auth.status_code == 200:
-                csrf_token = a[a.find('"csrf":"')+8:a.find('"',a.find('"csrf":"')+8)]
-                stateCode = a[a.find('StateProperties=')+16:a.find('"',a.find('StateProperties=')+16)]
-            else:
-                _LOGGER.error("Error fetching API authorization. " + str(request_auth.reason))
-                raise NetworkException("Error fetching API authorization.", request_auth.reason)
-            
-
-            Headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
-            Headers["X-Csrf-Token"] = csrf_token
-
-            _data = "request_type=RESPONSE&signInName=" + urllib.parse.quote(self.__email) + "&password=" + self.__password
-
-            uri = THERMIA_GENESIS_API_AUTH_URL + "SelfAsserted?tx=StateProperties="
-            uri += stateCode + "&p=B2C_1A_SignUpOrSigninOnline"
-            request_self_asserted = requests.post(uri, headers=Headers, data=_data, cookies=request_auth.cookies)
-
-            if request_self_asserted.status_code !=200 or '{"status":"400"' in request_self_asserted.text: #authentication failed
-                _LOGGER.error("Error in API authencation. Wrong credentials " + str(request_self_asserted.text))
-                raise NetworkException("Error in API authencation. Wrong credentials", request_self_asserted.text)
-
-            Cookies = request_self_asserted.cookies
-            cookie_obj = requests.cookies.create_cookie(name="x-ms-cpim-csrf",value=request_auth.cookies.get("x-ms-cpim-csrf"))
-            Cookies.set_cookie(cookie_obj)
-            
-            uri = THERMIA_GENESIS_API_AUTH_URL + "api/CombinedSigninAndSignup/confirmed?csrf_token="
-            uri += csrf_token + "&p=B2C_1A_SignUpOrSigninOnline"
-            uri += "&tx=StateProperties=" + stateCode
-            uri += "&p=B2C_1A_SignUpOrSigninOnline"
-
-            request_confirmed = requests.get(uri,cookies=Cookies)
-
-            Headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
-            
-
-            _data = "client_id=09ea4903-9e95-45fe-ae1f-e3b7d32fa385&redirect_uri=https%3A%2F%2Fonline-genesis.thermia.se%2Flogin&scope=09ea4903-9e95-45fe-ae1f-e3b7d32fa385"
-            _data += "&code=" + request_confirmed.url.split("code=")[1]
-            _data += "&code_verifier=" + code_Challenge
-            _data += "&grant_type=authorization_code"
-
-            uri = THERMIA_GENESIS_API_AUTH_URL + "oauth2/v2.0/token"
-            
-            request_token = requests.post(uri, headers=Headers, data=_data)
-
-            status = 200
-
-            if status != 200:
-                _LOGGER.error(
-                    "Authentication request failed, please check credentials. "
-                    + str(status)
-                )
-                raise AuthenticationException(
-                    "Authentication request failed, please check credentials.", status
-                )
-
-        token_data = json.loads(request_token.text)
-
-        self.__token = token_data["access_token"]
-        self.__token_valid_to = token_data["expires_on"]
-        #refresh token valid for 24h
-        self.__refresh_token_valid_to = (datetime.now() + timedelta(days=1)).timestamp()
-        self.__refresh_token = token_data.get("refresh_token")
-
-        self.__default_request_headers = {
-            "Authorization": "Bearer " + self.__token,
-            "Content-Type": "application/json",
-        }
-
-        _LOGGER.info("Authentication was successful, token set.")
-        return True
-
 
     def __check_token_validity(self):
         if (
@@ -606,5 +661,4 @@ class ThermiaAPI:
             or self.__token_valid_to < datetime.now().timestamp()
         ):
             _LOGGER.info("Token expired, re-authenticating.")
-            self.authenticated = self.__authenticate((self.__refresh_token_valid_to > datetime.now().timestamp()))
-            
+            self.authenticated = self.__authenticate()

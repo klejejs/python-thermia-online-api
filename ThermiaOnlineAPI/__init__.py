@@ -3,10 +3,11 @@ from typing import List
 from ThermiaOnlineAPI.api.ThermiaAPI import ThermiaAPI
 from ThermiaOnlineAPI.exceptions import AuthenticationException, NetworkException
 from ThermiaOnlineAPI.model.HeatPump import ThermiaHeatPump
+from ThermiaOnlineAPI.const import THERMIA_API_TYPE_CLASSIC
 
 
 class Thermia:
-    def __init__(self, username, password, api_type="classic"):
+    def __init__(self, username, password, api_type=THERMIA_API_TYPE_CLASSIC):
         self._username = username
         self._password = password
 
