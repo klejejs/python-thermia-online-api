@@ -2,6 +2,7 @@ import logging
 from collections import ChainMap
 from datetime import datetime, timedelta
 import requests
+from requests import cookies
 import json
 import hashlib
 
@@ -380,7 +381,7 @@ class ThermiaAPI:
     ):
         self.__set_register_value(device, register_index, value)
 
-    def __get_register_group(self, device_id: str, register_group: str):
+    def __get_register_group(self, device_id: str, register_group: str) -> list:
         self.__check_token_validity()
 
         url = (
@@ -400,7 +401,7 @@ class ThermiaAPI:
                 + ", Status: "
                 + str(status)
             )
-            return None
+            return []
 
         return request.json()
 
@@ -443,6 +444,8 @@ class ThermiaAPI:
         return request.json()
 
     def __authenticate(self):
+        result = False
+
         try:
             result = self.__authenticate_azure()
         except Exception as e:
@@ -453,7 +456,7 @@ class ThermiaAPI:
 
         return result
 
-    def __authenticate_azure(self):
+    def __authenticate_azure(self) -> bool:
         # Azure auth URLs
         azure_auth_authorize_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/authorize"
         azure_auth_get_token_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/token"
@@ -485,6 +488,16 @@ class ThermiaAPI:
                 headers=azure_auth_request_headers,
                 data=request_token__data,
             )
+
+            if request_token.status_code != 200:
+                error_text = (
+                    "Reauthentication request failed with previous refresh token. Status: "
+                    + str(request_token.status_code)
+                    + ", Response: "
+                    + request_token.text
+                )
+                _LOGGER.error(error_text)
+                raise AuthenticationException(error_text)
         else:
             code_challenge = utils.generate_challenge(43)
 
@@ -559,7 +572,7 @@ class ThermiaAPI:
                 )
 
             request_confirmed__cookies = request_self_asserted.cookies
-            cookie_obj = requests.cookies.create_cookie(
+            cookie_obj = cookies.create_cookie(
                 name="x-ms-cpim-csrf", value=request_auth.cookies.get("x-ms-cpim-csrf")
             )
             request_confirmed__cookies.set_cookie(cookie_obj)
@@ -592,22 +605,24 @@ class ThermiaAPI:
             )
 
             if request_token.status_code != 200:
-                _LOGGER.error(
-                    "Authentication request failed, please check credentials. "
+                error_text = (
+                    "Authentication request failed, please check credentials. Status: "
                     + str(request_token.status_code)
+                    + ", Response: "
+                    + request_token.text
                 )
-                raise AuthenticationException(
-                    "Authentication request failed, please check credentials.",
-                    request_token.status_code,
-                )
+                _LOGGER.error(error_text)
+                raise AuthenticationException(error_text)
 
         token_data = json.loads(request_token.text)
 
         self.__token = token_data["access_token"]
         self.__token_valid_to = token_data["expires_on"]
 
-        # refresh token valid for 24h
-        self.__refresh_token_valid_to = (datetime.now() + timedelta(days=1)).timestamp()
+        # refresh token valid for 24h, but we refresh it every 12h for safety
+        self.__refresh_token_valid_to = (
+            datetime.now() + timedelta(hours=12)
+        ).timestamp()
         self.__refresh_token = token_data.get("refresh_token")
 
         self.__default_request_headers = {

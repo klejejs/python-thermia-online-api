@@ -4,6 +4,8 @@ from ThermiaOnlineAPI import Thermia
 USERNAME = "demo"
 PASSWORD = "demo"
 
+CHANGE_HEAT_PUMP_DATA_DURING_TEST = True
+
 thermia = Thermia(USERNAME, PASSWORD, "classic")
 
 print("Connected: " + str(thermia.connected))
@@ -124,13 +126,14 @@ print("\n")
 
 thermia.update_data()
 
-heat_pump.set_temperature(19)
-heat_pump.set_register_data_by_register_group_and_name(
-    "REG_GROUP_HEATING_CURVE", "REG_HEATING_HEAT_CURVE", 30
-)
-heat_pump.set_operation_mode("COMPRESSOR")
-if heat_pump.is_hot_water_switch_available:
-    heat_pump.set_hot_water_switch_state(1)
+if CHANGE_HEAT_PUMP_DATA_DURING_TEST:
+    heat_pump.set_temperature(19)
+    heat_pump.set_register_data_by_register_group_and_name(
+        "REG_GROUP_HEATING_CURVE", "REG_HEATING_HEAT_CURVE", 30
+    )
+    heat_pump.set_operation_mode("COMPRESSOR")
+    if heat_pump.is_hot_water_switch_available:
+        heat_pump.set_hot_water_switch_state(1)
 
 print("Heat Temperature: " + str(heat_pump.heat_temperature))
 print("Operation Mode: " + str(heat_pump.operation_mode))
