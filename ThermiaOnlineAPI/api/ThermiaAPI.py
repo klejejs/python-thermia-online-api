@@ -373,7 +373,7 @@ class ThermiaAPI:
             device, device_hot_water_switch_state_register_index, state
         )
 
-    def get_register_group_json(self, device_id: str, register_group):
+    def get_register_group_json(self, device_id: str, register_group: str) -> list:
         return self.__get_register_group(device_id, register_group)
 
     def set_register_value(

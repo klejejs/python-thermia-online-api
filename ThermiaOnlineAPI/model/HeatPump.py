@@ -1,10 +1,9 @@
 from datetime import datetime
-import json
 import logging
 import sys
 from ..utils.utils import pretty_print_except
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from ThermiaOnlineAPI.const import (
     OPERATIONAL_TIME_REGISTERS,
@@ -34,7 +33,7 @@ from ..utils.utils import get_dict_value_safe
 if TYPE_CHECKING:
     from ..api.ThermiaAPI import ThermiaAPI
 
-DEFAULT_REGISTER_INDEXES = {
+DEFAULT_REGISTER_INDEXES: Dict[str, int | None] = {
     "temperature": None,
     "operation_mode": None,
     "hot_water_switch": None,
@@ -42,7 +41,7 @@ DEFAULT_REGISTER_INDEXES = {
 
 
 class ThermiaHeatPump:
-    def __init__(self, device_data: json, api_interface: "ThermiaAPI"):
+    def __init__(self, device_data: dict, api_interface: "ThermiaAPI"):
         self.__device_id = str(device_data["id"])
         self.__api_interface = api_interface
 
@@ -71,8 +70,8 @@ class ThermiaHeatPump:
         self.__status = self.__api_interface.get_device_status(self.__device_id)
         self.__device_data = self.__api_interface.get_device_by_id(self.__device_id)
 
-        self.__register_indexes["temperature"] = self.__status.get(
-            "heatingEffectRegisters", [None, None]
+        self.__register_indexes["temperature"] = get_dict_value_safe(
+            self.__status, "heatingEffectRegisters", [None, None]
         )[1]
 
         self.__group_temperatures = self.__api_interface.get__group_temperatures(
@@ -101,7 +100,12 @@ class ThermiaHeatPump:
         self.__register_indexes["hot_water_switch"] = register_index
 
     def set_temperature(self, temperature: int):
+        if self.__status is None:
+            self._LOGGER.error("Status not available, cannot set temperature")
+            return
+
         self._LOGGER.info("Setting temperature to " + str(temperature))
+
         self.__status[
             "heatingEffect"
         ] = temperature  # update local state before refetching data
@@ -130,7 +134,13 @@ class ThermiaHeatPump:
         self.update_data()
 
     def get_all_available_register_groups(self):
-        installation_profile_id = self.__info.get("installationProfileId")
+        installation_profile_id = get_dict_value_safe(
+            self.__info, "installationProfileId"
+        )
+
+        if installation_profile_id is None:
+            return []
+
         register_groups = self.__api_interface.get_all_available_groups(
             installation_profile_id
         )
@@ -153,16 +163,16 @@ class ThermiaHeatPump:
     def get_register_data_by_register_group_and_name(
         self, register_group: str, register_name: str
     ):
-        register_group = self.__api_interface.get_register_group_json(
+        register_group_data: list = self.__api_interface.get_register_group_json(
             self.__device_id, register_group
         )
 
-        if register_group is None:
+        if register_group_data is None:
             self._LOGGER.error("No register group found for group: " + register_group)
             return None
 
         return self.__get_data_from_group_by_register_name(
-            register_group, register_name
+            register_group_data, register_name
         )
 
     def set_register_data_by_register_group_and_name(
@@ -211,20 +221,26 @@ class ThermiaHeatPump:
         }
 
     def __get_temperature_data_by_register_name(
-        self, register_name: TEMPERATURE_REGISTERS
+        self, register_name: str  # TEMPERATURE_REGISTERS
     ):
+        if self.__group_temperatures is None:
+            return None
+
         return self.__get_data_from_group_by_register_name(
             self.__group_temperatures, register_name
         )
 
     def __get_operational_time_data_by_register_name(
-        self, register_name: OPERATIONAL_TIME_REGISTERS
+        self, register_name: str  # OPERATIONAL_TIME_REGISTERS
     ):
+        if self.__group_operational_time is None:
+            return None
+
         return self.__get_data_from_group_by_register_name(
             self.__group_operational_time, register_name
         )
 
-    def __get_data_from_group_by_register_name(self, group, register_name: str):
+    def __get_data_from_group_by_register_name(self, group: list, register_name: str):
         if group is None:
             return None
 
@@ -247,7 +263,8 @@ class ThermiaHeatPump:
 
     def __get_active_alarms(self):
         active_alarms = filter(
-            lambda alarm: alarm.get("isActiveAlarm", False) is True, self.__alarms
+            lambda alarm: get_dict_value_safe(alarm, "isActiveAlarm", False) is True,
+            self.__alarms or [],
         )
         return list(active_alarms)
 
@@ -266,7 +283,7 @@ class ThermiaHeatPump:
 
     @property
     def name(self):
-        return self.__info.get("name")
+        return get_dict_value_safe(self.__info, "name")
 
     @property
     def id(self):
@@ -274,44 +291,44 @@ class ThermiaHeatPump:
 
     @property
     def is_online(self):
-        return self.__info.get("isOnline")
+        return get_dict_value_safe(self.__info, "isOnline")
 
     @property
     def last_online(self):
-        return self.__info.get("lastOnline")
+        return get_dict_value_safe(self.__info, "lastOnline")
 
     @property
     def model(self):
-        return self.__device_data.get("profile", {}).get("thermiaName")
+        return get_dict_value_safe(self.__device_data, "profile", {}).get("thermiaName")
 
     @property
     def has_indoor_temp_sensor(self):
-        return self.__status.get("hasIndoorTempSensor")
+        return get_dict_value_safe(self.__status, "hasIndoorTempSensor")
 
     @property
     def indoor_temperature(self):
         if self.has_indoor_temp_sensor:
-            return self.__status.get("indoorTemperature")
+            return get_dict_value_safe(self.__status, "indoorTemperature")
         else:
             return self.heat_temperature
 
     @property
     def is_outdoor_temp_sensor_functioning(self):
-        return self.__status.get("isOutdoorTempSensorFunctioning")
+        return get_dict_value_safe(self.__status, "isOutdoorTempSensorFunctioning")
 
     @property
     def outdoor_temperature(self):
-        return self.__status.get("outdoorTemperature")
+        return get_dict_value_safe(self.__status, "outdoorTemperature")
 
     @property
     def is_hot_water_active(self):
-        return self.__status.get("isHotwaterActive") or self.__status.get(
-            "isHotWaterActive"
-        )
+        return get_dict_value_safe(
+            self.__status, "isHotwaterActive"
+        ) or get_dict_value_safe(self.__status, "isHotWaterActive")
 
     @property
     def hot_water_temperature(self):
-        return self.__status.get("hotWaterTemperature")
+        return get_dict_value_safe(self.__status, "hotWaterTemperature")
 
     ###########################################################################
     # Heat temperature data
@@ -319,7 +336,7 @@ class ThermiaHeatPump:
 
     @property
     def heat_temperature(self):
-        return self.__status.get("heatingEffect")
+        return get_dict_value_safe(self.__status, "heatingEffect")
 
     @property
     def heat_min_temperature_value(self):
@@ -525,7 +542,7 @@ class ThermiaHeatPump:
         if self.__historical_data_registers_map is None:
             self.__set_historical_data_registers()
 
-        return list(self.__historical_data_registers_map.keys())
+        return list((self.__historical_data_registers_map or {}).keys())
 
     def get_historical_data_for_register(
         self, register_name, start_date: datetime, end_date: datetime
@@ -533,7 +550,9 @@ class ThermiaHeatPump:
         if self.__historical_data_registers_map is None:
             self.__set_historical_data_registers()
 
-        register_id = self.__historical_data_registers_map.get(register_name)
+        register_id = get_dict_value_safe(
+            self.__historical_data_registers_map, register_name
+        )
 
         if register_id is None:
             self._LOGGER.error("Register name is not supported: " + str(register_name))
@@ -601,7 +620,9 @@ class ThermiaHeatPump:
         print("self.__group_temperatures:")
         pretty_print_except(self.__group_temperatures)
 
-        installation_profile_id = self.__info.get("installationProfileId")
+        installation_profile_id = get_dict_value_safe(
+            self.__info, "installationProfileId"
+        )
 
         if installation_profile_id is not None:
             all_available_groups = self.__api_interface.get_all_available_groups(
