@@ -1,3 +1,4 @@
+from collections import ChainMap
 from datetime import datetime
 import logging
 import sys
@@ -6,7 +7,6 @@ from ..utils.utils import pretty_print_except
 from typing import TYPE_CHECKING, Dict
 
 from ThermiaOnlineAPI.const import (
-    OPERATIONAL_TIME_REGISTERS,
     REG_BRINE_IN,
     REG_BRINE_OUT,
     REG_ACTUAL_POOL_TEMP,
@@ -24,7 +24,6 @@ from ThermiaOnlineAPI.const import (
     REG_OPER_TIME_IMM3,
     REG_RETURN_LINE,
     REG_SUPPLY_LINE,
-    TEMPERATURE_REGISTERS,
     DATETIME_FORMAT,
 )
 
@@ -281,6 +280,58 @@ class ThermiaHeatPump:
 
         self.__historical_data_registers_map = data_map
 
+    def __get_register_from_operational_status(self, register_name: str) -> dict | None:
+        data = [
+            d
+            for d in self.__group_operational_status or []
+            if d["registerName"] == register_name
+        ]
+
+        if len(data) != 1:
+            return None
+
+        return data[0]
+
+    def __get_value_by_key_and_register_name_from_operational_status(
+        self, register_name: str, value_key: str
+    ):
+        data_from_register = self.__get_register_from_operational_status(register_name)
+
+        if not data_from_register:
+            return None
+
+        register_values_list = data_from_register.get("valueNames", [])
+        values_list: list = [d for d in register_values_list if d["name"] == value_key]
+
+        if len(values_list) != 1:
+            return None
+
+        value: dict = values_list[0]
+
+        if value.get("visible"):
+            return value.get("value")
+
+        return None
+
+    def __get_all_operational_statuses_from_operational_status(self) -> ChainMap | None:
+        data = self.__get_register_from_operational_status(
+            "REG_OPERATIONAL_STATUS_PRIO1"
+        )
+
+        if not data:
+            return None
+
+        register_values_list = data.get("valueNames", [])
+
+        operation_modes_map = map(
+            lambda values: {
+                values.get("value"): values.get("name").split("REG_VALUE_STATUS_")[1],
+            },
+            register_values_list,
+        )
+        operation_modes_list = list(operation_modes_map)
+        return ChainMap(*operation_modes_list)
+
     @property
     def name(self):
         return get_dict_value_safe(self.__info, "name")
@@ -424,24 +475,117 @@ class ThermiaHeatPump:
         )
 
     ###########################################################################
-    # Operational status data
+    # Operational status (REG_GROUP_OPERATIONAL_STATUS)
     ###########################################################################
 
     @property
     def operational_status(self):
-        return get_dict_value_safe(self.__group_operational_status, "current")
+        data = self.__get_register_from_operational_status(
+            "REG_OPERATIONAL_STATUS_PRIO1"
+        )
+
+        if not data:
+            return None
+
+        current_register_value = get_dict_value_safe(data, "registerValue")
+
+        data = self.__get_all_operational_statuses_from_operational_status()
+
+        if not data:
+            return None
+
+        current_operation_mode = [
+            name for value, name in data.items() if value == current_register_value
+        ]
+
+        if len(current_operation_mode) != 1:
+            return None
+
+        return current_operation_mode[0]
 
     @property
     def available_operational_statuses(self):
-        return list(
-            get_dict_value_safe(
-                self.__group_operational_status, "available", {}
-            ).values()
-        )
+        data = self.__get_all_operational_statuses_from_operational_status()
+
+        if not data:
+            return None
+
+        return data.values()
 
     @property
     def available_operational_statuses_map(self):
-        return get_dict_value_safe(self.__group_operational_status, "available", {})
+        return self.__get_all_operational_statuses_from_operational_status()
+
+    @property
+    def operational_status_auxiliary_heater_3kw(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_POWER_STATUS", "COMP_VALUE_STEP_3KW"
+        )
+
+    @property
+    def operational_status_auxiliary_heater_6kw(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_POWER_STATUS", "COMP_VALUE_STEP_6KW"
+        )
+
+    @property
+    def operational_status_auxiliary_heater_9kw(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_POWER_STATUS", "COMP_VALUE_STEP_9KW"
+        )
+
+    @property
+    def operational_status_auxiliary_heater_12kw(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_POWER_STATUS", "COMP_VALUE_STEP_12KW"
+        )
+
+    @property
+    def operational_status_auxiliary_heater_15kw(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_POWER_STATUS", "COMP_VALUE_STEP_15KW"
+        )
+
+    @property
+    def operational_status_compressor_status(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_STATUS", "COMP_VALUE_COMPR"
+        )
+
+    @property
+    def operational_status_brine_pump_status(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_STATUS", "COMP_VALUE_BRINEPUMP"
+        )
+
+    @property
+    def operational_status_radiator_pump_status(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_STATUS", "COMP_VALUE_RADIATORPUMP"
+        )
+
+    @property
+    def operational_status_cooling_status(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_STATUS", "COMP_VALUE_COOLING"
+        )
+
+    @property
+    def operational_status_hot_water_status(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_STATUS", "COMP_VALUE_HOT_WATER"
+        )
+
+    @property
+    def operational_status_heating_status(self):
+        return self.__get_value_by_key_and_register_name_from_operational_status(
+            "COMP_STATUS", "COMP_VALUE_HEATING"
+        )
+
+    @property
+    def operational_status_integral(self):
+        data = self.__get_register_from_operational_status("REG_INTEGRAL_LSD")
+        return get_dict_value_safe(data, "registerValue")
 
     ###########################################################################
     # Operational time data

@@ -59,6 +59,18 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 | `operational_status` | Operational status of the Heat Pump |
 | `available_operational_statuses` | List of available operational statuses |
 | `available_operational_statuses_map` | Dictionary mapping operational status names to their values |
+| `operational_status_auxiliary_heater_3kw` | Auxiliary heater status for 3kw (returns `None` if unavailable) |
+| `operational_status_auxiliary_heater_6kw` | Auxiliary heater status for 6kw (returns `None` if unavailable) |
+| `operational_status_auxiliary_heater_9kw` | Auxiliary heater status for 9kw (returns `None` if unavailable) |
+| `operational_status_auxiliary_heater_12kw` | Auxiliary heater status for 12kw (returns `None` if unavailable) |
+| `operational_status_auxiliary_heater_15kw` | Auxiliary heater status for 15kw (returns `None` if unavailable) |
+| `operational_status_compressor_status` | Compressor status |
+| `operational_status_brine_pump_status` | Brine pump status |
+| `operational_status_radiator_pump_status` | Radiator pump status |
+| `operational_status_cooling_status` | Cooling status |
+| `operational_status_hot_water_status` | Hot water status |
+| `operational_status_heating_status` | Heating status |
+| `operational_status_integral` | Integral |
 | --- | --- |
 | Operational Times | |
 | `compressor_operational_time` | Compressor operational time in hours |

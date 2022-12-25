@@ -65,23 +65,6 @@ REG_COOL_SENSOR_TANK = "REG_COOL_SENSOR_TANK"
 REG_COOL_SENSOR_SUPPLY = "REG_COOL_SENSOR_SUPPLY"
 REG_ACTUAL_POOL_TEMP = "REG_ACTUAL_POOL_TEMP"
 
-TEMPERATURE_REGISTERS = [
-    REG_OUTDOOR_TEMPERATURE,
-    REG_INDOOR_TEMPERATURE,
-    REG_SUPPLY_LINE,
-    REG_HOT_WATER_TEMPERATURE,
-    REG_BRINE_OUT,
-    REG_BRINE_IN,
-    REG_DESIRED_INDOOR_TEMPERATURE,
-    REG_RETURN_LINE,
-    REG_DESIRED_SUPPLY_LINE,
-    REG_OPER_DATA_RETURN,
-    REG_DESIRED_SYS_SUPPLY_LINE_TEMP,
-    REG_COOL_SENSOR_TANK,
-    REG_COOL_SENSOR_SUPPLY,
-    REG_ACTUAL_POOL_TEMP,
-]
-
 ###############################################################################
 # Operational time registers
 ###############################################################################
@@ -91,14 +74,6 @@ REG_OPER_TIME_IMM2 = "REG_OPER_TIME_IMM2"  # Auxiliary heater 2
 REG_OPER_TIME_IMM3 = "REG_OPER_TIME_IMM3"  # Auxiliary heater 3
 REG_OPER_TIME_COMPRESSOR = "REG_OPER_TIME_COMPRESSOR"
 REG_OPER_TIME_HOT_WATER = "REG_OPER_TIME_HOT_WATER"
-
-OPERATIONAL_TIME_REGISTERS = [
-    REG_OPER_TIME_IMM1,
-    REG_OPER_TIME_IMM2,
-    REG_OPER_TIME_IMM3,
-    REG_OPER_TIME_COMPRESSOR,
-    REG_OPER_TIME_HOT_WATER,
-]
 
 ###############################################################################
 # Other

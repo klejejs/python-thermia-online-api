@@ -194,53 +194,7 @@ class ThermiaAPI:
         return self.__get_register_group(device_id, REG_GROUP_TEMPERATURES)
 
     def get__group_operational_status(self, device_id: str):
-        register_data = self.__get_register_group(
-            device_id, REG_GROUP_OPERATIONAL_STATUS
-        )
-
-        data = [
-            d
-            for d in register_data
-            if d["registerName"] == "REG_OPERATIONAL_STATUS_PRIO1"
-        ]
-
-        if len(data) != 1:
-            # Operation operational status not supported
-            return None
-
-        data = data[0]
-
-        current_operation_mode_value = int(data.get("registerValue"))
-        operation_modes_data = data.get("valueNames")
-
-        if operation_modes_data is not None:
-            operation_modes_map = map(
-                lambda values: {
-                    values.get("value"): values.get("name").split("REG_VALUE_STATUS_")[
-                        1
-                    ],
-                },
-                operation_modes_data,
-            )
-            operation_modes_list = list(operation_modes_map)
-            operation_modes = ChainMap(*operation_modes_list)
-
-            current_operation_mode = [
-                name
-                for value, name in operation_modes.items()
-                if value == current_operation_mode_value
-            ]
-            if len(current_operation_mode) != 1:
-                # Something has gone wrong or operation mode not supported
-                return None
-
-            return {
-                "current": current_operation_mode[0],
-                "available": operation_modes,
-                "isReadOnly": data["isReadOnly"],
-            }
-
-        return None
+        return self.__get_register_group(device_id, REG_GROUP_OPERATIONAL_STATUS)
 
     def get__group_operational_time(self, device_id: str):
         return self.__get_register_group(device_id, REG_GROUP_OPERATIONAL_TIME)
