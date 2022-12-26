@@ -13,7 +13,6 @@ from ThermiaOnlineAPI.const import (
     REG_GROUP_OPERATIONAL_TIME,
     REG_GROUP_TEMPERATURES,
     THERMIA_API_CONFIG_URLS_BY_API_TYPE,
-    THERMIA_API_TYPE_CLASSIC,
     THERMIA_AZURE_AUTH_URL,
     THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
     THERMIA_AZURE_AUTH_REDIRECT_URI,
@@ -35,7 +34,6 @@ class ThermiaAPI:
         self.__password = password
         self.__token = None
         self.__token_valid_to = None
-        self.__api_type = api_type
         self.__refresh_token_valid_to = None
         self.__refresh_token = None
 
@@ -397,20 +395,7 @@ class ThermiaAPI:
 
         return request.json()
 
-    def __authenticate(self):
-        result = False
-
-        try:
-            result = self.__authenticate_azure()
-        except Exception as e:
-            _LOGGER.warn("Error authenticating with Azure auth." + str(e))
-
-        if not result and self.__api_type == THERMIA_API_TYPE_CLASSIC:
-            return self.__authenticate_legacy()
-
-        return result
-
-    def __authenticate_azure(self) -> bool:
+    def __authenticate(self) -> bool:
         # Azure auth URLs
         azure_auth_authorize_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/authorize"
         azure_auth_get_token_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/token"
@@ -578,45 +563,6 @@ class ThermiaAPI:
             datetime.now() + timedelta(hours=12)
         ).timestamp()
         self.__refresh_token = token_data.get("refresh_token")
-
-        self.__default_request_headers = {
-            "Authorization": "Bearer " + self.__token,
-            "Content-Type": "application/json",
-        }
-
-        _LOGGER.info("Authentication was successful, token set.")
-
-        return True
-
-    def __authenticate_legacy(self):
-        auth_url = self.configuration["authApiBaseUrl"] + "/api/v1/Jwt/login"
-
-        json = {
-            "userName": self.__email,
-            "password": self.__password,
-            "rememberMe": True,
-        }
-
-        request_auth = requests.post(auth_url, json=json)
-        status = request_auth.status_code
-
-        if status != 200:
-            _LOGGER.error(
-                "Authentication request failed, please check credentials. "
-                + str(status)
-            )
-            raise AuthenticationException(
-                "Authentication request failed, please check credentials.", status
-            )
-
-        auth_data = request_auth.json()
-
-        token_valid_to = auth_data.get("tokenValidToUtc").split(".")[0]
-        datetime_object = datetime.strptime(token_valid_to, "%Y-%m-%dT%H:%M:%S")
-        token_valid_to = datetime_object.timestamp()
-
-        self.__token = auth_data.get("token")
-        self.__token_valid_to = token_valid_to
 
         self.__default_request_headers = {
             "Authorization": "Bearer " + self.__token,
