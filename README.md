@@ -19,7 +19,9 @@ Thus, I have created a `debug()` function that runs when `example.py` is execute
 * `genesis`, online access url is https://online-genesis.thermia.se
 
 ## How to use api:
-See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/example.py) file
+See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/example.py) file for examples.
+
+To execute the example file, first run `pip install -r requirements.txt` to install the required dependencies, then run `python3 example.py` to execute the example file. You will be prompted to enter your username and password, and then the example file will run. If do not want to manually enter your credentials every time, you can edit the `credentials.py` file and add your credentials there.
 
 ## Available functions in Thermia class:
 | Function | Description |

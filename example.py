@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 from ThermiaOnlineAPI import Thermia
+from credentials import USERNAME, PASSWORD
 
-USERNAME = "demo"
-PASSWORD = "demo"
+CHANGE_HEAT_PUMP_DATA_DURING_TEST = False # Set to True if you want to change heat pump data during test
 
-CHANGE_HEAT_PUMP_DATA_DURING_TEST = True
+if not USERNAME or not PASSWORD:
+    USERNAME = input("Enter username: ")
+    PASSWORD = input("Enter password: ")
 
 thermia = Thermia(USERNAME, PASSWORD, "classic")
 
