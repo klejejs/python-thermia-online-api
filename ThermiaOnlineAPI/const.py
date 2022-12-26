@@ -66,6 +66,26 @@ REG_COOL_SENSOR_SUPPLY = "REG_COOL_SENSOR_SUPPLY"
 REG_ACTUAL_POOL_TEMP = "REG_ACTUAL_POOL_TEMP"
 
 ###############################################################################
+# Operational operation registers
+###############################################################################
+
+REG_OPERATIONMODE = "REG_OPERATIONMODE"
+
+###############################################################################
+# Operational status registers
+###############################################################################
+
+REG_OPERATIONAL_STATUS_PRIO1 = "REG_OPERATIONAL_STATUS_PRIO1"
+REG_INTEGRAL_LSD = "REG_INTEGRAL_LSD"
+
+###############################################################################
+# Hot water registers
+###############################################################################
+
+REG_HOT_WATER_STATUS = "REG_HOT_WATER_STATUS"
+REG_HOT_WATER_BOOST = "REG_HOT_WATER_BOOST"
+
+###############################################################################
 # Operational time registers
 ###############################################################################
 

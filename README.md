@@ -89,10 +89,11 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `operation_mode` | Current operation mode of the Heat Pump |
 | `available_operation_modes` | List of available operation modes for the Heat Pump |
 | `available_operation_mode_map` | Dictionary mapping operation mode names to their values |
+| `is_operation_mode_read_only` | Boolean value indicating if the Heat Pump operation mode is read-only |
 | --- | --- |
 | Hot Water data | |
-| `is_operation_mode_read_only` | Boolean value indicating if the Heat Pump operation mode is read-only |
-| `is_hot_water_switch_available` | Boolean value indicating if the Heat Pump has a hot water switch |
+| `hot_water_switch_state` | Int value indicating the Heat Pump hot water switch state (0 or 1) or None if not available |
+| `hot_water_boost_switch_state` | Int value indicating the Heat Pump hot water boost switch state (0 or 1) or None if not available |
 | --- | --- |
 | Historical data | |
 | `historical_data_registers` | List of available registers to use for historical data fetching |
@@ -111,6 +112,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `set_temperature()` | Set the target temperature for the Heat Pump |
 | `set_operation_mode()` | Set the operation mode for the Heat Pump |
 | `set_hot_water_switch_state()` | Set the hot water switch state to 0 (off) or 1 (on) for the Heat Pump |
+| `set_hot_water_boost_switch_state()` | Set the hot water boost switch state to 0 (off) or 1 (on) for the Heat Pump |
 | --- | --- |
 | Fetch historical data | |
 | `get_historical_data_for_register()` | Fetch historical data by using register name from `historical_data_registers` together with start_time and end_time of the data in Python datatime format. Returns list of dictionaries which contains data in format `{ "time": datetime, "value": int }` |

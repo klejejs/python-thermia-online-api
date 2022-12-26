@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 from ThermiaOnlineAPI import Thermia
 from credentials import USERNAME, PASSWORD
 
-CHANGE_HEAT_PUMP_DATA_DURING_TEST = False # Set to True if you want to change heat pump data during test
+CHANGE_HEAT_PUMP_DATA_DURING_TEST = (
+    False  # Set to True if you want to change heat pump data during test
+)
 
 if not USERNAME or not PASSWORD:
     USERNAME = input("Enter username: ")
@@ -110,9 +112,8 @@ print("Is Operation Mode Read Only: " + str(heat_pump.is_operation_mode_read_onl
 print("\n")
 
 print("Hot Water data")
-print("Is Hot Water Switch Available: " + str(heat_pump.is_hot_water_switch_available))
-if heat_pump.is_hot_water_switch_available:
-    print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))
+print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))
+print("Hot Water Boost Switch State: " + str(heat_pump.hot_water_boost_switch_state))
 
 print("\n")
 
@@ -147,15 +148,22 @@ thermia.update_data()
 
 if CHANGE_HEAT_PUMP_DATA_DURING_TEST:
     heat_pump.set_temperature(19)
+
     heat_pump.set_register_data_by_register_group_and_name(
         "REG_GROUP_HEATING_CURVE", "REG_HEATING_HEAT_CURVE", 30
     )
+
     heat_pump.set_operation_mode("COMPRESSOR")
-    if heat_pump.is_hot_water_switch_available:
+
+    if heat_pump.hot_water_switch_state:
         heat_pump.set_hot_water_switch_state(1)
+
+    if heat_pump.hot_water_boost_switch_state:
+        heat_pump.set_hot_water_boost_switch_state(1)
 
 print("Heat Temperature: " + str(heat_pump.heat_temperature))
 print("Operation Mode: " + str(heat_pump.operation_mode))
 print("Available Operation Modes: " + str(heat_pump.available_operation_modes))
-if heat_pump.is_hot_water_switch_available:
-    print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))
+
+print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))
+print("Hot Water Boost Switch State: " + str(heat_pump.hot_water_boost_switch_state))

@@ -12,6 +12,9 @@ from ThermiaOnlineAPI.const import (
     REG_GROUP_OPERATIONAL_STATUS,
     REG_GROUP_OPERATIONAL_TIME,
     REG_GROUP_TEMPERATURES,
+    REG_HOT_WATER_STATUS,
+    REG_HOT_WATER_BOOST,
+    REG_OPERATIONMODE,
     THERMIA_API_CONFIG_URLS_BY_API_TYPE,
     THERMIA_AZURE_AUTH_URL,
     THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
@@ -202,7 +205,7 @@ class ThermiaAPI:
             device.id, REG_GROUP_OPERATIONAL_OPERATION
         )
 
-        data = [d for d in register_data if d["registerName"] == "REG_OPERATIONMODE"]
+        data = [d for d in register_data if d["registerName"] == REG_OPERATIONMODE]
 
         if len(data) != 1:
             # Operation mode not supported
@@ -244,26 +247,66 @@ class ThermiaAPI:
 
         return None
 
-    def get_group_hot_water(self, device: ThermiaHeatPump):
+    def __get_switch_register_index_and_value_from_group_by_register_name(
+        self, register_group: list, register_name: str
+    ):
+        default_return_object = {
+            "registerIndex": None,
+            "registerValue": None,
+        }
+
+        switch_data_list = [
+            d for d in register_group if d["registerName"] == register_name
+        ]
+
+        if len(switch_data_list) != 1:
+            # Switch not supported
+            return default_return_object
+
+        switch_data: dict = switch_data_list[0]
+
+        register_value = switch_data.get("registerValue")
+
+        if not register_value:
+            return default_return_object
+
+        # Validate that register is a switch
+        switch_states_data = switch_data.get("valueNames")
+
+        if not switch_states_data or len(switch_states_data) != 2:
+            return default_return_object
+
+        return {
+            "registerIndex": switch_data["registerIndex"],
+            "registerValue": int(register_value),
+        }
+
+    def get_group_hot_water(self, device: ThermiaHeatPump) -> dict[str, int | None]:
         register_data = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
 
-        data = [d for d in register_data if d["registerName"] == "REG_HOT_WATER_STATUS"]
+        hot_water_switch_data = (
+            self.__get_switch_register_index_and_value_from_group_by_register_name(
+                register_data, REG_HOT_WATER_STATUS
+            )
+        )
+        hot_water_boost_switch_data = (
+            self.__get_switch_register_index_and_value_from_group_by_register_name(
+                register_data, REG_HOT_WATER_BOOST
+            )
+        )
 
-        if len(data) == 0:
-            # Hot water switch not supported
-            return None
+        device.set_register_index_hot_water_switch(
+            hot_water_switch_data["registerIndex"]
+        )
 
-        data = data[0]
+        device.set_register_index_hot_water_boost_switch(
+            hot_water_boost_switch_data["registerIndex"]
+        )
 
-        device.set_register_index_hot_water_switch(data["registerIndex"])
-
-        current_switch_state = int(data.get("registerValue"))
-        switch_states_data = data.get("valueNames")
-
-        if switch_states_data is not None and len(switch_states_data) == 2:
-            return current_switch_state
-
-        return None
+        return {
+            "hot_water_switch": hot_water_switch_data["registerValue"],
+            "hot_water_boost_switch": hot_water_boost_switch_data["registerValue"],
+        }
 
     def set_temperature(self, device: ThermiaHeatPump, temperature):
         device_temperature_register_index = device.get_register_indexes()["temperature"]
@@ -312,18 +355,26 @@ class ThermiaAPI:
     def set_hot_water_switch_state(
         self, device: ThermiaHeatPump, state: int
     ):  # 0 - off, 1 - on
-        device_hot_water_switch_state_register_index = device.get_register_indexes()[
-            "hot_water_switch"
-        ]
-        if device_hot_water_switch_state_register_index is None:
+        register_index = device.get_register_indexes()["hot_water_switch"]
+        if register_index is None:
             _LOGGER.error(
                 "Error setting device's hot water switch state. No hot water switch register index."
             )
             return
 
-        self.__set_register_value(
-            device, device_hot_water_switch_state_register_index, state
-        )
+        self.__set_register_value(device, register_index, state)
+
+    def set_hot_water_boost_switch_state(
+        self, device: ThermiaHeatPump, state: int
+    ):  # 0 - off, 1 - on
+        register_index = device.get_register_indexes()["hot_water_boost_switch"]
+        if register_index is None:
+            _LOGGER.error(
+                "Error setting device's hot water boost switch state. No hot water boost switch register index."
+            )
+            return
+
+        self.__set_register_value(device, register_index, state)
 
     def get_register_group_json(self, device_id: str, register_group: str) -> list:
         return self.__get_register_group(device_id, register_group)
