@@ -15,6 +15,8 @@ from ThermiaOnlineAPI.const import (
     REG_DESIRED_SUPPLY_LINE,
     REG_DESIRED_SUPPLY_LINE_TEMP,
     REG_DESIRED_SYS_SUPPLY_LINE_TEMP,
+    REG_INTEGRAL_LSD,
+    REG_OPERATIONAL_STATUS_PRIO1,
     REG_OPER_DATA_RETURN,
     REG_OPER_DATA_SUPPLY_MA_SA,
     REG_OPER_TIME_COMPRESSOR,
@@ -36,6 +38,7 @@ DEFAULT_REGISTER_INDEXES: Dict[str, int | None] = {
     "temperature": None,
     "operation_mode": None,
     "hot_water_switch": None,
+    "hot_water_boost_switch": None,
 }
 
 
@@ -55,7 +58,10 @@ class ThermiaHeatPump:
         self.__group_operational_status = None
         self.__group_operational_time = None
         self.__group_operational_operation = None
-        self.__group_hot_water = None
+        self.__group_hot_water: dict[str, int | None] = {
+            "hot_water_switch": None,
+            "hot_water_boost_switch": None,
+        }
 
         self.__alarms = None
         self.__historical_data_registers_map = None
@@ -95,8 +101,11 @@ class ThermiaHeatPump:
     def set_register_index_operation_mode(self, register_index: int):
         self.__register_indexes["operation_mode"] = register_index
 
-    def set_register_index_hot_water_switch(self, register_index: int):
+    def set_register_index_hot_water_switch(self, register_index: int | None):
         self.__register_indexes["hot_water_switch"] = register_index
+
+    def set_register_index_hot_water_boost_switch(self, register_index: int | None):
+        self.__register_indexes["hot_water_boost_switch"] = register_index
 
     def set_temperature(self, temperature: int):
         if self.__status is None:
@@ -124,12 +133,27 @@ class ThermiaHeatPump:
     def set_hot_water_switch_state(self, state: int):
         self._LOGGER.info("Setting hot water switch to " + str(state))
 
-        if self.__group_hot_water is None:
+        if self.__group_hot_water["hot_water_switch"] is None:
             self._LOGGER.error("Hot water switch not available")
             return
 
-        self.__group_hot_water = state  # update local state before refetching data
+        self.__group_hot_water[
+            "hot_water_switch"
+        ] = state  # update local state before refetching data
         self.__api_interface.set_hot_water_switch_state(self, state)
+        self.update_data()
+
+    def set_hot_water_boost_switch_state(self, state: int):
+        self._LOGGER.info("Setting hot water boost switch to " + str(state))
+
+        if self.__group_hot_water["hot_water_boost_switch"] is None:
+            self._LOGGER.error("Hot water switch not available")
+            return
+
+        self.__group_hot_water[
+            "hot_water_boost_switch"
+        ] = state  # update local state before refetching data
+        self.__api_interface.set_hot_water_boost_switch_state(self, state)
         self.update_data()
 
     def get_all_available_register_groups(self):
@@ -297,7 +321,7 @@ class ThermiaHeatPump:
     ):
         data_from_register = self.__get_register_from_operational_status(register_name)
 
-        if not data_from_register:
+        if data_from_register is None:
             return None
 
         register_values_list = data_from_register.get("valueNames", [])
@@ -314,11 +338,9 @@ class ThermiaHeatPump:
         return None
 
     def __get_all_operational_statuses_from_operational_status(self) -> ChainMap | None:
-        data = self.__get_register_from_operational_status(
-            "REG_OPERATIONAL_STATUS_PRIO1"
-        )
+        data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
 
-        if not data:
+        if data is None:
             return None
 
         register_values_list = data.get("valueNames", [])
@@ -480,18 +502,16 @@ class ThermiaHeatPump:
 
     @property
     def operational_status(self):
-        data = self.__get_register_from_operational_status(
-            "REG_OPERATIONAL_STATUS_PRIO1"
-        )
+        data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
 
-        if not data:
+        if data is None:
             return None
 
         current_register_value = get_dict_value_safe(data, "registerValue")
 
         data = self.__get_all_operational_statuses_from_operational_status()
 
-        if not data:
+        if data is None:
             return None
 
         current_operation_mode = [
@@ -507,7 +527,7 @@ class ThermiaHeatPump:
     def available_operational_statuses(self):
         data = self.__get_all_operational_statuses_from_operational_status()
 
-        if not data:
+        if data is None:
             return None
 
         return data.values()
@@ -584,7 +604,7 @@ class ThermiaHeatPump:
 
     @property
     def operational_status_integral(self):
-        data = self.__get_register_from_operational_status("REG_INTEGRAL_LSD")
+        data = self.__get_register_from_operational_status(REG_INTEGRAL_LSD)
         return get_dict_value_safe(data, "registerValue")
 
     ###########################################################################
@@ -651,16 +671,21 @@ class ThermiaHeatPump:
         return get_dict_value_safe(self.__group_operational_operation, "isReadOnly")
 
     ###########################################################################
-    # Hot water switch data
+    # Hot water data
     ###########################################################################
 
+    # TODO: DEPRECATED, remove in next major release
     @property
     def is_hot_water_switch_available(self):
         return self.__group_hot_water is not None
 
     @property
-    def hot_water_switch_state(self):
-        return self.__group_hot_water
+    def hot_water_switch_state(self) -> int | None:
+        return self.__group_hot_water["hot_water_switch"]
+
+    @property
+    def hot_water_boost_switch_state(self) -> int | None:
+        return self.__group_hot_water["hot_water_boost_switch"]
 
     ###########################################################################
     # Alarm data
