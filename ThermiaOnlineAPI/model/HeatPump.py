@@ -321,7 +321,7 @@ class ThermiaHeatPump:
     ):
         data_from_register = self.__get_register_from_operational_status(register_name)
 
-        if not data_from_register:
+        if data_from_register is None:
             return None
 
         register_values_list = data_from_register.get("valueNames", [])
@@ -340,7 +340,7 @@ class ThermiaHeatPump:
     def __get_all_operational_statuses_from_operational_status(self) -> ChainMap | None:
         data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
 
-        if not data:
+        if data is None:
             return None
 
         register_values_list = data.get("valueNames", [])
@@ -504,14 +504,14 @@ class ThermiaHeatPump:
     def operational_status(self):
         data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
 
-        if not data:
+        if data is None:
             return None
 
         current_register_value = get_dict_value_safe(data, "registerValue")
 
         data = self.__get_all_operational_statuses_from_operational_status()
 
-        if not data:
+        if data is None:
             return None
 
         current_operation_mode = [
@@ -527,7 +527,7 @@ class ThermiaHeatPump:
     def available_operational_statuses(self):
         data = self.__get_all_operational_statuses_from_operational_status()
 
-        if not data:
+        if data is None:
             return None
 
         return data.values()

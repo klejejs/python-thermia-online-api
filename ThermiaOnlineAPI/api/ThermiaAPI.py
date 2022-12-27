@@ -13,7 +13,7 @@ from ThermiaOnlineAPI.const import (
     REG_GROUP_OPERATIONAL_TIME,
     REG_GROUP_TEMPERATURES,
     REG_HOT_WATER_STATUS,
-    REG_HOT_WATER_BOOST,
+    REG__HOT_WATER_BOOST,
     REG_OPERATIONMODE,
     THERMIA_API_CONFIG_URLS_BY_API_TYPE,
     THERMIA_AZURE_AUTH_URL,
@@ -267,13 +267,13 @@ class ThermiaAPI:
 
         register_value = switch_data.get("registerValue")
 
-        if not register_value:
+        if register_value is None:
             return default_return_object
 
         # Validate that register is a switch
         switch_states_data = switch_data.get("valueNames")
 
-        if not switch_states_data or len(switch_states_data) != 2:
+        if switch_states_data is None or len(switch_states_data) != 2:
             return default_return_object
 
         return {
@@ -282,7 +282,7 @@ class ThermiaAPI:
         }
 
     def get_group_hot_water(self, device: ThermiaHeatPump) -> dict[str, int | None]:
-        register_data = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
+        register_data: list = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
 
         hot_water_switch_data = (
             self.__get_switch_register_index_and_value_from_group_by_register_name(
@@ -291,7 +291,7 @@ class ThermiaAPI:
         )
         hot_water_boost_switch_data = (
             self.__get_switch_register_index_and_value_from_group_by_register_name(
-                register_data, REG_HOT_WATER_BOOST
+                register_data, REG__HOT_WATER_BOOST
             )
         )
 
