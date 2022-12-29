@@ -4,7 +4,7 @@ import logging
 import sys
 from ..utils.utils import pretty_print_except
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, Union
 
 from ThermiaOnlineAPI.const import (
     REG_BRINE_IN,
@@ -34,7 +34,7 @@ from ..utils.utils import get_dict_value_safe
 if TYPE_CHECKING:
     from ..api.ThermiaAPI import ThermiaAPI
 
-DEFAULT_REGISTER_INDEXES: Dict[str, int | None] = {
+DEFAULT_REGISTER_INDEXES: Dict[str, Union[int, None]] = {
     "temperature": None,
     "operation_mode": None,
     "hot_water_switch": None,
@@ -58,7 +58,7 @@ class ThermiaHeatPump:
         self.__group_operational_status = None
         self.__group_operational_time = None
         self.__group_operational_operation = None
-        self.__group_hot_water: dict[str, int | None] = {
+        self.__group_hot_water: Dict[str, Union[int, None]] = {
             "hot_water_switch": None,
             "hot_water_boost_switch": None,
         }
@@ -101,10 +101,10 @@ class ThermiaHeatPump:
     def set_register_index_operation_mode(self, register_index: int):
         self.__register_indexes["operation_mode"] = register_index
 
-    def set_register_index_hot_water_switch(self, register_index: int | None):
+    def set_register_index_hot_water_switch(self, register_index: Union[int, None]):
         self.__register_indexes["hot_water_switch"] = register_index
 
-    def set_register_index_hot_water_boost_switch(self, register_index: int | None):
+    def set_register_index_hot_water_boost_switch(self, register_index: Union[int, None]):
         self.__register_indexes["hot_water_boost_switch"] = register_index
 
     def set_temperature(self, temperature: int):
@@ -304,7 +304,7 @@ class ThermiaHeatPump:
 
         self.__historical_data_registers_map = data_map
 
-    def __get_register_from_operational_status(self, register_name: str) -> dict | None:
+    def __get_register_from_operational_status(self, register_name: str) -> Union[dict, None]:
         data = [
             d
             for d in self.__group_operational_status or []
@@ -337,7 +337,7 @@ class ThermiaHeatPump:
 
         return None
 
-    def __get_all_operational_statuses_from_operational_status(self) -> ChainMap | None:
+    def __get_all_operational_statuses_from_operational_status(self) -> Union[ChainMap, None]:
         data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
 
         if data is None:
@@ -680,11 +680,11 @@ class ThermiaHeatPump:
         return self.__group_hot_water is not None
 
     @property
-    def hot_water_switch_state(self) -> int | None:
+    def hot_water_switch_state(self) -> Union[int, None]:
         return self.__group_hot_water["hot_water_switch"]
 
     @property
-    def hot_water_boost_switch_state(self) -> int | None:
+    def hot_water_boost_switch_state(self) -> Union[int, None]:
         return self.__group_hot_water["hot_water_boost_switch"]
 
     ###########################################################################

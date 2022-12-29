@@ -5,6 +5,7 @@ import requests
 from requests import cookies
 import json
 import hashlib
+from typing import Dict, Union
 
 from ThermiaOnlineAPI.const import (
     REG_GROUP_HOT_WATER,
@@ -281,7 +282,7 @@ class ThermiaAPI:
             "registerValue": int(register_value),
         }
 
-    def get_group_hot_water(self, device: ThermiaHeatPump) -> dict[str, int | None]:
+    def get_group_hot_water(self, device: ThermiaHeatPump) -> Dict[str, Union[int, None]]:
         register_data: list = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
 
         hot_water_switch_data = (
