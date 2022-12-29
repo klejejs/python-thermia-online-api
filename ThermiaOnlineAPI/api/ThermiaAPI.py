@@ -31,6 +31,19 @@ from ..utils import utils
 
 _LOGGER = logging.getLogger(__name__)
 
+# Azure auth URLs
+AZURE_AUTH_AUTHORIZE_URL = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/authorize"
+AZURE_AUTH_GET_TOKEN_URL = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/token"
+AZURE_SELF_ASSERTED_URL = THERMIA_AZURE_AUTH_URL + "/SelfAsserted"
+AZURE_AUTH_CONFIRM_URL = (
+    THERMIA_AZURE_AUTH_URL + "/api/CombinedSigninAndSignup/confirmed"
+)
+
+# Azure default headers
+azure_auth_request_headers = {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+}
+
 
 class ThermiaAPI:
     def __init__(self, email, password, api_type):
@@ -282,7 +295,9 @@ class ThermiaAPI:
             "registerValue": int(register_value),
         }
 
-    def get_group_hot_water(self, device: ThermiaHeatPump) -> Dict[str, Union[int, None]]:
+    def get_group_hot_water(
+        self, device: ThermiaHeatPump
+    ) -> Dict[str, Union[int, None]]:
         register_data: list = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
 
         hot_water_switch_data = (
@@ -447,49 +462,44 @@ class ThermiaAPI:
 
         return request.json()
 
-    def __authenticate(self) -> bool:
-        # Azure auth URLs
-        azure_auth_authorize_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/authorize"
-        azure_auth_get_token_url = THERMIA_AZURE_AUTH_URL + "/oauth2/v2.0/token"
-        azure_self_asserted_url = THERMIA_AZURE_AUTH_URL + "/SelfAsserted"
-        azure_auth_confirm_url = (
-            THERMIA_AZURE_AUTH_URL + "/api/CombinedSigninAndSignup/confirmed"
-        )
-
-        # Azure default headers
-        azure_auth_request_headers = {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+    def __authenticate_refresh_token(self) -> Union[str, None]:
+        request_token__data = {
+            "client_id": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+            "redirect_uri": THERMIA_AZURE_AUTH_REDIRECT_URI,
+            "scope": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
+            "refresh_token": self.__refresh_token,
+            "grant_type": "refresh_token",
         }
 
+        request_token = requests.post(
+            AZURE_AUTH_GET_TOKEN_URL,
+            headers=azure_auth_request_headers,
+            data=request_token__data,
+        )
+
+        if request_token.status_code != 200:
+            error_text = (
+                "Reauthentication request failed with previous refresh token. Status: "
+                + str(request_token.status_code)
+                + ", Response: "
+                + request_token.text
+            )
+            _LOGGER.error(error_text)
+            return None
+
+        return request_token.text
+
+    def __authenticate(self) -> bool:
         refresh_azure_token = self.__refresh_token_valid_to and (
             self.__refresh_token_valid_to > datetime.now().timestamp()
         )
 
+        request_token_text = None
+
         if refresh_azure_token:  # Refresh token
-            request_token__data = {
-                "client_id": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
-                "redirect_uri": THERMIA_AZURE_AUTH_REDIRECT_URI,
-                "scope": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
-                "refresh_token": self.__refresh_token,
-                "grant_type": "refresh_token",
-            }
+            request_token_text = self.__authenticate_refresh_token()
 
-            request_token = requests.post(
-                azure_auth_get_token_url,
-                headers=azure_auth_request_headers,
-                data=request_token__data,
-            )
-
-            if request_token.status_code != 200:
-                error_text = (
-                    "Reauthentication request failed with previous refresh token. Status: "
-                    + str(request_token.status_code)
-                    + ", Response: "
-                    + request_token.text
-                )
-                _LOGGER.error(error_text)
-                raise AuthenticationException(error_text)
-        else:
+        if request_token_text is None:  # New token, or refresh failed
             code_challenge = utils.generate_challenge(43)
 
             request_auth__data = {
@@ -506,7 +516,7 @@ class ThermiaAPI:
                 "code_challenge_method": "S256",
             }
 
-            request_auth = requests.get(azure_auth_authorize_url, request_auth__data)
+            request_auth = requests.get(AZURE_AUTH_AUTHORIZE_URL, request_auth__data)
 
             state_code = ""
             csrf_token = ""
@@ -542,7 +552,7 @@ class ThermiaAPI:
             }
 
             request_self_asserted = requests.post(
-                azure_self_asserted_url,
+                AZURE_SELF_ASSERTED_URL,
                 cookies=request_auth.cookies,
                 data=request_self_asserted__data,
                 headers={**azure_auth_request_headers, "X-Csrf-Token": csrf_token},
@@ -575,7 +585,7 @@ class ThermiaAPI:
             }
 
             request_confirmed = requests.get(
-                azure_auth_confirm_url,
+                AZURE_AUTH_CONFIRM_URL,
                 cookies=request_confirmed__cookies,
                 params=request_confirmed__params,
             )
@@ -590,7 +600,7 @@ class ThermiaAPI:
             }
 
             request_token = requests.post(
-                azure_auth_get_token_url,
+                AZURE_AUTH_GET_TOKEN_URL,
                 headers=azure_auth_request_headers,
                 data=request_token__data,
             )
@@ -605,7 +615,9 @@ class ThermiaAPI:
                 _LOGGER.error(error_text)
                 raise AuthenticationException(error_text)
 
-        token_data = json.loads(request_token.text)
+            request_token_text = request_token.text
+
+        token_data = json.loads(request_token_text)
 
         self.__token = token_data["access_token"]
         self.__token_valid_to = token_data["expires_on"]
