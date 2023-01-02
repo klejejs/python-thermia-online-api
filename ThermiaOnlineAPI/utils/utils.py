@@ -2,9 +2,18 @@ import json
 from base64 import urlsafe_b64encode
 import random
 import string
+from typing import Any, TypeVar
+
+T = TypeVar("T")
 
 
-def get_dict_value_safe(dictionary, key, default=None):
+def get_dict_value_or_none(dictionary, key) -> Any:
+    if dictionary is None or key not in dictionary:
+        return None
+    return dictionary[key]
+
+
+def get_dict_value_or_default(dictionary, key, default: T) -> T:
     if dictionary is None or key not in dictionary:
         return default
     return dictionary[key]

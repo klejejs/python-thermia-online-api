@@ -4,7 +4,7 @@ import logging
 import sys
 from ..utils.utils import pretty_print_except
 
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING, Dict, Optional
 
 from ThermiaOnlineAPI.const import (
     REG_BRINE_IN,
@@ -17,6 +17,7 @@ from ThermiaOnlineAPI.const import (
     REG_DESIRED_SYS_SUPPLY_LINE_TEMP,
     REG_INTEGRAL_LSD,
     REG_OPERATIONAL_STATUS_PRIO1,
+    REG_OPERATIONAL_STATUS_PRIORITY_BITMASK,
     REG_OPER_DATA_RETURN,
     REG_OPER_DATA_SUPPLY_MA_SA,
     REG_OPER_TIME_COMPRESSOR,
@@ -24,17 +25,19 @@ from ThermiaOnlineAPI.const import (
     REG_OPER_TIME_IMM1,
     REG_OPER_TIME_IMM2,
     REG_OPER_TIME_IMM3,
+    REG_PID,
     REG_RETURN_LINE,
+    COMP_STATUS_ITEC,
     REG_SUPPLY_LINE,
     DATETIME_FORMAT,
 )
 
-from ..utils.utils import get_dict_value_safe
+from ..utils.utils import get_dict_value_or_none, get_dict_value_or_default
 
 if TYPE_CHECKING:
     from ..api.ThermiaAPI import ThermiaAPI
 
-DEFAULT_REGISTER_INDEXES: Dict[str, Union[int, None]] = {
+DEFAULT_REGISTER_INDEXES: Dict[str, Optional[int]] = {
     "temperature": None,
     "operation_mode": None,
     "hot_water_switch": None,
@@ -58,7 +61,7 @@ class ThermiaHeatPump:
         self.__group_operational_status = None
         self.__group_operational_time = None
         self.__group_operational_operation = None
-        self.__group_hot_water: Dict[str, Union[int, None]] = {
+        self.__group_hot_water: Dict[str, Optional[int]] = {
             "hot_water_switch": None,
             "hot_water_boost_switch": None,
         }
@@ -75,7 +78,7 @@ class ThermiaHeatPump:
         self.__status = self.__api_interface.get_device_status(self.__device_id)
         self.__device_data = self.__api_interface.get_device_by_id(self.__device_id)
 
-        self.__register_indexes["temperature"] = get_dict_value_safe(
+        self.__register_indexes["temperature"] = get_dict_value_or_default(
             self.__status, "heatingEffectRegisters", [None, None]
         )[1]
 
@@ -101,10 +104,10 @@ class ThermiaHeatPump:
     def set_register_index_operation_mode(self, register_index: int):
         self.__register_indexes["operation_mode"] = register_index
 
-    def set_register_index_hot_water_switch(self, register_index: Union[int, None]):
+    def set_register_index_hot_water_switch(self, register_index: Optional[int]):
         self.__register_indexes["hot_water_switch"] = register_index
 
-    def set_register_index_hot_water_boost_switch(self, register_index: Union[int, None]):
+    def set_register_index_hot_water_boost_switch(self, register_index: Optional[int]):
         self.__register_indexes["hot_water_boost_switch"] = register_index
 
     def set_temperature(self, temperature: int):
@@ -157,7 +160,7 @@ class ThermiaHeatPump:
         self.update_data()
 
     def get_all_available_register_groups(self):
-        installation_profile_id = get_dict_value_safe(
+        installation_profile_id = get_dict_value_or_none(
             self.__info, "installationProfileId"
         )
 
@@ -286,7 +289,8 @@ class ThermiaHeatPump:
 
     def __get_active_alarms(self):
         active_alarms = filter(
-            lambda alarm: get_dict_value_safe(alarm, "isActiveAlarm", False) is True,
+            lambda alarm: get_dict_value_or_default(alarm, "isActiveAlarm", False)
+            is True,
             self.__alarms or [],
         )
         return list(active_alarms)
@@ -304,7 +308,9 @@ class ThermiaHeatPump:
 
         self.__historical_data_registers_map = data_map
 
-    def __get_register_from_operational_status(self, register_name: str) -> Union[dict, None]:
+    def __get_register_from_operational_status(
+        self, register_name: str
+    ) -> Optional[dict]:
         data = [
             d
             for d in self.__group_operational_status or []
@@ -337,26 +343,62 @@ class ThermiaHeatPump:
 
         return None
 
-    def __get_all_operational_statuses_from_operational_status(self) -> Union[ChainMap, None]:
+    def __get_operational_statuses_from_operational_status(self) -> Optional[Dict]:
+        # Try to get the data from the REG_OPERATIONAL_STATUS_PRIO1 register
         data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
+        if data is not None:
+            return {
+                "registerValues": data.get("valueNames", []),
+                "valueNamePrefix": "REG_VALUE_STATUS_",
+            }
+
+        # Try to get the data from the COMP_STATUS_ITEC register
+        data = self.__get_register_from_operational_status(COMP_STATUS_ITEC)
+        if data is not None:
+            return {
+                "registerValues": data.get("valueNames", []),
+                "valueNamePrefix": "COMP_STATUS_",
+            }
+
+        # Try to get the data from the REG_OPERATIONAL_STATUS_PRIORITY_BITMASK register
+        data = self.__get_register_from_operational_status(
+            REG_OPERATIONAL_STATUS_PRIORITY_BITMASK
+        )
+        if data is not None:
+            return {
+                "registerValues": data.get("valueNames", []),
+                "valueNamePrefix": "REG_VALUE_STATUS_",
+            }
+
+        return None
+
+    def __get_all_operational_statuses_from_operational_status(
+        self,
+    ) -> Optional[ChainMap]:
+        data = self.__get_operational_statuses_from_operational_status()
 
         if data is None:
             return None
 
-        register_values_list = data.get("valueNames", [])
+        filtered_register_values = list(
+            filter(lambda value: value.get("visible"), data["registerValues"])
+        )
 
         operation_modes_map = map(
             lambda values: {
-                values.get("value"): values.get("name").split("REG_VALUE_STATUS_")[1],
+                values.get("value"): values.get("name").split(data["valueNamePrefix"])[
+                    1
+                ],
             },
-            register_values_list,
+            filtered_register_values,
         )
+
         operation_modes_list = list(operation_modes_map)
         return ChainMap(*operation_modes_list)
 
     @property
     def name(self):
-        return get_dict_value_safe(self.__info, "name")
+        return get_dict_value_or_none(self.__info, "name")
 
     @property
     def id(self):
@@ -364,44 +406,46 @@ class ThermiaHeatPump:
 
     @property
     def is_online(self):
-        return get_dict_value_safe(self.__info, "isOnline")
+        return get_dict_value_or_none(self.__info, "isOnline")
 
     @property
     def last_online(self):
-        return get_dict_value_safe(self.__info, "lastOnline")
+        return get_dict_value_or_none(self.__info, "lastOnline")
 
     @property
     def model(self):
-        return get_dict_value_safe(self.__device_data, "profile", {}).get("thermiaName")
+        return get_dict_value_or_default(self.__device_data, "profile", {}).get(
+            "thermiaName"
+        )
 
     @property
     def has_indoor_temp_sensor(self):
-        return get_dict_value_safe(self.__status, "hasIndoorTempSensor")
+        return get_dict_value_or_none(self.__status, "hasIndoorTempSensor")
 
     @property
     def indoor_temperature(self):
         if self.has_indoor_temp_sensor:
-            return get_dict_value_safe(self.__status, "indoorTemperature")
+            return get_dict_value_or_none(self.__status, "indoorTemperature")
         else:
             return self.heat_temperature
 
     @property
     def is_outdoor_temp_sensor_functioning(self):
-        return get_dict_value_safe(self.__status, "isOutdoorTempSensorFunctioning")
+        return get_dict_value_or_none(self.__status, "isOutdoorTempSensorFunctioning")
 
     @property
     def outdoor_temperature(self):
-        return get_dict_value_safe(self.__status, "outdoorTemperature")
+        return get_dict_value_or_none(self.__status, "outdoorTemperature")
 
     @property
     def is_hot_water_active(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__status, "isHotwaterActive"
-        ) or get_dict_value_safe(self.__status, "isHotWaterActive")
+        ) or get_dict_value_or_none(self.__status, "isHotWaterActive")
 
     @property
     def hot_water_temperature(self):
-        return get_dict_value_safe(self.__status, "hotWaterTemperature")
+        return get_dict_value_or_none(self.__status, "hotWaterTemperature")
 
     ###########################################################################
     # Heat temperature data
@@ -409,19 +453,19 @@ class ThermiaHeatPump:
 
     @property
     def heat_temperature(self):
-        return get_dict_value_safe(self.__status, "heatingEffect")
+        return get_dict_value_or_none(self.__status, "heatingEffect")
 
     @property
     def heat_min_temperature_value(self):
-        return get_dict_value_safe(self.__get_heat_temperature_data(), "minValue")
+        return get_dict_value_or_none(self.__get_heat_temperature_data(), "minValue")
 
     @property
     def heat_max_temperature_value(self):
-        return get_dict_value_safe(self.__get_heat_temperature_data(), "maxValue")
+        return get_dict_value_or_none(self.__get_heat_temperature_data(), "maxValue")
 
     @property
     def heat_temperature_step(self):
-        return get_dict_value_safe(self.__get_heat_temperature_data(), "step")
+        return get_dict_value_or_none(self.__get_heat_temperature_data(), "step")
 
     ###########################################################################
     # Other temperature data
@@ -429,9 +473,9 @@ class ThermiaHeatPump:
 
     @property
     def supply_line_temperature(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_SUPPLY_LINE), "value"
-        ) or get_dict_value_safe(
+        ) or get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_OPER_DATA_SUPPLY_MA_SA),
             "value",
         )
@@ -439,17 +483,17 @@ class ThermiaHeatPump:
     @property
     def desired_supply_line_temperature(self):
         return (
-            get_dict_value_safe(
+            get_dict_value_or_none(
                 self.__get_temperature_data_by_register_name(REG_DESIRED_SUPPLY_LINE),
                 "value",
             )
-            or get_dict_value_safe(
+            or get_dict_value_or_none(
                 self.__get_temperature_data_by_register_name(
                     REG_DESIRED_SUPPLY_LINE_TEMP
                 ),
                 "value",
             )
-            or get_dict_value_safe(
+            or get_dict_value_or_none(
                 self.__get_temperature_data_by_register_name(
                     REG_DESIRED_SYS_SUPPLY_LINE_TEMP
                 ),
@@ -459,39 +503,39 @@ class ThermiaHeatPump:
 
     @property
     def return_line_temperature(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_RETURN_LINE), "value"
-        ) or get_dict_value_safe(
+        ) or get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_OPER_DATA_RETURN), "value"
         )
 
     @property
     def brine_out_temperature(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_BRINE_OUT), "value"
         )
 
     @property
     def pool_temperature(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_ACTUAL_POOL_TEMP), "value"
         )
 
     @property
     def brine_in_temperature(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_BRINE_IN), "value"
         )
 
     @property
     def cooling_tank_temperature(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_COOL_SENSOR_TANK), "value"
         )
 
     @property
     def cooling_supply_line_temperature(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_COOL_SENSOR_SUPPLY),
             "value",
         )
@@ -507,7 +551,7 @@ class ThermiaHeatPump:
         if data is None:
             return None
 
-        current_register_value = get_dict_value_safe(data, "registerValue")
+        current_register_value = get_dict_value_or_none(data, "registerValue")
 
         data = self.__get_all_operational_statuses_from_operational_status()
 
@@ -605,7 +649,12 @@ class ThermiaHeatPump:
     @property
     def operational_status_integral(self):
         data = self.__get_register_from_operational_status(REG_INTEGRAL_LSD)
-        return get_dict_value_safe(data, "registerValue")
+        return get_dict_value_or_none(data, "registerValue")
+
+    @property
+    def operational_status_pid(self) -> Optional[int]:
+        data = self.__get_register_from_operational_status(REG_PID)
+        return get_dict_value_or_none(data, "registerValue")
 
     ###########################################################################
     # Operational time data
@@ -613,35 +662,35 @@ class ThermiaHeatPump:
 
     @property
     def compressor_operational_time(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_operational_time_data_by_register_name(REG_OPER_TIME_COMPRESSOR),
             "value",
         )
 
     @property
     def hot_water_operational_time(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_operational_time_data_by_register_name(REG_OPER_TIME_HOT_WATER),
             "value",
         )
 
     @property
     def auxiliary_heater_1_operational_time(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM1),
             "value",
         )
 
     @property
     def auxiliary_heater_2_operational_time(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM2),
             "value",
         )
 
     @property
     def auxiliary_heater_3_operational_time(self):
-        return get_dict_value_safe(
+        return get_dict_value_or_none(
             self.__get_operational_time_data_by_register_name(REG_OPER_TIME_IMM3),
             "value",
         )
@@ -652,23 +701,25 @@ class ThermiaHeatPump:
 
     @property
     def operation_mode(self):
-        return get_dict_value_safe(self.__group_operational_operation, "current")
+        return get_dict_value_or_none(self.__group_operational_operation, "current")
 
     @property
     def available_operation_modes(self):
         return list(
-            get_dict_value_safe(
+            get_dict_value_or_default(
                 self.__group_operational_operation, "available", {}
             ).values()
         )
 
     @property
     def available_operation_mode_map(self):
-        return get_dict_value_safe(self.__group_operational_operation, "available", {})
+        return get_dict_value_or_default(
+            self.__group_operational_operation, "available", {}
+        )
 
     @property
     def is_operation_mode_read_only(self):
-        return get_dict_value_safe(self.__group_operational_operation, "isReadOnly")
+        return get_dict_value_or_none(self.__group_operational_operation, "isReadOnly")
 
     ###########################################################################
     # Hot water data
@@ -680,11 +731,11 @@ class ThermiaHeatPump:
         return self.__group_hot_water is not None
 
     @property
-    def hot_water_switch_state(self) -> Union[int, None]:
+    def hot_water_switch_state(self) -> Optional[int]:
         return self.__group_hot_water["hot_water_switch"]
 
     @property
-    def hot_water_boost_switch_state(self) -> Union[int, None]:
+    def hot_water_boost_switch_state(self) -> Optional[int]:
         return self.__group_hot_water["hot_water_boost_switch"]
 
     ###########################################################################
@@ -719,7 +770,7 @@ class ThermiaHeatPump:
         if self.__historical_data_registers_map is None:
             self.__set_historical_data_registers()
 
-        register_id = get_dict_value_safe(
+        register_id = get_dict_value_or_none(
             self.__historical_data_registers_map, register_name
         )
 
@@ -789,7 +840,7 @@ class ThermiaHeatPump:
         print("self.__group_temperatures:")
         pretty_print_except(self.__group_temperatures)
 
-        installation_profile_id = get_dict_value_safe(
+        installation_profile_id = get_dict_value_or_none(
             self.__info, "installationProfileId"
         )
 

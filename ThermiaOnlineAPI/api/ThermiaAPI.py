@@ -5,7 +5,7 @@ import requests
 from requests import cookies
 import json
 import hashlib
-from typing import Dict, Union
+from typing import Dict, Optional
 
 from ThermiaOnlineAPI.const import (
     REG_GROUP_HOT_WATER,
@@ -295,9 +295,7 @@ class ThermiaAPI:
             "registerValue": int(register_value),
         }
 
-    def get_group_hot_water(
-        self, device: ThermiaHeatPump
-    ) -> Dict[str, Union[int, None]]:
+    def get_group_hot_water(self, device: ThermiaHeatPump) -> Dict[str, Optional[int]]:
         register_data: list = self.__get_register_group(device.id, REG_GROUP_HOT_WATER)
 
         hot_water_switch_data = (
@@ -462,7 +460,7 @@ class ThermiaAPI:
 
         return request.json()
 
-    def __authenticate_refresh_token(self) -> Union[str, None]:
+    def __authenticate_refresh_token(self) -> Optional[str]:
         request_token__data = {
             "client_id": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
             "redirect_uri": THERMIA_AZURE_AUTH_REDIRECT_URI,

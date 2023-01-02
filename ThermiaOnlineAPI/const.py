@@ -75,8 +75,15 @@ REG_OPERATIONMODE = "REG_OPERATIONMODE"
 # Operational status registers
 ###############################################################################
 
-REG_OPERATIONAL_STATUS_PRIO1 = "REG_OPERATIONAL_STATUS_PRIO1"
+REG_OPERATIONAL_STATUS_PRIO1 = (
+    "REG_OPERATIONAL_STATUS_PRIO1"  # Operational status for most heat pumps
+)
+COMP_STATUS_ITEC = "COMP_STATUS_ITEC"  # Operational status for ITEC heat pumps
+REG_OPERATIONAL_STATUS_PRIORITY_BITMASK = (
+    "REG_OPERATIONAL_STATUS_PRIORITY_BITMASK"  # Operational status for Atlas heat pumps
+)
 REG_INTEGRAL_LSD = "REG_INTEGRAL_LSD"
+REG_PID = "REG_PID"
 
 ###############################################################################
 # Hot water registers
