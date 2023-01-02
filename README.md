@@ -69,6 +69,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `operational_status_hot_water_status` | Hot water status |
 | `operational_status_heating_status` | Heating status |
 | `operational_status_integral` | Integral |
+| `operational_status_pid` | PID |
 | --- | --- |
 | Operational Times | |
 | `compressor_operational_time` | Compressor operational time in hours |
