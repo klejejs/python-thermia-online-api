@@ -1,14 +1,10 @@
 # Thermia Online API
 ### A Python API for Thermia heat pumps using https://online.thermia.se
 
-## Confirmed Thermia profiles that API supports:
-* Thermia Diplomat / Diplomat Duo
-* Thermia iTec
-
 ## Confirmed Thermia models that API supports:
-* Danfoss DHP-AQ 9
+It is hard for me to keep track of all models that I have added feature support for in the past, so, to understand if your model is supported, please try running the example file and see if it works. If it does not, please submit a bug report.
 
-## Regarding unsupported models
+### Regarding unsupported models
 I am willing to do my best to support them, but as there turns out to be many different Thermia models and configurations, it is hard for me to implement all functionalities and test them thoroughly.
 Thus, I have created a `debug()` function that runs when `example.py` is executed and creates a `debug.txt` file which has data about your heat pump and all its supported features. If you want to submit a bug or feature request, please include the debug file as it will make my development much easier.
 
