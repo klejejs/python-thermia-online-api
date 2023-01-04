@@ -357,7 +357,7 @@ class ThermiaHeatPump:
         if data is not None:
             return {
                 "registerValues": data.get("valueNames", []),
-                "valueNamePrefix": "COMP_STATUS_",
+                "valueNamePrefix": "COMP_VALUE_",
             }
 
         # Try to get the data from the REG_OPERATIONAL_STATUS_PRIORITY_BITMASK register
