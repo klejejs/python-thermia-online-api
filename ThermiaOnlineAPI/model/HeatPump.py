@@ -59,6 +59,7 @@ class ThermiaHeatPump:
         # GROUPS
         self.__group_temperatures = None
         self.__group_operational_status = None
+        self.__operational_status_register = None
         self.__group_operational_time = None
         self.__group_operational_operation = None
         self.__group_hot_water: Dict[str, Optional[int]] = {
@@ -344,9 +345,15 @@ class ThermiaHeatPump:
         return None
 
     def __get_operational_statuses_from_operational_status(self) -> Optional[Dict]:
+        if self.__operational_status_register is not None:
+            return self.__get_register_from_operational_status(
+                self.__operational_status_register
+            )
+
         # Try to get the data from the REG_OPERATIONAL_STATUS_PRIO1 register
         data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
         if data is not None:
+            self.__operational_status_register = REG_OPERATIONAL_STATUS_PRIO1
             return {
                 "registerValues": data.get("valueNames", []),
                 "valueNamePrefix": "REG_VALUE_STATUS_",
@@ -355,6 +362,7 @@ class ThermiaHeatPump:
         # Try to get the data from the COMP_STATUS_ITEC register
         data = self.__get_register_from_operational_status(COMP_STATUS_ITEC)
         if data is not None:
+            self.__operational_status_register = COMP_STATUS_ITEC
             return {
                 "registerValues": data.get("valueNames", []),
                 "valueNamePrefix": "COMP_VALUE_",
@@ -365,6 +373,7 @@ class ThermiaHeatPump:
             REG_OPERATIONAL_STATUS_PRIORITY_BITMASK
         )
         if data is not None:
+            self.__operational_status_register = REG_OPERATIONAL_STATUS_PRIORITY_BITMASK
             return {
                 "registerValues": data.get("valueNames", []),
                 "valueNamePrefix": "REG_VALUE_STATUS_",
@@ -546,7 +555,15 @@ class ThermiaHeatPump:
 
     @property
     def operational_status(self):
-        data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
+        if self.__operational_status_register is None:
+            # Attempt to get the register from the status data
+            self.__get_operational_statuses_from_operational_status()
+            if self.__operational_status_register is None:
+                return None
+
+        data = self.__get_register_from_operational_status(
+            self.__operational_status_register
+        )
 
         if data is None:
             return None

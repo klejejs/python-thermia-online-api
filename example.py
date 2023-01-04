@@ -75,6 +75,7 @@ print("Cooling status: " + str(heat_pump.operational_status_cooling_status))
 print("Hot water status: " + str(heat_pump.operational_status_hot_water_status))
 print("Heating status: " + str(heat_pump.operational_status_heating_status))
 print("Integral: " + str(heat_pump.operational_status_integral))
+print("Pid: " + str(heat_pump.operational_status_pid))
 
 print("\n")
 
