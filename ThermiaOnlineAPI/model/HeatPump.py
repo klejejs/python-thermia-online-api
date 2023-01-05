@@ -390,7 +390,7 @@ class ThermiaHeatPump:
             return None
 
         filtered_register_values = list(
-            filter(lambda value: value.get("visible"), data["registerValues"])
+            filter(lambda value: value.get("visible"), data["valueNames"])
         )
 
         operation_modes_map = map(
