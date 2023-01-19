@@ -27,6 +27,7 @@ from ThermiaOnlineAPI.const import (
     REG_OPER_TIME_IMM3,
     REG_PID,
     REG_RETURN_LINE,
+    COMP_STATUS,
     COMP_STATUS_ITEC,
     REG_SUPPLY_LINE,
     DATETIME_FORMAT,
@@ -59,6 +60,7 @@ class ThermiaHeatPump:
         self.__device_config: Dict[str, Optional[str]] = {
             "operational_status_register": None,
             "operational_status_valueNamePrefix": None,
+            "operational_status_minRegisterValue": None,
         }
 
         # GROUPS
@@ -382,9 +384,17 @@ class ThermiaHeatPump:
             self.__device_config[
                 "operational_status_register"
             ] = REG_OPERATIONAL_STATUS_PRIORITY_BITMASK
+            self.__device_config["operational_status_valueNamePrefix"] = "REG_VALUE_"
+            return data.get("valueNames", [])
+
+        # Try to get the data from the COMP_STATUS register
+        data = self.__get_register_from_operational_status(COMP_STATUS)
+        if data is not None:
+            self.__device_config["operational_status_register"] = COMP_STATUS
+            self.__device_config["operational_status_valueNamePrefix"] = "COMP_VALUE_"
             self.__device_config[
-                "operational_status_valueNamePrefix"
-            ] = "REG_VALUE_"
+                "operational_status_minRegisterValue"
+            ] = "4"  # 4 is OFF
             return data.get("valueNames", [])
 
         return None
@@ -593,6 +603,11 @@ class ThermiaHeatPump:
             # Attempt to get multiple statuses by binary sum of the values
             data_items_list.sort(key=lambda x: x[0], reverse=True)
             list_of_current_operation_modes = []
+
+            if self.__device_config["operational_status_minRegisterValue"] is not None:
+                current_register_value -= int(
+                    self.__device_config["operational_status_minRegisterValue"]
+                )
 
             for value, name in data_items_list:
                 if value <= current_register_value:
