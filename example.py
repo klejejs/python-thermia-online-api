@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from ThermiaOnlineAPI import Thermia
-from credentials import USERNAME, PASSWORD
+from credentials import USERNAME, PASSWORD, API_TYPE
+from ThermiaOnlineAPI.const import (
+    THERMIA_API_TYPE_CLASSIC,
+    THERMIA_API_TYPE_GENESIS,
+)
 
 CHANGE_HEAT_PUMP_DATA_DURING_TEST = (
     False  # Set to True if you want to change heat pump data during test
@@ -10,7 +14,17 @@ if not USERNAME or not PASSWORD:
     USERNAME = input("Enter username: ")
     PASSWORD = input("Enter password: ")
 
-thermia = Thermia(USERNAME, PASSWORD, "classic")
+if not API_TYPE:
+    api_type_number = input("Enter api type (1 = classic, 2 = genesis): ")
+    if api_type_number == "1":
+        API_TYPE = THERMIA_API_TYPE_CLASSIC
+    elif api_type_number == "2":
+        API_TYPE = THERMIA_API_TYPE_GENESIS
+    else:
+        print("Invalid api type")
+        exit(1)
+
+thermia = Thermia(USERNAME, PASSWORD, api_type=API_TYPE)
 
 print("Connected: " + str(thermia.connected))
 
