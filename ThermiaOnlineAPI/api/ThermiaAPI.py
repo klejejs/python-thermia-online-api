@@ -440,7 +440,7 @@ class ThermiaAPI:
             + "/Registers"
         )
         body = {
-            "registerIndex": register_index,
+            "registerSpecificationId": register_index,
             "registerValue": register_value,
             "clientUuid": "api-client-uuid",
         }
