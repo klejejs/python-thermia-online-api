@@ -233,7 +233,7 @@ class ThermiaAPI:
 
         data = data[0]
 
-        device.set_register_index_operation_mode(data["registerIndex"])
+        device.set_register_index_operation_mode(data["registerId"])
 
         current_operation_mode_value = int(data.get("registerValue"))
         operation_modes_data = data.get("valueNames")
@@ -271,7 +271,7 @@ class ThermiaAPI:
         self, register_group: list, register_name: str
     ):
         default_return_object = {
-            "registerIndex": None,
+            "registerId": None,
             "registerValue": None,
         }
 
@@ -297,7 +297,7 @@ class ThermiaAPI:
             return default_return_object
 
         return {
-            "registerIndex": switch_data["registerIndex"],
+            "registerId": switch_data["registerId"],
             "registerValue": int(register_value),
         }
 
@@ -315,12 +315,10 @@ class ThermiaAPI:
             )
         )
 
-        device.set_register_index_hot_water_switch(
-            hot_water_switch_data["registerIndex"]
-        )
+        device.set_register_index_hot_water_switch(hot_water_switch_data["registerId"])
 
         device.set_register_index_hot_water_boost_switch(
-            hot_water_boost_switch_data["registerIndex"]
+            hot_water_boost_switch_data["registerId"]
         )
 
         return {

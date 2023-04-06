@@ -238,7 +238,7 @@ class ThermiaHeatPump:
         data = [
             d
             for d in self.__group_temperatures
-            if d["registerIndex"] == device_temperature_register_index
+            if d["registerId"] == device_temperature_register_index
         ]
 
         if len(data) != 1:
@@ -286,7 +286,7 @@ class ThermiaHeatPump:
         data = data[0]
 
         return {
-            "id": data["registerIndex"],
+            "id": data["registerId"],
             "isReadOnly": data["isReadOnly"],
             "minValue": data["minValue"],
             "maxValue": data["maxValue"],
