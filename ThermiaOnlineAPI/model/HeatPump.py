@@ -622,13 +622,13 @@ class ThermiaHeatPump:
         return current_operation_mode[0]
 
     @property
-    def available_operational_statuses(self):
+    def available_operational_statuses(self) -> Optional[List[str]]:
         data = self.__get_all_operational_statuses_from_operational_status()
 
         if data is None:
             return None
 
-        return data.values()
+        return list(data.values())
 
     @property
     def available_operational_statuses_map(self):
