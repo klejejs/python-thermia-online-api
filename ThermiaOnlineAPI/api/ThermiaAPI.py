@@ -61,7 +61,7 @@ class ThermiaAPI:
         }
 
         self.__session = requests.Session()
-        retry = Retry(connect=3, backoff_factor=0.5)
+        retry = Retry(total=20, connect=10, backoff_factor=0.1)
         adapter = HTTPAdapter(max_retries=retry)
         self.__session.mount("https://", adapter)
 

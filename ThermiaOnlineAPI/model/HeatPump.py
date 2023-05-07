@@ -595,6 +595,9 @@ class ThermiaHeatPump:
             name for value, name in data_items_list if value == current_register_value
         ]
 
+        if len(current_operation_mode) == 0:
+            return None
+
         if (
             len(current_operation_mode) != 1
             and current_register_value > 0
@@ -626,12 +629,12 @@ class ThermiaHeatPump:
         data = self.__get_all_operational_statuses_from_operational_status()
 
         if data is None:
-            return None
+            return []
 
         return list(data.values())
 
     @property
-    def available_operational_statuses_map(self):
+    def available_operational_statuses_map(self) -> Optional[ChainMap]:
         return self.__get_all_operational_statuses_from_operational_status()
 
     @property
