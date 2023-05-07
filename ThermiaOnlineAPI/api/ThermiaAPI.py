@@ -58,10 +58,14 @@ class ThermiaAPI:
         self.__default_request_headers = {
             "Authorization": "Bearer ",
             "Content-Type": "application/json",
+            "cache-control": "no-cache",
+            "Access-Control-Allow-Origin": "*",
         }
 
         self.__session = requests.Session()
-        retry = Retry(total=20, connect=10, backoff_factor=0.1)
+        retry = Retry(
+            total=20, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
+        )
         adapter = HTTPAdapter(max_retries=retry)
         self.__session.mount("https://", adapter)
 
@@ -81,7 +85,12 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            _LOGGER.error("Error fetching devices. " + str(status))
+            _LOGGER.error(
+                "Error fetching devices. Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
             return []
 
         return request.json()
@@ -107,7 +116,12 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            _LOGGER.error("Error fetching device info. " + str(status))
+            _LOGGER.error(
+                "Error fetching device info. Status: "
+                + str(status)
+                + ", Response: "
+                + str(request.text)
+            )
             return None
 
         return request.json()
@@ -125,7 +139,12 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            _LOGGER.error("Error fetching device status. " + str(status))
+            _LOGGER.error(
+                "Error fetching device status. Status :"
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
             return None
 
         return request.json()
@@ -143,7 +162,12 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            _LOGGER.error("Error in getting device's alarms. " + str(status))
+            _LOGGER.error(
+                "Error in getting device's alarms. Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
             return None
 
         return request.json()
@@ -160,7 +184,12 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            _LOGGER.error("Error in historical data registers. " + str(status))
+            _LOGGER.error(
+                "Error in historical data registers. Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
             return None
 
         return request.json()
@@ -186,7 +215,10 @@ class ThermiaAPI:
 
         if status != 200:
             _LOGGER.error(
-                "Error in historical data for specific register. " + str(status)
+                "Error in historical data for specific register. Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
             )
             return None
 
@@ -206,7 +238,12 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            _LOGGER.error("Error in getting available groups. " + str(status))
+            _LOGGER.error(
+                "Error in getting available groups. Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
             return None
 
         return request.json()
@@ -421,6 +458,8 @@ class ThermiaAPI:
                 + register_group
                 + ", Status: "
                 + str(status)
+                + ", Response: "
+                + request.text
             )
             return []
 
@@ -452,8 +491,10 @@ class ThermiaAPI:
             _LOGGER.error(
                 "Error setting register "
                 + str(register_index)
-                + " value. "
+                + " value. Status: "
                 + str(status)
+                + ", Response: "
+                + request.text
             )
 
     def __fetch_configuration(self):
@@ -461,7 +502,12 @@ class ThermiaAPI:
         status = request.status_code
 
         if status != 200:
-            _LOGGER.error("Error fetching API configuration. " + str(status))
+            _LOGGER.error(
+                "Error fetching API configuration. Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
             raise NetworkException("Error fetching API configuration.", status)
 
         return request.json()
@@ -547,7 +593,10 @@ class ThermiaAPI:
                     csrf_token = settings["csrf"]
             else:
                 _LOGGER.error(
-                    "Error fetching authorization API. " + str(request_auth.reason)
+                    "Error fetching authorization API. Status: "
+                    + str(request_auth.status_code)
+                    + ", Response: "
+                    + request_auth.text
                 )
                 raise NetworkException(
                     "Error fetching authorization API.", request_auth.reason
@@ -641,10 +690,7 @@ class ThermiaAPI:
         ).timestamp()
         self.__refresh_token = token_data.get("refresh_token")
 
-        self.__default_request_headers = {
-            "Authorization": "Bearer " + self.__token,
-            "Content-Type": "application/json",
-        }
+        self.__default_request_headers["Authorization"] = "Bearer " + self.__token
 
         _LOGGER.info("Authentication was successful, token set.")
 
