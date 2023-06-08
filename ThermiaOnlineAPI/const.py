@@ -44,6 +44,7 @@ REG_SUPPLY_LINE = "REG_SUPPLY_LINE"
 REG_HOT_WATER_TEMPERATURE = "REG_HOT_WATER_TEMPERATURE"
 REG_BRINE_OUT = "REG_BRINE_OUT"
 REG_BRINE_IN = "REG_BRINE_IN"
+REG_OPER_DATA_BUFFER_TANK = "REG_OPER_DATA_BUFFER_TANK"
 
 ###############################################################################
 # Temperature registers ("classic" specific)
