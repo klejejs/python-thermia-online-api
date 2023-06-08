@@ -31,6 +31,8 @@ from ThermiaOnlineAPI.const import (
     COMP_STATUS_ITEC,
     REG_SUPPLY_LINE,
     DATETIME_FORMAT,
+    REG_GROUP_TEMPERATURES,
+    REG_OPER_DATA_BUFFER_TANK,
 )
 
 from ..utils.utils import get_dict_value_or_none, get_dict_value_or_default
@@ -522,6 +524,13 @@ class ThermiaHeatPump:
                 ),
                 "value",
             )
+        )
+    
+    @property
+    def buffer_tank_temperature(self):
+        return get_dict_value_or_none(
+            self.get_register_data_by_register_group_and_name(REG_GROUP_TEMPERATURES, REG_OPER_DATA_BUFFER_TANK),
+            "value",
         )
 
     @property
