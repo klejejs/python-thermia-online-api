@@ -46,6 +46,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | --- | --- |
 | Other temperatures | |
 | `supply_line_temperature` | Supply line temperature in Celsius |
+| `buffer_tank_temperature` | Buffer tank temperature in Celsius |
 | `desired_supply_line_temperature` | Desired supply line temperature in Celsius |
 | `return_line_temperature` | Return line temperature in Celsius |
 | `brine_out_temperature` | Brine out temperature in Celsius |
