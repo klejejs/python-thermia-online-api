@@ -21,6 +21,7 @@ from ThermiaOnlineAPI.const import (
     REG_OPER_DATA_RETURN,
     REG_OPER_DATA_SUPPLY_MA_SA,
     REG_OPER_TIME_COMPRESSOR,
+    REG_OPER_TIME_HEATING,
     REG_OPER_TIME_HOT_WATER,
     REG_OPER_TIME_IMM1,
     REG_OPER_TIME_IMM2,
@@ -805,6 +806,13 @@ class ThermiaHeatPump:
     def compressor_operational_time(self):
         return get_dict_value_or_none(
             self.__get_operational_time_data_by_register_name(REG_OPER_TIME_COMPRESSOR),
+            "value",
+        )
+
+    @property
+    def heating_operational_time(self):
+        return get_dict_value_or_none(
+            self.__get_operational_time_data_by_register_name(REG_OPER_TIME_HEATING),
             "value",
         )
 
