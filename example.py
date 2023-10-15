@@ -55,6 +55,7 @@ print(
 )
 print("Return Line Temperature: " + str(heat_pump.return_line_temperature))
 print("Brine Out Temperature: " + str(heat_pump.brine_out_temperature))
+print("Pool Temperature: " + str(heat_pump.pool_temperature))
 print("Brine In Temperature: " + str(heat_pump.brine_in_temperature))
 print("Cooling Tank Temperature: " + str(heat_pump.cooling_tank_temperature))
 print(
