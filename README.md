@@ -55,7 +55,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `cooling_supply_line_temperature` | Cooling supply line temperature in Celsius |
 | --- | --- |
 | Operational status | |
-| `operational_status` | Operational status of the Heat Pump or list of operational statuses (if multiple) |
+| `running_operational_statuses` | List of running operational statuses of the Heat Pump  |
 | `available_operational_statuses` | List of available operational statuses |
 | `available_operational_statuses_map` | Dictionary mapping operational status names to their values |
 | `operational_status_auxiliary_heater_3kw` | Auxiliary heater status for 3kw (returns `None` if unavailable) |

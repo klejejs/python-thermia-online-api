@@ -79,6 +79,13 @@ class ThermiaHeatPump:
 
         self.__register_indexes = DEFAULT_REGISTER_INDEXES
 
+        # Precalculated data so it does not have to be updated
+
+        self.__operational_statuses = None
+        self.__all_operational_statuses_map = None
+        self.__visible_operational_statuses_map = None
+        self.__running_operational_statuses = None
+
         self.update_data()
 
     def update_data(self):
@@ -105,6 +112,18 @@ class ThermiaHeatPump:
         self.__group_hot_water = self.__api_interface.get_group_hot_water(self)
 
         self.__alarms = self.__api_interface.get_all_alarms(self.__device_id)
+
+        # Precalculate data (order is important)
+        self.__operational_statuses = (
+            self.__get_operational_statuses_from_operational_status()
+        )
+        self.__all_operational_statuses_map = (
+            self.__get_all_operational_statuses_from_operational_status()
+        )
+        self.__visible_operational_statuses_map = (
+            self.__get_all_visible_operational_statuses_from_operational_status()
+        )
+        self.__running_operational_statuses = self.__get_running_operational_statuses()
 
     def get_register_indexes(self):
         return self.__register_indexes
@@ -318,7 +337,7 @@ class ThermiaHeatPump:
 
     def __get_register_from_operational_status(
         self, register_name: str
-    ) -> Optional[dict]:
+    ) -> Optional[Dict]:
         data = [
             d
             for d in self.__group_operational_status or []
@@ -403,22 +422,99 @@ class ThermiaHeatPump:
     def __get_all_operational_statuses_from_operational_status(
         self,
     ) -> Optional[ChainMap]:
-        data = self.__get_operational_statuses_from_operational_status()
+        data = self.__operational_statuses
 
         if data is None:
-            return None
+            return ChainMap()
 
         operation_modes_map = map(
             lambda values: {
-                values.get("value"): values.get("name").split(
-                    self.__device_config["operational_status_valueNamePrefix"]
-                )[1],
+                values.get("value"): {
+                    "name": values.get("name").split(
+                        self.__device_config["operational_status_valueNamePrefix"]
+                    )[1],
+                    "visible": values.get("visible"),
+                }
             },
             data,
         )
 
         operation_modes_list = list(operation_modes_map)
         return ChainMap(*operation_modes_list)
+
+    def __get_all_visible_operational_statuses_from_operational_status(
+        self,
+    ) -> Optional[ChainMap]:
+        data = self.__all_operational_statuses_map
+
+        if data is None:
+            return ChainMap()
+
+        operation_modes_map = map(
+            lambda item: {item[0]: item[1].get("name")}
+            if item[1].get("visible")
+            else {},
+            data.items(),
+        )
+
+        operation_modes_list = list(filter(lambda x: x != {}, operation_modes_map))
+        return ChainMap(*operation_modes_list)
+
+    def __get_running_operational_statuses(
+        self,
+    ) -> List[str]:
+        if self.__device_config["operational_status_register"] is None:
+            return []
+
+        data = self.__get_register_from_operational_status(
+            self.__device_config["operational_status_register"]
+        )
+
+        if data is None:
+            return []
+
+        current_register_value = get_dict_value_or_none(data, "registerValue")
+
+        data = self.__all_operational_statuses_map
+
+        if data is None:
+            return []
+
+        data_items_list = list(data.items())
+
+        current_operation_mode = [
+            value.name
+            for key, value in data_items_list
+            if key == current_register_value
+        ]
+
+        if len(current_operation_mode) == 1:
+            return current_operation_mode
+
+        if (
+            len(current_operation_mode) != 1
+            and current_register_value > 0
+            and len(data_items_list) > 1
+        ):
+            # Attempt to get multiple statuses by binary sum of the values
+            data_items_list.sort(key=lambda x: x[0], reverse=True)
+            list_of_current_operation_modes = []
+
+            if self.__device_config["operational_status_minRegisterValue"] is not None:
+                current_register_value -= int(
+                    self.__device_config["operational_status_minRegisterValue"]
+                )
+
+            for key, value in data_items_list:
+                if key <= current_register_value:
+                    current_register_value -= key
+                    if value.get("visible"):
+                        list_of_current_operation_modes.append(value.get("name"))
+
+            if current_register_value == 0:
+                return list_of_current_operation_modes
+
+        return []
 
     @property
     def name(self):
@@ -576,65 +672,17 @@ class ThermiaHeatPump:
     ###########################################################################
 
     @property
-    def operational_status(self) -> Optional[Union[str, List[str]]]:
-        if self.__device_config["operational_status_register"] is None:
-            # Attempt to get the register from the status data
-            self.__get_operational_statuses_from_operational_status()
-            if self.__device_config["operational_status_register"] is None:
-                return None
-
-        data = self.__get_register_from_operational_status(
-            self.__device_config["operational_status_register"]
-        )
+    def running_operational_statuses(self) -> List[str]:
+        data = self.__running_operational_statuses
 
         if data is None:
-            return None
+            return []
 
-        current_register_value = get_dict_value_or_none(data, "registerValue")
-
-        data = self.__get_all_operational_statuses_from_operational_status()
-
-        if data is None:
-            return None
-
-        data_items_list = list(data.items())
-
-        current_operation_mode = [
-            name for value, name in data_items_list if value == current_register_value
-        ]
-
-        if len(current_operation_mode) == 0:
-            return None
-
-        if (
-            len(current_operation_mode) != 1
-            and current_register_value > 0
-            and len(data_items_list) > 1
-        ):
-            # Attempt to get multiple statuses by binary sum of the values
-            data_items_list.sort(key=lambda x: x[0], reverse=True)
-            list_of_current_operation_modes = []
-
-            if self.__device_config["operational_status_minRegisterValue"] is not None:
-                current_register_value -= int(
-                    self.__device_config["operational_status_minRegisterValue"]
-                )
-
-            for value, name in data_items_list:
-                if value <= current_register_value:
-                    current_register_value -= value
-                    list_of_current_operation_modes.append(name)
-
-            if current_register_value == 0:
-                return list_of_current_operation_modes
-
-            return None
-
-        return current_operation_mode[0]
+        return data
 
     @property
     def available_operational_statuses(self) -> Optional[List[str]]:
-        data = self.__get_all_operational_statuses_from_operational_status()
+        data = self.__visible_operational_statuses_map
 
         if data is None:
             return []
@@ -643,7 +691,7 @@ class ThermiaHeatPump:
 
     @property
     def available_operational_statuses_map(self) -> Optional[ChainMap]:
-        return self.__get_all_operational_statuses_from_operational_status()
+        return self.__visible_operational_statuses_map
 
     @property
     def operational_status_auxiliary_heater_3kw(self):
@@ -677,39 +725,27 @@ class ThermiaHeatPump:
 
     @property
     def operational_status_compressor_status(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_STATUS", "COMP_VALUE_COMPR"
-        )
+        return "COMPR" in self.running_operational_statuses
 
     @property
     def operational_status_brine_pump_status(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_STATUS", "COMP_VALUE_BRINEPUMP"
-        )
+        return "BRINEPUMP" in self.running_operational_statuses
 
     @property
     def operational_status_radiator_pump_status(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_STATUS", "COMP_VALUE_RADIATORPUMP"
-        )
+        return "RADIATORPUMP" in self.running_operational_statuses
 
     @property
     def operational_status_cooling_status(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_STATUS", "COMP_VALUE_COOLING"
-        )
+        return "COOLING" in self.running_operational_statuses
 
     @property
     def operational_status_hot_water_status(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_STATUS", "COMP_VALUE_HOT_WATER"
-        )
+        return "HOT_WATER" in self.running_operational_statuses
 
     @property
     def operational_status_heating_status(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_STATUS", "COMP_VALUE_HEATING"
-        )
+        return "HEATING" in self.running_operational_statuses
 
     @property
     def operational_status_integral(self):
@@ -789,11 +825,6 @@ class ThermiaHeatPump:
     ###########################################################################
     # Hot water data
     ###########################################################################
-
-    # TODO: DEPRECATED, remove in next major release
-    @property
-    def is_hot_water_switch_available(self):
-        return self.__group_hot_water is not None
 
     @property
     def hot_water_switch_state(self) -> Optional[int]:

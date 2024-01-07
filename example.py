@@ -65,7 +65,7 @@ print(
 print("\n")
 
 print("Operational status")
-print("Operational status: " + str(heat_pump.operational_status))
+print("Running operational statuses: " + str(heat_pump.running_operational_statuses))
 print(
     "Available operational statuses: " + str(heat_pump.available_operational_statuses)
 )
