@@ -4,7 +4,7 @@ import logging
 import sys
 from ..utils.utils import pretty_print_except
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from ThermiaOnlineAPI.const import (
     REG_BRINE_IN,
@@ -724,27 +724,63 @@ class ThermiaHeatPump:
         )
 
     @property
-    def operational_status_compressor_status(self):
+    def operational_status_compressor_status(self) -> Optional[bool]:
+        if (
+            self.__visible_operational_statuses_map is None
+            or "COMPR" not in self.__visible_operational_statuses_map.values()
+        ):
+            return None
+
         return "COMPR" in self.running_operational_statuses
 
     @property
-    def operational_status_brine_pump_status(self):
+    def operational_status_brine_pump_status(self) -> Optional[bool]:
+        if (
+            self.__visible_operational_statuses_map is None
+            or "BRINEPUMP" not in self.__visible_operational_statuses_map.values()
+        ):
+            return None
+
         return "BRINEPUMP" in self.running_operational_statuses
 
     @property
-    def operational_status_radiator_pump_status(self):
+    def operational_status_radiator_pump_status(self) -> Optional[bool]:
+        if (
+            self.__visible_operational_statuses_map is None
+            or "RADIATORPUMP" not in self.__visible_operational_statuses_map.values()
+        ):
+            return None
+
         return "RADIATORPUMP" in self.running_operational_statuses
 
     @property
-    def operational_status_cooling_status(self):
+    def operational_status_cooling_status(self) -> Optional[bool]:
+        if (
+            self.__visible_operational_statuses_map is None
+            or "COOLING" not in self.__visible_operational_statuses_map.values()
+        ):
+            return None
+
         return "COOLING" in self.running_operational_statuses
 
     @property
-    def operational_status_hot_water_status(self):
+    def operational_status_hot_water_status(self) -> Optional[bool]:
+        if (
+            self.__visible_operational_statuses_map is None
+            or "HOT_WATER" not in self.__visible_operational_statuses_map.values()
+        ):
+            return None
+
         return "HOT_WATER" in self.running_operational_statuses
 
     @property
-    def operational_status_heating_status(self):
+    def operational_status_heating_status(self) -> Optional[bool]:
+        if (
+            self.__visible_operational_statuses_map is None
+            or "HEATING" not in self.__visible_operational_statuses_map.values()
+        ):
+            return None
+
         return "HEATING" in self.running_operational_statuses
 
     @property
