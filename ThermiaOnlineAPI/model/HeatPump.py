@@ -483,7 +483,7 @@ class ThermiaHeatPump:
         data_items_list = list(data.items())
 
         current_operation_mode = [
-            value.name
+            value.get("name")
             for key, value in data_items_list
             if key == current_register_value
         ]
