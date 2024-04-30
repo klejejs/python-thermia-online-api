@@ -581,14 +581,10 @@ class ThermiaAPI:
             csrf_token = ""
 
             if request_auth.status_code == 200:
-                settings_string = [
-                    i
-                    for i in request_auth.text.splitlines()
-                    if i.startswith("var SETTINGS = ")
-                ]
+                settings_string = request_auth.text.split("var SETTINGS = ")
+                settings_string = settings_string[1].split("};")[0] + "}"
                 if len(settings_string) > 0:
-                    settings = json.loads(settings_string[0][15:-1])
-
+                    settings = json.loads(settings_string)
                     state_code = str(settings["transId"]).split("=")[1]
                     csrf_token = settings["csrf"]
             else:
