@@ -10,10 +10,6 @@ Thus, I have created a `debug()` function that runs when `example.py` is execute
 
 **Note:** I have done my best to remove the sensitive parts from debugging, but I do not guarantee that no sensitive data is printed to the debug file. I have no intention of using it maliciously, but if you post the file publicly on GitHub, please make sure you remove anything you feel might be suspicious of sharing.
 
-## Supported APIs:
-* `classic`, default, online access url is https://online.thermia.se
-* `genesis`, online access url is https://online-genesis.thermia.se
-
 ## How to use api:
 See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/example.py) file for examples.
 
