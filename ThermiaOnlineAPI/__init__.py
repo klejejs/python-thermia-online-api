@@ -3,15 +3,14 @@ from typing import List
 from ThermiaOnlineAPI.api.ThermiaAPI import ThermiaAPI
 from ThermiaOnlineAPI.exceptions import AuthenticationException, NetworkException
 from ThermiaOnlineAPI.model.HeatPump import ThermiaHeatPump
-from ThermiaOnlineAPI.const import THERMIA_API_TYPE_CLASSIC
 
 
 class Thermia:
-    def __init__(self, username, password, api_type=THERMIA_API_TYPE_CLASSIC):
+    def __init__(self, username, password):
         self._username = username
         self._password = password
 
-        self.api_interface = ThermiaAPI(username, password, api_type)
+        self.api_interface = ThermiaAPI(username, password)
         self.connected = self.api_interface.authenticated
 
         self.heat_pumps = self.fetch_heat_pumps()

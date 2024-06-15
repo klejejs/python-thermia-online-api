@@ -17,7 +17,7 @@ from ThermiaOnlineAPI.const import (
     REG_HOT_WATER_STATUS,
     REG__HOT_WATER_BOOST,
     REG_OPERATIONMODE,
-    THERMIA_API_CONFIG_URLS_BY_API_TYPE,
+    THERMIA_CONFIG_URL,
     THERMIA_AZURE_AUTH_URL,
     THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
     THERMIA_AZURE_AUTH_REDIRECT_URI,
@@ -47,7 +47,7 @@ azure_auth_request_headers = {
 
 
 class ThermiaAPI:
-    def __init__(self, email, password, api_type):
+    def __init__(self, email, password):
         self.__email = email
         self.__password = password
         self.__token = None
@@ -68,11 +68,6 @@ class ThermiaAPI:
         )
         adapter = HTTPAdapter(max_retries=retry)
         self.__session.mount("https://", adapter)
-
-        if api_type not in THERMIA_API_CONFIG_URLS_BY_API_TYPE:
-            raise ValueError("Unknown device type: " + api_type)
-
-        self.__api_config_url = THERMIA_API_CONFIG_URLS_BY_API_TYPE[api_type]
 
         self.configuration = self.__fetch_configuration()
         self.authenticated = self.__authenticate()
@@ -514,7 +509,7 @@ class ThermiaAPI:
             )
 
     def __fetch_configuration(self):
-        request = self.__session.get(self.__api_config_url)
+        request = self.__session.get(THERMIA_CONFIG_URL)
         status = request.status_code
 
         if status != 200:
