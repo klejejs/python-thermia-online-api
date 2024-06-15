@@ -1,10 +1,14 @@
 import json
 from base64 import urlsafe_b64encode
+import logging
 import random
 import string
 from typing import Any, TypeVar
 
 T = TypeVar("T")
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def get_dict_value_or_none(dictionary, key) -> Any:
@@ -43,3 +47,11 @@ def generate_challenge(length):
     characters = string.ascii_letters + string.digits
     challenge = "".join(random.choice(characters) for _ in range(length))
     return challenge
+
+
+def get_response_json_or_log_and_raise_exception(response, message: str):
+    try:
+        return response.json()
+    except Exception as e:
+        _LOGGER.error(f"{message} {response.status_code} {response.text}")
+        raise Exception(f"{message} {response.status_code} {response.text}") from e

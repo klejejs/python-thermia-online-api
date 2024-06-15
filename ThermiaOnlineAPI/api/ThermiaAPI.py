@@ -93,7 +93,9 @@ class ThermiaAPI:
             )
             return []
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error getting devices."
+        )
 
     def get_device_by_id(self, device_id: str):
         self.__check_token_validity()
@@ -124,7 +126,9 @@ class ThermiaAPI:
             )
             return None
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error getting device info."
+        )
 
     def get_device_status(self, device_id: str):
         self.__check_token_validity()
@@ -147,7 +151,9 @@ class ThermiaAPI:
             )
             return None
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error fetching device status."
+        )
 
     def get_all_alarms(self, device_id: str):
         self.__check_token_validity()
@@ -170,7 +176,9 @@ class ThermiaAPI:
             )
             return None
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in getting device's alarms."
+        )
 
     def get_historical_data_registers(self, device_id: str):
         self.__check_token_validity()
@@ -192,7 +200,9 @@ class ThermiaAPI:
             )
             return None
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in historical data registers."
+        )
 
     def get_historical_data(
         self, device_id: str, register_id, start_date_str, end_date_str
@@ -222,7 +232,9 @@ class ThermiaAPI:
             )
             return None
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in historical data for specific register."
+        )
 
     def get_all_available_groups(self, installation_profile_id: int):
         self.__check_token_validity()
@@ -246,7 +258,9 @@ class ThermiaAPI:
             )
             return None
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in getting available groups."
+        )
 
     def get__group_temperatures(self, device_id: str):
         return self.__get_register_group(device_id, REG_GROUP_TEMPERATURES)
@@ -463,7 +477,9 @@ class ThermiaAPI:
             )
             return []
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in getting device's register group: " + register_group
+        )
 
     def __set_register_value(
         self, device: ThermiaHeatPump, register_index: int, register_value: int
@@ -510,7 +526,9 @@ class ThermiaAPI:
             )
             raise NetworkException("Error fetching API configuration.", status)
 
-        return request.json()
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error fetching API configuration."
+        )
 
     def __authenticate_refresh_token(self) -> Optional[str]:
         request_token__data = {
@@ -584,9 +602,21 @@ class ThermiaAPI:
                 settings_string = request_auth.text.split("var SETTINGS = ")
                 settings_string = settings_string[1].split("};")[0] + "}"
                 if len(settings_string) > 0:
-                    settings = json.loads(settings_string)
-                    state_code = str(settings["transId"]).split("=")[1]
-                    csrf_token = settings["csrf"]
+                    try:
+                        settings = json.loads(settings_string)
+                        state_code = str(settings["transId"]).split("=")[1]
+                        csrf_token = settings["csrf"]
+                    except Exception as e:
+                        _LOGGER.error(
+                            "Error parsing authorization API settings. "
+                            + str(request_auth.text),
+                            e,
+                        )
+                        raise NetworkException(
+                            "Error parsing authorization API settings. "
+                            + request_auth.text,
+                            e,
+                        )
             else:
                 _LOGGER.error(
                     "Error fetching authorization API. Status: "
@@ -675,7 +705,16 @@ class ThermiaAPI:
 
             request_token_text = request_token.text
 
-        token_data = json.loads(request_token_text)
+        try:
+            token_data = json.loads(request_token_text)
+        except Exception as e:
+            _LOGGER.error(
+                "Error parsing authentication token data. " + str(request_token_text),
+                e,
+            )
+            raise NetworkException(
+                "Error parsing authentication token data. " + request_token_text, e
+            )
 
         self.__token = token_data["access_token"]
         self.__token_valid_to = token_data["expires_on"]

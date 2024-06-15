@@ -14,3 +14,5 @@ debug.txt
 
 # Visual Studio related files
 /.vs/*
+
+.DS_Store
