@@ -92,6 +92,7 @@ REG_OPER_TIME_IMM1 = "REG_OPER_TIME_IMM1"  # Auxiliary heater 1
 REG_OPER_TIME_IMM2 = "REG_OPER_TIME_IMM2"  # Auxiliary heater 2
 REG_OPER_TIME_IMM3 = "REG_OPER_TIME_IMM3"  # Auxiliary heater 3
 REG_OPER_TIME_COMPRESSOR = "REG_OPER_TIME_COMPRESSOR"
+REG_OPER_TIME_HEATING = "REG_OPER_TIME_HEATING"
 REG_OPER_TIME_HOT_WATER = "REG_OPER_TIME_HOT_WATER"
 
 ###############################################################################
