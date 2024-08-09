@@ -19,6 +19,10 @@ heat_pump = thermia.fetch_heat_pumps()[0]
 heat_pump.debug()
 
 print("\n")
+print("\n")
+
+print("Heat pump model: " + str(heat_pump.model))
+print("Heat pump model id: " + str(heat_pump.model_id))
 
 print("\n")
 

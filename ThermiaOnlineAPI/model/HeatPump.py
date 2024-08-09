@@ -144,9 +144,9 @@ class ThermiaHeatPump:
 
         self._LOGGER.info("Setting temperature to " + str(temperature))
 
-        self.__status[
-            "heatingEffect"
-        ] = temperature  # update local state before refetching data
+        self.__status["heatingEffect"] = (
+            temperature  # update local state before refetching data
+        )
         self.__api_interface.set_temperature(self, temperature)
         self.update_data()
 
@@ -154,9 +154,9 @@ class ThermiaHeatPump:
         self._LOGGER.info("Setting operation mode to " + str(mode))
 
         if self.__group_operational_operation is not None:
-            self.__group_operational_operation[
-                "current"
-            ] = mode  # update local state before refetching data
+            self.__group_operational_operation["current"] = (
+                mode  # update local state before refetching data
+            )
         self.__api_interface.set_operation_mode(self, mode)
         self.update_data()
 
@@ -167,9 +167,9 @@ class ThermiaHeatPump:
             self._LOGGER.error("Hot water switch not available")
             return
 
-        self.__group_hot_water[
-            "hot_water_switch"
-        ] = state  # update local state before refetching data
+        self.__group_hot_water["hot_water_switch"] = (
+            state  # update local state before refetching data
+        )
         self.__api_interface.set_hot_water_switch_state(self, state)
         self.update_data()
 
@@ -180,9 +180,9 @@ class ThermiaHeatPump:
             self._LOGGER.error("Hot water switch not available")
             return
 
-        self.__group_hot_water[
-            "hot_water_boost_switch"
-        ] = state  # update local state before refetching data
+        self.__group_hot_water["hot_water_boost_switch"] = (
+            state  # update local state before refetching data
+        )
         self.__api_interface.set_hot_water_boost_switch_state(self, state)
         self.update_data()
 
@@ -381,12 +381,12 @@ class ThermiaHeatPump:
         # Try to get the data from the REG_OPERATIONAL_STATUS_PRIO1 register
         data = self.__get_register_from_operational_status(REG_OPERATIONAL_STATUS_PRIO1)
         if data is not None:
-            self.__device_config[
-                "operational_status_register"
-            ] = REG_OPERATIONAL_STATUS_PRIO1
-            self.__device_config[
-                "operational_status_valueNamePrefix"
-            ] = "REG_VALUE_STATUS_"
+            self.__device_config["operational_status_register"] = (
+                REG_OPERATIONAL_STATUS_PRIO1
+            )
+            self.__device_config["operational_status_valueNamePrefix"] = (
+                "REG_VALUE_STATUS_"
+            )
             return data.get("valueNames", [])
 
         # Try to get the data from the COMP_STATUS_ITEC register
@@ -401,9 +401,9 @@ class ThermiaHeatPump:
             REG_OPERATIONAL_STATUS_PRIORITY_BITMASK
         )
         if data is not None:
-            self.__device_config[
-                "operational_status_register"
-            ] = REG_OPERATIONAL_STATUS_PRIORITY_BITMASK
+            self.__device_config["operational_status_register"] = (
+                REG_OPERATIONAL_STATUS_PRIORITY_BITMASK
+            )
             self.__device_config["operational_status_valueNamePrefix"] = "REG_VALUE_"
             return data.get("valueNames", [])
 
@@ -412,9 +412,9 @@ class ThermiaHeatPump:
         if data is not None:
             self.__device_config["operational_status_register"] = COMP_STATUS
             self.__device_config["operational_status_valueNamePrefix"] = "COMP_VALUE_"
-            self.__device_config[
-                "operational_status_minRegisterValue"
-            ] = "4"  # 4 is OFF
+            self.__device_config["operational_status_minRegisterValue"] = (
+                "4"  # 4 is OFF
+            )
             return data.get("valueNames", [])
 
         return None
@@ -451,9 +451,9 @@ class ThermiaHeatPump:
             return ChainMap()
 
         operation_modes_map = map(
-            lambda item: {item[0]: item[1].get("name")}
-            if item[1].get("visible")
-            else {},
+            lambda item: (
+                {item[0]: item[1].get("name")} if item[1].get("visible") else {}
+            ),
             data.items(),
         )
 
@@ -537,6 +537,10 @@ class ThermiaHeatPump:
         return get_dict_value_or_default(self.__device_data, "profile", {}).get(
             "thermiaName"
         )
+
+    @property
+    def model_id(self):
+        return get_dict_value_or_default(self.__device_data, "profile", {}).get("name")
 
     @property
     def has_indoor_temp_sensor(self):
