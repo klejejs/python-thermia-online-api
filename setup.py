@@ -1,4 +1,3 @@
-import sys
 import setuptools
 from pathlib import Path
 
@@ -17,7 +16,7 @@ setuptools.setup(
     ],
     setuptools_git_versioning={
         "enabled": True,
-        "dev_template": "{tag}", 
+        "dev_template": "{tag}",
     },
     license="GPL-3.0",
     description="A Python API for Thermia heat pumps using https://online.thermia.se",
