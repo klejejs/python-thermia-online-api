@@ -1,1 +1,3 @@
 requests
+setuptools >= 74.1.0
+setuptools_git_versioning >= 2.0.0
