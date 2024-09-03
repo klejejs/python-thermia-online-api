@@ -70,6 +70,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | --- | --- |
 | Operational Times | |
 | `compressor_operational_time` | Compressor operational time in hours |
+| `heating_operation_time` | Heating operational time in hours |
 | `hot_water_operational_time` | Hot water operational time in hours |
 | `auxiliary_heater_1_operational_time` | Auxiliary heater 1 operational time in hours |
 | `auxiliary_heater_2_operational_time` | Auxiliary heater 2 operational time in hours |

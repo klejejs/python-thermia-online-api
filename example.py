@@ -86,6 +86,7 @@ print("\n")
 
 print("Operational Times")
 print("Compressor Operational Time: " + str(heat_pump.compressor_operational_time))
+print("Heating Operational Time: " + str(heat_pump.heating_operational_time))
 print("Hot Water Operational Time: " + str(heat_pump.hot_water_operational_time))
 print(
     "Auxiliary Heater 1 Operational Time: "
