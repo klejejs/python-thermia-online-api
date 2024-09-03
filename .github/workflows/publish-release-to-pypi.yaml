@@ -20,16 +20,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: "3.x"
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -U setuptools wheel twine
+          pip install -U -r requirements_release.txt
       - name: Build and publish release
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          if [ -z ${{ github.event.inputs.version }} ]; then VERSION=${{ github.event.release.tag_name }}; else VERSION=${{ github.event.inputs.version }}; fi
-          python setup.py sdist bdist_wheel $VERSION
+          python setup.py sdist bdist_wheel
           twine upload dist/*
