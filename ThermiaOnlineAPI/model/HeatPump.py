@@ -28,6 +28,7 @@ from ThermiaOnlineAPI.const import (
     REG_OPER_TIME_IMM3,
     REG_PID,
     REG_RETURN_LINE,
+    COMP_POWER_STATUS,
     COMP_STATUS,
     COMP_STATUS_ITEC,
     REG_SUPPLY_LINE,
@@ -87,6 +88,11 @@ class ThermiaHeatPump:
         self.__visible_operational_statuses_map = None
         self.__running_operational_statuses = None
 
+        self.__power_statuses = None
+        self.__all_power_statuses_map = None
+        self.__visible_power_statuses_map = None
+        self.__running_power_statuses = None
+
         self.update_data()
 
     def update_data(self):
@@ -125,6 +131,15 @@ class ThermiaHeatPump:
             self.__get_all_visible_operational_statuses_from_operational_status()
         )
         self.__running_operational_statuses = self.__get_running_operational_statuses()
+
+        self.__power_statuses = self.__get_power_statuses_from_operational_status()
+        self.__all_power_statuses_map = (
+            self.__get_all_power_statuses_from_power_status()
+        )
+        self.__visible_power_statuses_map = (
+            self.__get_all_visible_power_statuses_from_power_status()
+        )
+        self.__running_power_statuses = self.__get_running_power_statuses()
 
     def get_register_indexes(self):
         return self.__register_indexes
@@ -517,6 +532,99 @@ class ThermiaHeatPump:
 
         return []
 
+    def __get_power_statuses_from_operational_status(self) -> Optional[Dict]:
+        data = self.__get_register_from_operational_status(COMP_POWER_STATUS)
+
+        if data is None:
+            return None
+
+        return data.get("valueNames", [])
+
+    def __get_all_power_statuses_from_power_status(
+        self,
+    ) -> Optional[ChainMap]:
+        data = self.__power_statuses
+
+        if data is None:
+            return ChainMap()
+
+        power_modes_map = map(
+            lambda values: {
+                values.get("value"): {
+                    "name": values.get("name").split("COMP_VALUE_STEP_")[1],
+                    "visible": values.get("visible"),
+                }
+            },
+            data,
+        )
+
+        power_modes_list = list(power_modes_map)
+        return ChainMap(*power_modes_list)
+
+    def __get_all_visible_power_statuses_from_power_status(
+        self,
+    ) -> Optional[ChainMap]:
+        data = self.__all_power_statuses_map
+
+        if data is None:
+            return ChainMap()
+
+        power_modes_map = map(
+            lambda item: (
+                {item[0]: item[1].get("name")} if item[1].get("visible") else {}
+            ),
+            data.items(),
+        )
+
+        power_modes_list = list(filter(lambda x: x != {}, power_modes_map))
+        return ChainMap(*power_modes_list)
+
+    def __get_running_power_statuses(
+        self,
+    ) -> List[str]:
+        data = self.__get_register_from_operational_status(COMP_POWER_STATUS)
+
+        if data is None:
+            return []
+
+        current_register_value = get_dict_value_or_none(data, "registerValue")
+
+        data = self.__all_power_statuses_map
+
+        if data is None:
+            return []
+
+        data_items_list = list(data.items())
+
+        current_power_status = [
+            value.get("name")
+            for key, value in data_items_list
+            if key == current_register_value
+        ]
+
+        if len(current_power_status) == 1:
+            return current_power_status
+
+        if (
+            len(current_power_status) != 1
+            and current_register_value > 0
+            and len(data_items_list) > 1
+        ):
+            # Attempt to get multiple statuses by binary sum of the values
+            data_items_list.sort(key=lambda x: x[0], reverse=True)
+            list_of_current_power_statuses = []
+
+            for key, value in data_items_list:
+                if key <= current_register_value:
+                    current_register_value -= key
+                    if value.get("visible"):
+                        list_of_current_power_statuses.append(value.get("name"))
+
+            if current_register_value == 0:
+                return list_of_current_power_statuses
+
+        return []
+
     @property
     def name(self):
         return get_dict_value_or_none(self.__info, "name")
@@ -699,94 +807,26 @@ class ThermiaHeatPump:
         return self.__visible_operational_statuses_map
 
     @property
-    def operational_status_auxiliary_heater_3kw(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_POWER_STATUS", "COMP_VALUE_STEP_3KW"
-        )
+    def running_power_statuses(self) -> List[str]:
+        data = self.__running_power_statuses
+
+        if data is None:
+            return []
+
+        return data
 
     @property
-    def operational_status_auxiliary_heater_6kw(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_POWER_STATUS", "COMP_VALUE_STEP_6KW"
-        )
+    def available_power_statuses(self) -> Optional[List[str]]:
+        data = self.__visible_power_statuses_map
+
+        if data is None:
+            return []
+
+        return list(data.values())
 
     @property
-    def operational_status_auxiliary_heater_9kw(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_POWER_STATUS", "COMP_VALUE_STEP_9KW"
-        )
-
-    @property
-    def operational_status_auxiliary_heater_12kw(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_POWER_STATUS", "COMP_VALUE_STEP_12KW"
-        )
-
-    @property
-    def operational_status_auxiliary_heater_15kw(self):
-        return self.__get_value_by_key_and_register_name_from_operational_status(
-            "COMP_POWER_STATUS", "COMP_VALUE_STEP_15KW"
-        )
-
-    @property
-    def operational_status_compressor_status(self) -> Optional[bool]:
-        if (
-            self.__visible_operational_statuses_map is None
-            or "COMPR" not in self.__visible_operational_statuses_map.values()
-        ):
-            return None
-
-        return "COMPR" in self.running_operational_statuses
-
-    @property
-    def operational_status_brine_pump_status(self) -> Optional[bool]:
-        if (
-            self.__visible_operational_statuses_map is None
-            or "BRINEPUMP" not in self.__visible_operational_statuses_map.values()
-        ):
-            return None
-
-        return "BRINEPUMP" in self.running_operational_statuses
-
-    @property
-    def operational_status_radiator_pump_status(self) -> Optional[bool]:
-        if (
-            self.__visible_operational_statuses_map is None
-            or "RADIATORPUMP" not in self.__visible_operational_statuses_map.values()
-        ):
-            return None
-
-        return "RADIATORPUMP" in self.running_operational_statuses
-
-    @property
-    def operational_status_cooling_status(self) -> Optional[bool]:
-        if (
-            self.__visible_operational_statuses_map is None
-            or "COOLING" not in self.__visible_operational_statuses_map.values()
-        ):
-            return None
-
-        return "COOLING" in self.running_operational_statuses
-
-    @property
-    def operational_status_hot_water_status(self) -> Optional[bool]:
-        if (
-            self.__visible_operational_statuses_map is None
-            or "HOT_WATER" not in self.__visible_operational_statuses_map.values()
-        ):
-            return None
-
-        return "HOT_WATER" in self.running_operational_statuses
-
-    @property
-    def operational_status_heating_status(self) -> Optional[bool]:
-        if (
-            self.__visible_operational_statuses_map is None
-            or "HEATING" not in self.__visible_operational_statuses_map.values()
-        ):
-            return None
-
-        return "HEATING" in self.running_operational_statuses
+    def available_power_statuses_map(self) -> Optional[ChainMap]:
+        return self.__visible_power_statuses_map
 
     @property
     def operational_status_integral(self):

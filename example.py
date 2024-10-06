@@ -63,22 +63,16 @@ print(
     "Available operational statuses map: "
     + str(heat_pump.available_operational_statuses_map)
 )
-print("Auxiliary heater 3KW: " + str(heat_pump.operational_status_auxiliary_heater_3kw))
-print("Auxiliary heater 6KW: " + str(heat_pump.operational_status_auxiliary_heater_6kw))
-print("Auxiliary heater 9KW: " + str(heat_pump.operational_status_auxiliary_heater_9kw))
-print(
-    "Auxiliary heater 12KW: " + str(heat_pump.operational_status_auxiliary_heater_12kw)
-)
-print(
-    "Auxiliary heater 15KW: " + str(heat_pump.operational_status_auxiliary_heater_15kw)
-)
 
-print("Compressor status: " + str(heat_pump.operational_status_compressor_status))
-print("Brine pump status: " + str(heat_pump.operational_status_brine_pump_status))
-print("Radiator pump status: " + str(heat_pump.operational_status_radiator_pump_status))
-print("Cooling status: " + str(heat_pump.operational_status_cooling_status))
-print("Hot water status: " + str(heat_pump.operational_status_hot_water_status))
-print("Heating status: " + str(heat_pump.operational_status_heating_status))
+print("\n")
+
+print("Power status")
+print("Running power statuses: " + str(heat_pump.running_power_statuses))
+print("Available power statuses: " + str(heat_pump.available_power_statuses))
+print("Available power statuses map: " + str(heat_pump.available_power_statuses_map))
+
+print("\n")
+
 print("Integral: " + str(heat_pump.operational_status_integral))
 print("Pid: " + str(heat_pump.operational_status_pid))
 
