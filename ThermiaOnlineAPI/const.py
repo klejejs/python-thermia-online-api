@@ -77,6 +77,8 @@ REG_OPERATIONAL_STATUS_PRIORITY_BITMASK = (
 REG_INTEGRAL_LSD = "REG_INTEGRAL_LSD"
 REG_PID = "REG_PID"
 
+COMP_POWER_STATUS = "COMP_POWER_STATUS"
+
 ###############################################################################
 # Hot water registers
 ###############################################################################
