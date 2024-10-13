@@ -11,9 +11,13 @@ Thus, I have created a `debug()` function that runs when `example.py` is execute
 **Note:** I have done my best to remove the sensitive parts from debugging, but I do not guarantee that no sensitive data is printed to the debug file. I have no intention of using it maliciously, but if you post the file publicly on GitHub, please make sure you remove anything you feel might be suspicious of sharing.
 
 ## How to use api:
+### example.py
 See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/example.py) file for examples.
 
 To execute the example file, first run `pip install -r requirements.txt` to install the required dependencies, then run `python3 example.py` to execute the example file. You will be prompted to enter your username and password, and then the example file will run. If do not want to manually enter your credentials every time, you can edit the `credentials.py` file and add your credentials there.
+
+### Promethues metrics endpoint
+You can use the metrics.py to start a flask server that exposes the data for Prometheus. Install the metrics requirements: ``pip install -r requirements_metrics.txt`` and then run ``python3 metrics.py`` to start the server.
 
 ## Available functions in Thermia class:
 | Function | Description |
