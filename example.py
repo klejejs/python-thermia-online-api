@@ -14,7 +14,7 @@ thermia = Thermia(USERNAME, PASSWORD)
 
 print("Connected: " + str(thermia.connected))
 
-heat_pump = thermia.fetch_heat_pumps()[0]
+heat_pump = thermia.heat_pumps[0]
 
 heat_pump.debug()
 

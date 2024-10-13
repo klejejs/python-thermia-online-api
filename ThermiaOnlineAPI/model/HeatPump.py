@@ -1023,9 +1023,6 @@ class ThermiaHeatPump:
             ["macAddress", "owner", "retailerAccess", "retailerId", "id", "status"],
         )
 
-        print("self.__group_temperatures:")
-        pretty_print_except(self.__group_temperatures)
-
         installation_profile_id = get_dict_value_or_none(
             self.__info, "installationProfileId"
         )
