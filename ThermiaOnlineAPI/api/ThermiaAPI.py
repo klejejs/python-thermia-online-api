@@ -286,14 +286,18 @@ class ThermiaAPI:
 
         if operation_modes_data is not None:
             operation_modes_map = map(
-                lambda values: {
-                    values.get("value"): values.get("name").split(
-                        "REG_VALUE_OPERATION_MODE_"
-                    )[1],
-                },
+                lambda values: (
+                    {
+                        values.get("value"): values.get("name").split(
+                            "REG_VALUE_OPERATION_MODE_"
+                        )[1],
+                    }
+                    if values.get("visible")
+                    else {}
+                ),
                 operation_modes_data,
             )
-            operation_modes_list = list(operation_modes_map)
+            operation_modes_list = list(filter(lambda x: x != {}, operation_modes_map))
             operation_modes = ChainMap(*operation_modes_list)
 
             current_operation_mode = [
@@ -677,7 +681,9 @@ class ThermiaAPI:
                 "client_id": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
                 "redirect_uri": THERMIA_AZURE_AUTH_REDIRECT_URI,
                 "scope": THERMIA_AZURE_AUTH_CLIENT_ID_AND_SCOPE,
-                "code": request_confirmed.url.split("code=")[1],
+                "code": utils.get_list_value_or_default(
+                    request_confirmed.url.split("code="), 1, ""
+                ),
                 "code_verifier": code_challenge,
                 "grant_type": "authorization_code",
             }

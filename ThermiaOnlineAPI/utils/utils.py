@@ -23,6 +23,13 @@ def get_dict_value_or_default(dictionary, key, default: T) -> T:
     return dictionary[key]
 
 
+def get_list_value_or_default(list, idx, default: T) -> T:
+    try:
+        return list[idx]
+    except IndexError:
+        return default
+
+
 def pretty_print(json_object):
     print(json.dumps(json_object, indent=4, sort_keys=True))
     print("\n")
