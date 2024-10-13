@@ -41,6 +41,30 @@ def test_itec_iq(requests_mock):
     )
 
 
+def test_ncp_1024(requests_mock):
+    setup_thermia_and_perform_basic_tests(
+        requests_mock,
+        "ncp_1024.txt",
+        expected_model="NCP 1024",
+        expected_model_id="NCP 1024",
+        expected_available_operational_modes=["OFF", "AUX_HEATER_ONLY", "AUTO"],
+        expected_is_operation_mode_read_only=True,
+        expected_available_operational_statuses=[
+            "STATUS_MANUAL",
+            "STATUS_HOTWATER",
+            "STATUS_HEAT",
+            "STATUS_COOL",
+            "STATUS_POOL",
+            "STATUS_LEGIONELLA",
+            "STATUS_PASSIVE_COOL",
+            "STATUS_STANDBY",
+            "STATUS_NO_DEMAND",
+            "OPERATION_MODE_OFF",
+        ],
+        expected_available_power_statuses=[],
+    )
+
+
 def test_ncp_1028(requests_mock):
     setup_thermia_and_perform_basic_tests(
         requests_mock,

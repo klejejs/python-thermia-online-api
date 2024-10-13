@@ -937,7 +937,7 @@ class ThermiaHeatPump:
             )
 
         if self.__group_operational_operation_read_only is not None:
-            True
+            return True
 
         return None
 
