@@ -1,4 +1,5 @@
 from ThermiaOnlineAPI import Thermia
+from ThermiaOnlineAPI.exceptions import AuthenticationException
 from credentials import USERNAME, PASSWORD
 from prometheus_client import CollectorRegistry, Gauge, generate_latest
 from flask import Flask, Response
@@ -23,14 +24,25 @@ wanted_metrics = {
     'desired_supply_line_temperature': {'path': ['_ThermiaHeatPump__group_temperatures', 6, 'registerValue'], 'description': 'Desired Supply Line Temperature of the heat pump'}
 }
 
+thermia = None
+
+def init_thermia():
+    global thermia
+    if thermia is None:
+        thermia = Thermia(USERNAME, PASSWORD)
+
+def reauthenticate():
+    global thermia
+    thermia = Thermia(USERNAME, PASSWORD)
+
 def collect_data():
     if not USERNAME or not PASSWORD:
         return "Error: USERNAME and PASSWORD must be set in credentials.py"
     
     try:
-        thermia = Thermia(USERNAME, PASSWORD)
+        init_thermia()
         heat_pumps = thermia.fetch_heat_pumps()
-        
+
         for hp in heat_pumps:
             heat_pump_name = hp.__dict__.get('_ThermiaHeatPump__info', {}).get('name', 'unknown')
 
@@ -49,6 +61,11 @@ def collect_data():
                     prometheus_metrics[metric].labels(heat_pump_name=heat_pump_name).set(value)
 
         return None
+
+    except AuthenticationException as auth_error:
+        print("Authentication error detected, re-authenticating...")
+        reauthenticate()
+        return collect_data()
 
     except Exception as e:
         return f"Error while collecting data: {str(e)}"
