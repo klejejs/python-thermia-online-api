@@ -17,7 +17,7 @@ See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/
 To execute the example file, first run `pip install -r requirements.txt` to install the required dependencies, then run `python3 example.py` to execute the example file. You will be prompted to enter your username and password, and then the example file will run. If do not want to manually enter your credentials every time, you can edit the `credentials.py` file and add your credentials there.
 
 ### Promethues metrics endpoint
-You can use the metrics.py to start a flask server that exposes the data for Prometheus. Install the metrics requirements: ``pip install -r requirements_metrics.txt`` and then run ``python3 metrics.py`` to start the server.
+You can use the metrics.py to start a flask server that exposes the data for Prometheus. Install the metrics requirements: ``pip install -r requirements_metrics.txt`` and then run ``gunicorn -b 0.0.0.0:8000 metrics:app`` to use gunicorn to run the flask app. When the server is running you can access it at ``http://localhost:8000/metrics``
 
 ## Available functions in Thermia class:
 | Function | Description |

@@ -18,7 +18,7 @@ wanted_metrics = {
     'heating_effect': {'path': ['_ThermiaHeatPump__status', 'heatingEffect'], 'description': 'Heating Effect of the heat pump'},
     'compressor_operational_time': {'path': ['_ThermiaHeatPump__group_operational_time', 2, 'registerValue'], 'description': 'Compressor Operational Time in hours'},
     'hot_water_operational_time': {'path': ['_ThermiaHeatPump__group_operational_time', 3, 'registerValue'], 'description': 'Hot Water Operational Time in hours'},
-    'desired_supply_line_temperature': {'path': ['_ThermiaHeatPump__group_temperatures', 6, 'registerValue'], 'description': 'Desired Supply Line Temperature of the heat pump'}  # New metric added
+    'desired_supply_line_temperature': {'path': ['_ThermiaHeatPump__group_temperatures', 6, 'registerValue'], 'description': 'Desired Supply Line Temperature of the heat pump'}
 }
 
 def collect_data():
@@ -58,6 +58,3 @@ def metrics():
         return Response(error_message, status=500, mimetype='text/plain')
     
     return Response(prometheus_client.generate_latest(), mimetype='text/plain')
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8000)

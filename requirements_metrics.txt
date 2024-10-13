@@ -1,3 +1,4 @@
 requests >= 2.32.3
 prometheus_client >= 0.21.0
 flask >= 3.0.3
+gunicorn >= 23.0.0
