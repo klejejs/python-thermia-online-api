@@ -267,9 +267,19 @@ class ThermiaAPI:
         return self.__get_register_group(device_id, REG_GROUP_OPERATIONAL_TIME)
 
     def get_group_operational_operation(self, device: ThermiaHeatPump):
-        register_data = self.__get_register_group(
-            device.id, REG_GROUP_OPERATIONAL_OPERATION
+        return self.__get_group_operational_operation_from_register_group(
+            device, REG_GROUP_OPERATIONAL_OPERATION
         )
+
+    def get_group_operational_operation_from_status(self, device: ThermiaHeatPump):
+        return self.__get_group_operational_operation_from_register_group(
+            device, REG_GROUP_OPERATIONAL_STATUS
+        )
+
+    def __get_group_operational_operation_from_register_group(
+        self, device: ThermiaHeatPump, register_group: str
+    ):
+        register_data = self.__get_register_group(device.id, register_group)
 
         data = [d for d in register_data if d["registerName"] == REG_OPERATIONMODE]
 

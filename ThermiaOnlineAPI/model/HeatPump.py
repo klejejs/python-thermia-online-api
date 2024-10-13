@@ -71,6 +71,7 @@ class ThermiaHeatPump:
         self.__group_operational_status = None
         self.__group_operational_time = None
         self.__group_operational_operation = None
+        self.__group_operational_operation_read_only = None
         self.__group_hot_water: Dict[str, Optional[int]] = {
             "hot_water_switch": None,
             "hot_water_boost_switch": None,
@@ -115,6 +116,9 @@ class ThermiaHeatPump:
         )
         self.__group_operational_operation = (
             self.__api_interface.get_group_operational_operation(self)
+        )
+        self.__group_operational_operation_read_only = (
+            self.__api_interface.get_group_operational_operation_from_status(self)
         )
         self.__group_hot_water = self.__api_interface.get_group_hot_water(self)
 
@@ -892,25 +896,50 @@ class ThermiaHeatPump:
 
     @property
     def operation_mode(self):
-        return get_dict_value_or_none(self.__group_operational_operation, "current")
+        if self.__group_operational_operation is not None:
+            return get_dict_value_or_none(self.__group_operational_operation, "current")
+
+        return get_dict_value_or_none(
+            self.__group_operational_operation_read_only, "current"
+        )
 
     @property
     def available_operation_modes(self):
+        if self.__group_operational_operation is not None:
+            return list(
+                get_dict_value_or_default(
+                    self.__group_operational_operation, "available", {}
+                ).values()
+            )
+
         return list(
             get_dict_value_or_default(
-                self.__group_operational_operation, "available", {}
+                self.__group_operational_operation_read_only, "available", {}
             ).values()
         )
 
     @property
     def available_operation_mode_map(self):
+        if self.__group_operational_operation is not None:
+            return get_dict_value_or_default(
+                self.__group_operational_operation, "available", {}
+            )
+
         return get_dict_value_or_default(
-            self.__group_operational_operation, "available", {}
+            self.__group_operational_operation_read_only, "available", {}
         )
 
     @property
     def is_operation_mode_read_only(self):
-        return get_dict_value_or_none(self.__group_operational_operation, "isReadOnly")
+        if self.__group_operational_operation is not None:
+            return get_dict_value_or_none(
+                self.__group_operational_operation, "isReadOnly"
+            )
+
+        if self.__group_operational_operation_read_only is not None:
+            True
+
+        return None
 
     ###########################################################################
     # Hot water data
