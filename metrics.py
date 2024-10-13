@@ -1,10 +1,12 @@
 from ThermiaOnlineAPI import Thermia
 from credentials import USERNAME, PASSWORD
-from prometheus_client import start_http_server, Gauge
+from prometheus_client import CollectorRegistry, Gauge, generate_latest
 from flask import Flask, Response
 import prometheus_client
 
 app = Flask(__name__)
+
+custom_registry = CollectorRegistry()
 
 prometheus_metrics = {}
 
@@ -43,7 +45,7 @@ def collect_data():
                 if isinstance(value, (int, float)):
                     print(f"Registering {metric}: {value} for {heat_pump_name}")
                     if metric not in prometheus_metrics:
-                        prometheus_metrics[metric] = Gauge(metric, details['description'], ['heat_pump_name'])
+                        prometheus_metrics[metric] = Gauge(metric, details['description'], ['heat_pump_name'], registry=custom_registry)
                     prometheus_metrics[metric].labels(heat_pump_name=heat_pump_name).set(value)
 
         return None
@@ -57,4 +59,4 @@ def metrics():
     if collection_status:
         return Response(collection_status, status=500, mimetype='text/plain')
     
-    return Response(prometheus_client.generate_latest(), mimetype='text/plain')
+    return Response(generate_latest(custom_registry), mimetype='text/plain')
