@@ -443,7 +443,7 @@ class ThermiaHeatPump:
         if data is None:
             return ChainMap()
 
-        operation_modes_map = map(
+        operation_statuses_map = map(
             lambda values: {
                 values.get("value"): {
                     "name": values.get("name").split(
@@ -455,8 +455,8 @@ class ThermiaHeatPump:
             data,
         )
 
-        operation_modes_list = list(operation_modes_map)
-        return ChainMap(*operation_modes_list)
+        operation_statuses_list = list(operation_statuses_map)
+        return ChainMap(*operation_statuses_list)
 
     def __get_all_visible_operational_statuses_from_operational_status(
         self,
@@ -466,15 +466,17 @@ class ThermiaHeatPump:
         if data is None:
             return ChainMap()
 
-        operation_modes_map = map(
+        operation_statuses_map = map(
             lambda item: (
                 {item[0]: item[1].get("name")} if item[1].get("visible") else {}
             ),
             data.items(),
         )
 
-        operation_modes_list = list(filter(lambda x: x != {}, operation_modes_map))
-        return ChainMap(*operation_modes_list)
+        operation_statuses_list = list(
+            filter(lambda x: x != {}, operation_statuses_map)
+        )
+        return ChainMap(*operation_statuses_list)
 
     def __get_running_operational_statuses(
         self,
@@ -514,7 +516,7 @@ class ThermiaHeatPump:
         ):
             # Attempt to get multiple statuses by binary sum of the values
             data_items_list.sort(key=lambda x: x[0], reverse=True)
-            list_of_current_operation_modes = []
+            list_of_current_operation_statuses = []
 
             if self.__device_config["operational_status_minRegisterValue"] is not None:
                 current_register_value -= int(
@@ -525,10 +527,10 @@ class ThermiaHeatPump:
                 if key <= current_register_value:
                     current_register_value -= key
                     if value.get("visible"):
-                        list_of_current_operation_modes.append(value.get("name"))
+                        list_of_current_operation_statuses.append(value.get("name"))
 
             if current_register_value == 0:
-                return list_of_current_operation_modes
+                return list_of_current_operation_statuses
 
         return []
 
@@ -548,7 +550,7 @@ class ThermiaHeatPump:
         if data is None:
             return ChainMap()
 
-        power_modes_map = map(
+        power_statuses_map = map(
             lambda values: {
                 values.get("value"): {
                     "name": values.get("name").split("COMP_VALUE_STEP_")[1],
@@ -558,8 +560,8 @@ class ThermiaHeatPump:
             data,
         )
 
-        power_modes_list = list(power_modes_map)
-        return ChainMap(*power_modes_list)
+        power_statuses_list = list(power_statuses_map)
+        return ChainMap(*power_statuses_list)
 
     def __get_all_visible_power_statuses_from_power_status(
         self,
@@ -569,15 +571,15 @@ class ThermiaHeatPump:
         if data is None:
             return ChainMap()
 
-        power_modes_map = map(
+        power_statuses_map = map(
             lambda item: (
                 {item[0]: item[1].get("name")} if item[1].get("visible") else {}
             ),
             data.items(),
         )
 
-        power_modes_list = list(filter(lambda x: x != {}, power_modes_map))
-        return ChainMap(*power_modes_list)
+        power_statuses_list = list(filter(lambda x: x != {}, power_statuses_map))
+        return ChainMap(*power_statuses_list)
 
     def __get_running_power_statuses(
         self,
