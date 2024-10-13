@@ -53,8 +53,8 @@ def collect_data():
 
 @app.route('/metrics')
 def metrics():
-    error_message = collect_data()
-    if error_message:
-        return Response(error_message, status=500, mimetype='text/plain')
+    collection_status = collect_data()
+    if collection_status:
+        return Response(collection_status, status=500, mimetype='text/plain')
     
     return Response(prometheus_client.generate_latest(), mimetype='text/plain')
