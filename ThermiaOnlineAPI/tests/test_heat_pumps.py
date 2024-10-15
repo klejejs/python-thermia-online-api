@@ -17,10 +17,18 @@ def test_diplomat_duo_921(requests_mock):
         expected_available_operational_statuses=[
             "COMPR",
             "BRINEPUMP",
+            "RADIATORPUMP",
+            "COOLING",
             "HOT_WATER",
             "HEATING",
         ],
-        expected_available_power_statuses=["3KW", "6KW"],
+        expected_available_power_statuses=[
+            "3KW",
+            "6KW",
+            "9KW",
+            "12KW",
+            "15KW",
+        ],
     )
 
 
@@ -30,11 +38,20 @@ def test_itec_iq(requests_mock):
         "iTec_IQ.txt",
         expected_model="iTec",
         expected_model_id="IQ",
-        expected_available_operational_modes=["OFF", "AUTO", "COMPRESSOR", "AUXILIARY"],
+        expected_available_operational_modes=[
+            "OFF",
+            "AUTO",
+            "COMPRESSOR",
+            "AUXILIARY",
+            "HOT_WATER",
+        ],
         expected_available_operational_statuses=[
             "COMPR",
+            "RADIATORPUMP",
+            "HOT_WATER",
             "HEATING",
             "DEFROST",
+            "POOL",
             "COOLING",
         ],
         expected_available_power_statuses=[],
@@ -51,6 +68,7 @@ def test_ncp_1024(requests_mock):
         expected_is_operation_mode_read_only=True,
         expected_available_operational_statuses=[
             "STATUS_MANUAL",
+            "STATUS_DEFROST",
             "STATUS_HOTWATER",
             "STATUS_HEAT",
             "STATUS_COOL",
@@ -75,6 +93,7 @@ def test_ncp_1028(requests_mock):
         expected_is_operation_mode_read_only=True,
         expected_available_operational_statuses=[
             "STATUS_MANUAL",
+            "STATUS_DEFROST",
             "STATUS_HOTWATER",
             "STATUS_HEAT",
             "STATUS_COOL",

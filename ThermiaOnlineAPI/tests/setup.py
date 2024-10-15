@@ -99,16 +99,27 @@ def setup_thermia_and_perform_basic_tests(
 
     heat_pump = thermia.heat_pumps[0]
 
+    print(heat_pump.model)
     assert heat_pump.model == expected_model
+
+    print(heat_pump.model_id)
     assert heat_pump.model_id == expected_model_id
+
+    print(heat_pump.available_operation_modes)
     assert match_lists_in_any_order(
         heat_pump.available_operation_modes, expected_available_operational_modes
     )
+
+    print(heat_pump.is_operation_mode_read_only)
     assert heat_pump.is_operation_mode_read_only == expected_is_operation_mode_read_only
+
+    print(heat_pump.available_operational_statuses)
     assert match_lists_in_any_order(
         heat_pump.available_operational_statuses,
         expected_available_operational_statuses,
     )
+
+    print(heat_pump.available_power_statuses)
     assert match_lists_in_any_order(
         heat_pump.available_power_statuses, expected_available_power_statuses
     )

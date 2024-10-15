@@ -45,6 +45,9 @@ azure_auth_request_headers = {
     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
 }
 
+# Fix for multiple operation modes with the same value
+REG_OPERATIONMODE_SKIP_VALUES = ["REG_VALUE_OPERATION_MODE_SERVICE"]
+
 
 class ThermiaAPI:
     def __init__(self, email, password):
@@ -302,7 +305,7 @@ class ThermiaAPI:
                             "REG_VALUE_OPERATION_MODE_"
                         )[1],
                     }
-                    if values.get("visible")
+                    if values.get("name") not in REG_OPERATIONMODE_SKIP_VALUES
                     else {}
                 ),
                 operation_modes_data,
