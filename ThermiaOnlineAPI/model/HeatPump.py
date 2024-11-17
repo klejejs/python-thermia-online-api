@@ -577,6 +577,10 @@ class ThermiaHeatPump:
     @property
     def last_online(self):
         return get_dict_value_or_none(self.__info, "lastOnline")
+    
+    @property
+    def installation_timezone(self) -> str:
+        return get_dict_value_or_none(self.__info, "timeZoneId")
 
     @property
     def model(self):
