@@ -63,8 +63,12 @@ def generate_challenge(length):
 
 
 def get_response_json_or_log_and_raise_exception(response, message: str):
-    try:
-        return response.json()
-    except Exception as e:
+    if response.status_code >100 and response.status_code < 300:
+        try:
+            return response.json()
+        except Exception as e:
+            _LOGGER.error(f"{message} {response.status_code} {response.text}")
+            raise Exception(f"{message} {response.status_code} {response.text}") from e
+    else:
         _LOGGER.error(f"{message} {response.status_code} {response.text}")
-        raise Exception(f"{message} {response.status_code} {response.text}") from e
+        raise Exception(f"{message} {response.status_code} {response.text}")
