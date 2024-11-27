@@ -78,7 +78,7 @@ class ThermiaAPI:
     def get_devices(self):
         self.__check_token_validity()
 
-        url = self.configuration["apiBaseUrl"] + "/api/v1/InstallationsInfo/own"
+        url = self.configuration["apiBaseUrl"] + "/api/v1/installationsInfo"
         request = self.__session.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
@@ -91,9 +91,11 @@ class ThermiaAPI:
             )
             return []
 
-        return utils.get_response_json_or_log_and_raise_exception(
+        response = utils.get_response_json_or_log_and_raise_exception(
             request, "Error getting devices."
         )
+
+        return response.get("items", [])
 
     def get_device_by_id(self, device_id: str):
         self.__check_token_validity()
