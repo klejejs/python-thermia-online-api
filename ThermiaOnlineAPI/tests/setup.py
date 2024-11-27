@@ -43,8 +43,8 @@ def __mock_data_requests(requests_mock, test_data_file: str):
     test_data = parse_debug_file(f"{absolute_path}/debug_files/{test_data_file}")
 
     requests_mock.get(
-        f"{THERMIA_TEST_URL}/api/v1/InstallationsInfo/own",
-        json=[{**test_data["device_data"], "id": "test-id"}],
+        f"{THERMIA_TEST_URL}/api/v1/InstallationsInfo",
+        json={"items": [{**test_data["device_data"], "id": "test-id"}]},
     )
     requests_mock.get(
         f"{THERMIA_TEST_URL}/api/v1/installations/test-id",
