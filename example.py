@@ -16,7 +16,12 @@ print("Connected: " + str(thermia.connected))
 
 heat_pump = thermia.heat_pumps[0]
 
-heat_pump.debug()
+
+print("Creating debug file")
+with open("debug.txt", "w") as f:
+    f.write(heat_pump.debug())
+
+print("Debug file created")
 
 print("\n")
 print("\n")
