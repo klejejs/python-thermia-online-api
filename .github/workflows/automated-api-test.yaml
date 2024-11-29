@@ -26,6 +26,6 @@ jobs:
           touch .env
           echo "USERNAME=${{ secrets.THERMIA_USERNAME }}" >> .env
           echo "PASSWORD=${{ secrets.THERMIA_PASSWORD }}" >> .env
-      - name: Create a debug log file
+      - name: Run tests against Thermia API
         run: |
           python scripts/test_api.py
