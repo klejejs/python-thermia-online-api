@@ -20,8 +20,10 @@ TEST_EXCLUDED_LINE_STRINGS = [
     "programVersion",
     "reducedHeatingEffect",
     # self.__device_data related
-    "firmwareVersion",
     "lastOnline",
+]
+
+REPEATING_TEST_EXCLUDED_LINE_STRINGS = [
     # Register group related
     "registerValue",
     "timeStamp",
@@ -29,10 +31,19 @@ TEST_EXCLUDED_LINE_STRINGS = [
 ]
 
 
-def test_excluded_string_in_line(line: str) -> bool:
-    for excluded_string in TEST_EXCLUDED_LINE_STRINGS:
-        if excluded_string in line:
+def test_excluded_string_in_lines(line1: str, line2) -> bool:
+    if (
+        len(TEST_EXCLUDED_LINE_STRINGS) != 0
+        and TEST_EXCLUDED_LINE_STRINGS[0] in line1
+        and TEST_EXCLUDED_LINE_STRINGS[0] in line2
+    ):
+        del TEST_EXCLUDED_LINE_STRINGS[0]
+        return True
+
+    for excluded_string in REPEATING_TEST_EXCLUDED_LINE_STRINGS:
+        if excluded_string in line1 and excluded_string in line2:
             return True
+
     return False
 
 
@@ -67,22 +78,17 @@ existing_data_filename = (
     f"{absolute_path}/../ThermiaOnlineAPI/tests/debug_files/diplomat_duo_921.txt"
 )
 
-with open("debug.txt", "r") as f:
+with open(existing_data_filename, "r") as f:
     existing_debug_data = f.read()
 
-for [existing_line, new_line] in zip(
-    existing_debug_data.split("\n"), debug_data.split("\n")
+for [idx, [existing_line, new_line]] in enumerate(
+    zip(existing_debug_data.split("\n"), debug_data.split("\n"))
 ):
-    if test_excluded_string_in_line(existing_line) and test_excluded_string_in_line(
-        new_line
-    ):
+    if test_excluded_string_in_lines(existing_line, new_line):
         continue
 
     if existing_line != new_line:
-        print("Existing data does not match new data")
-        print("Existing line: " + existing_line)
-        print("New line: " + new_line)
-        print("\n")
+        print("Existing data does not match new data on line " + str(idx + 1))
         exit(1)
 
 print("Debug data matches existing debug file")

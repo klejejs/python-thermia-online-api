@@ -9,6 +9,8 @@ __pycache__/
 MANIFEST
 build/
 dist/
+.eggs/
+ThermiaOnlineAPI.egg-info/
 
 # Debug file
 debug.txt

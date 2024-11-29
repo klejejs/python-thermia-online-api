@@ -948,6 +948,8 @@ class ThermiaHeatPump:
         debug_str += pretty_json_string_except(
             self.__info,
             [
+                "deviceId",
+                "name",
                 "address",
                 "macAddress",
                 "ownerId",
@@ -967,7 +969,17 @@ class ThermiaHeatPump:
 
         debug_str += pretty_json_string_except(
             self.__device_data,
-            ["macAddress", "owner", "retailerAccess", "retailerId", "id", "status"],
+            [
+                "deviceId",
+                "location",
+                "name",
+                "macAddress",
+                "owner",
+                "retailerAccess",
+                "retailerId",
+                "id",
+                "status",
+            ],
         )
 
         installation_profile_id = get_dict_value_or_none(
