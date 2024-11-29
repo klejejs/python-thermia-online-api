@@ -89,9 +89,6 @@ for [idx, [existing_line, new_line]] in enumerate(
 
     if existing_line != new_line:
         print("Existing data does not match new data on line " + str(idx + 1))
-        print("Existing line: " + existing_line)
-        print("New line: " + new_line)
-        print("\n")
         exit(1)
 
 print("Debug data matches existing debug file")
