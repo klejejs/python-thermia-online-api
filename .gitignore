@@ -17,3 +17,5 @@ debug.txt
 /.vs/*
 
 .DS_Store
+
+.env
