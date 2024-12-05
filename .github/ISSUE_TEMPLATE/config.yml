@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: GitHub Discussions
-    url: https://github.com/klejejs/ha-thermia-heat-pump-integration/discussions
+    url: https://github.com/klejejs/python-thermia-online-api/discussions
     about: In case you have any questions or need help with the integration, please use GitHub Discussions.
