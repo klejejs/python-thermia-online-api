@@ -89,6 +89,7 @@ def setup_thermia_and_perform_basic_tests(
     expected_available_operational_statuses: List[str],
     expected_available_power_statuses: List[str],
     expected_is_operation_mode_read_only: bool = False,
+    expected_operational_status_pid_value: int | None = None,
 ) -> ThermiaHeatPump:
     __mock_auth_requests(requests_mock)
     __mock_data_requests(requests_mock, test_data_file)
@@ -123,5 +124,8 @@ def setup_thermia_and_perform_basic_tests(
     assert match_lists_in_any_order(
         heat_pump.available_power_statuses, expected_available_power_statuses
     )
+
+    print(heat_pump.operational_status_pid)
+    assert heat_pump.operational_status_pid == expected_operational_status_pid_value
 
     return heat_pump

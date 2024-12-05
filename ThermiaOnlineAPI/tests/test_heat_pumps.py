@@ -55,6 +55,7 @@ def test_itec_iq(requests_mock):
             "COOLING",
         ],
         expected_available_power_statuses=[],
+        expected_operational_status_pid_value=50,
     )
 
 
