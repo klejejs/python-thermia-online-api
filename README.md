@@ -8,8 +8,6 @@ It is hard for me to keep track of all models that I have added feature support 
 I am willing to do my best to support them, but as there turns out to be many different Thermia models and configurations, it is hard for me to implement all functionalities and test them thoroughly.
 Thus, I have created a `debug()` function that runs when `example.py` is executed and creates a `debug.txt` file which has data about your heat pump and all its supported features. If you want to submit a bug or feature request, please include the debug file as it will make my development much easier.
 
-**Note:** I have done my best to remove the sensitive parts from debugging, but I do not guarantee that no sensitive data is printed to the debug file. I have no intention of using it maliciously, but if you post the file publicly on GitHub, please make sure you remove anything you feel might be suspicious of sharing.
-
 ## How to use api:
 See [example.py](https://github.com/klejejs/python-thermia-online-api/blob/main/example.py) file for examples.
 
