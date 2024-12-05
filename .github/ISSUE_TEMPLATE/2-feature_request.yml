@@ -8,12 +8,6 @@ assignees:
   - klejejs
 
 body:
-  - type: markdown
-    attributes:
-      value: |
-        **Is your feature request related to a problem? Please describe.**
-        A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
-
   - type: textarea
     id: problem
     validations:
@@ -21,12 +15,6 @@ body:
     attributes:
       label: Problem
       description: A clear and concise description of what the problem is.
-
-  - type: markdown
-    attributes:
-      value: |
-        **Describe the solution you'd like**
-        A clear and concise description of what you want to happen.
 
   - type: textarea
     id: solution
@@ -36,12 +24,6 @@ body:
       label: Solution
       description: A clear and concise description of what you want to happen.
 
-  - type: markdown
-    attributes:
-      value: |
-        **Describe alternatives you've considered**
-        A clear and concise description of any alternative solutions or features you've considered.
-
   - type: textarea
     id: alternatives
     validations:
@@ -50,25 +32,13 @@ body:
       label: Alternatives
       description: A clear and concise description of any alternative solutions or features you've considered.
 
-  - type: markdown
-    attributes:
-      value: |
-        **Debug file data**
-        Please attach Thermia debug file data that can help diagnose the issue. To get the debug file data, see [README.md](https://github.com/klejejs/python-thermia-online-api?tab=readme-ov-file#regarding-unsupported-models).
-
   - type: textarea
     id: debug_file_data
     validations:
       required: true
     attributes:
       label: Debug File Data
-      description: Please attach Thermia debug file data that can help diagnose the issue.
-
-  - type: markdown
-    attributes:
-      value: |
-        **Are you running the latest version?**
-        Please check if you are running the latest version of the package before submitting a bug report.
+      description: Please attach Thermia debug file data that can help diagnose the issue. To get the debug file data, see [README.md](https://github.com/klejejs/python-thermia-online-api?tab=readme-ov-file#regarding-unsupported-models).
 
   - type: checkboxes
     id: latest_version
@@ -78,12 +48,6 @@ body:
       options:
         - label: I have checked and am running the latest version of the package
           required: true
-
-  - type: markdown
-    attributes:
-      value: |
-        **Additional context**
-        Add any other context or screenshots about the feature request here.
 
   - type: textarea
     id: additional_context
