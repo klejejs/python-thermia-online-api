@@ -30,6 +30,7 @@ from ThermiaOnlineAPI.const import (
     REG_RETURN_LINE,
     COMP_POWER_STATUS,
     COMP_STATUS,
+    COMP_STATUS_ATEC,
     COMP_STATUS_ITEC,
     REG_SUPPLY_LINE,
     DATETIME_FORMAT,
@@ -378,6 +379,13 @@ class ThermiaHeatPump:
             self.__device_config["operational_status_valueNamePrefix"] = (
                 "REG_VALUE_STATUS_"
             )
+            return data.get("valueNames", [])
+
+        # Try to get the data from the COMP_STATUS_ATEC register
+        data = self.__get_register_from_operational_status(COMP_STATUS_ATEC)
+        if data is not None:
+            self.__device_config["operational_status_register"] = COMP_STATUS_ATEC
+            self.__device_config["operational_status_valueNamePrefix"] = "COMP_VALUE_"
             return data.get("valueNames", [])
 
         # Try to get the data from the COMP_STATUS_ITEC register

@@ -70,6 +70,7 @@ REG_OPERATIONAL_STATUS_PRIO1 = (
     "REG_OPERATIONAL_STATUS_PRIO1"  # Operational status for most heat pumps
 )
 COMP_STATUS = "COMP_STATUS"  # Operational status for Diplomat heat pumps
+COMP_STATUS_ATEC = "COMP_STATUS_ATEC"  # Operational status for ATEC heat pumps
 COMP_STATUS_ITEC = "COMP_STATUS_ITEC"  # Operational status for ITEC heat pumps
 REG_OPERATIONAL_STATUS_PRIORITY_BITMASK = (
     "REG_OPERATIONAL_STATUS_PRIORITY_BITMASK"  # Operational status for Atlas heat pumps
