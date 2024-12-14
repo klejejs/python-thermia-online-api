@@ -100,32 +100,34 @@ def setup_thermia_and_perform_basic_tests(
 
     heat_pump = thermia.heat_pumps[0]
 
-    print(heat_pump.model)
-    assert heat_pump.model == expected_model
+    assert (
+        heat_pump.model == expected_model
+    ), f"Model - expected: {expected_model}, got: {heat_pump.model}"
 
-    print(heat_pump.model_id)
-    assert heat_pump.model_id == expected_model_id
+    assert (
+        heat_pump.model_id == expected_model_id
+    ), f"Model ID - expected: {expected_model_id}, got: {heat_pump.model_id}"
 
-    print(heat_pump.available_operation_modes)
     assert match_lists_in_any_order(
-        heat_pump.available_operation_modes, expected_available_operational_modes
-    )
+        heat_pump.available_operation_modes,
+        expected_available_operational_modes,
+    ), f"Avaliable operational modes - expected: {expected_available_operational_modes}, got: {heat_pump.available_operation_modes}"
 
-    print(heat_pump.is_operation_mode_read_only)
-    assert heat_pump.is_operation_mode_read_only == expected_is_operation_mode_read_only
+    assert (
+        heat_pump.is_operation_mode_read_only == expected_is_operation_mode_read_only
+    ), f"Is operation mode read only - expected: {expected_is_operation_mode_read_only}, got: {heat_pump.is_operation_mode_read_only}"
 
-    print(heat_pump.available_operational_statuses)
     assert match_lists_in_any_order(
         heat_pump.available_operational_statuses,
         expected_available_operational_statuses,
-    )
+    ), f"Avaliable operational statuses - expected: {expected_available_operational_statuses}, got: {heat_pump.available_operational_statuses}"
 
-    print(heat_pump.available_power_statuses)
     assert match_lists_in_any_order(
         heat_pump.available_power_statuses, expected_available_power_statuses
-    )
+    ), f"Avaliable power statuses - expected: {expected_available_power_statuses}, got: {heat_pump.available_power_statuses}"
 
-    print(heat_pump.operational_status_pid)
-    assert heat_pump.operational_status_pid == expected_operational_status_pid_value
+    assert (
+        heat_pump.operational_status_pid == expected_operational_status_pid_value
+    ), f"Operational status PID - expected: {expected_operational_status_pid_value}, got: {heat_pump.operational_status_pid}"
 
     return heat_pump
