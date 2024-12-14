@@ -107,3 +107,29 @@ def test_ncp_1028(requests_mock):
         ],
         expected_available_power_statuses=[],
     )
+
+
+def test_atec_dhp_aq(requests_mock):
+    setup_thermia_and_perform_basic_tests(
+        requests_mock,
+        "ATEC_DHP_AQ.txt",
+        expected_model="ATEC",
+        expected_model_id="DHP AQ",
+        expected_available_operational_modes=[
+            "OFF",
+            "AUTO",
+            "COMPRESSOR",
+            "AUXILIARY",
+            "HOT_WATER",
+        ],
+        expected_available_operational_statuses=[
+            "COMPR",
+            "RADIATORPUMP",
+            "COOLING",
+            "HOT_WATER",
+            "HEATING",
+            "DEFROST",
+            "POOL",
+        ],
+        expected_available_power_statuses=[],
+    )
