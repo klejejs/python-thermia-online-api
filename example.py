@@ -1,10 +1,19 @@
 from datetime import datetime, timedelta
 from ThermiaOnlineAPI import Thermia
-from credentials import USERNAME, PASSWORD
 
 CHANGE_HEAT_PUMP_DATA_DURING_TEST = (
     False  # Set to True if you want to change heat pump data during test
 )
+
+USERNAME = None
+PASSWORD = None
+
+with open(".env", "r") as env_file:
+    for line in env_file:
+        if line.startswith("USERNAME="):
+            USERNAME = line.split("=")[1].strip()
+        elif line.startswith("PASSWORD="):
+            PASSWORD = line.split("=")[1].strip()
 
 if not USERNAME or not PASSWORD:
     USERNAME = input("Enter username: ")
@@ -16,7 +25,12 @@ print("Connected: " + str(thermia.connected))
 
 heat_pump = thermia.heat_pumps[0]
 
-heat_pump.debug()
+
+print("Creating debug file")
+with open("debug.txt", "w") as f:
+    f.write(heat_pump.debug())
+
+print("Debug file created")
 
 print("\n")
 print("\n")

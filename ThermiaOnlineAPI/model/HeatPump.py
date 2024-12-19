@@ -2,7 +2,7 @@ from collections import ChainMap
 from datetime import datetime
 import logging
 import sys
-from ..utils.utils import pretty_print_except
+from ..utils.utils import pretty_json_string_except
 
 from typing import TYPE_CHECKING, Dict, List, Optional
 
@@ -30,6 +30,7 @@ from ThermiaOnlineAPI.const import (
     REG_RETURN_LINE,
     COMP_POWER_STATUS,
     COMP_STATUS,
+    COMP_STATUS_ATEC,
     COMP_STATUS_ITEC,
     REG_SUPPLY_LINE,
     DATETIME_FORMAT,
@@ -378,6 +379,13 @@ class ThermiaHeatPump:
             self.__device_config["operational_status_valueNamePrefix"] = (
                 "REG_VALUE_STATUS_"
             )
+            return data.get("valueNames", [])
+
+        # Try to get the data from the COMP_STATUS_ATEC register
+        data = self.__get_register_from_operational_status(COMP_STATUS_ATEC)
+        if data is not None:
+            self.__device_config["operational_status_register"] = COMP_STATUS_ATEC
+            self.__device_config["operational_status_valueNamePrefix"] = "COMP_VALUE_"
             return data.get("valueNames", [])
 
         # Try to get the data from the COMP_STATUS_ITEC register
@@ -940,19 +948,16 @@ class ThermiaHeatPump:
     # Print debug data
     ###########################################################################
 
-    def debug(self):
-        print("Creating debug file")
+    def debug(self) -> str:
+        debug_str = "########## DEBUG START ##########\n"
 
-        original_stdout = sys.stdout
-        f = open("debug.txt", "w")
-        sys.stdout = f
+        debug_str += "self.__info:\n"
 
-        print("########## DEBUG START ##########")
-
-        print("self.__info:")
-        pretty_print_except(
+        debug_str += pretty_json_string_except(
             self.__info,
             [
+                "deviceId",
+                "name",
                 "address",
                 "macAddress",
                 "ownerId",
@@ -964,13 +969,25 @@ class ThermiaHeatPump:
             ],
         )
 
-        print("self.__status:")
-        pretty_print_except(self.__status)
+        debug_str += "self.__status:\n"
 
-        print("self.__device_data:")
-        pretty_print_except(
+        debug_str += pretty_json_string_except(self.__status)
+
+        debug_str += "self.__device_data:\n"
+
+        debug_str += pretty_json_string_except(
             self.__device_data,
-            ["macAddress", "owner", "retailerAccess", "retailerId", "id", "status"],
+            [
+                "deviceId",
+                "location",
+                "name",
+                "macAddress",
+                "owner",
+                "retailerAccess",
+                "retailerId",
+                "id",
+                "status",
+            ],
         )
 
         installation_profile_id = get_dict_value_or_none(
@@ -982,20 +999,18 @@ class ThermiaHeatPump:
                 installation_profile_id
             )
             if all_available_groups is not None:
-                print("All available groups:")
-                pretty_print_except(all_available_groups)
+                debug_str += "All available groups:\n"
+                debug_str += pretty_json_string_except(all_available_groups)
 
                 for group in all_available_groups:
                     group_name = group.get("name")
                     if group_name is not None:
-                        print("Group " + group_name + ":")
+                        debug_str += "Group " + group_name + ":\n"
                         group_data = self.__api_interface.get_register_group_json(
                             self.__device_id, group_name
                         )
-                        pretty_print_except(group_data)
+                        debug_str += pretty_json_string_except(group_data)
 
-        print("########## DEBUG END ##########")
+        debug_str += "########## DEBUG END ##########\n"
 
-        sys.stdout = original_stdout
-        f.close()
-        print("Debug file created")
+        return debug_str

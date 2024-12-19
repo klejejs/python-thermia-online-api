@@ -9,6 +9,8 @@ __pycache__/
 MANIFEST
 build/
 dist/
+.eggs/
+ThermiaOnlineAPI.egg-info/
 
 # Debug file
 debug.txt
@@ -17,3 +19,5 @@ debug.txt
 /.vs/*
 
 .DS_Store
+
+.env

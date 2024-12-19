@@ -30,12 +30,14 @@ def get_list_value_or_default(list, idx, default: T) -> T:
         return default
 
 
-def pretty_print(json_object):
-    print(json.dumps(json_object, indent=4, sort_keys=True))
-    print("\n")
+def pretty_json_string(json_object) -> str:
+    pretty_str = json.dumps(json_object, indent=4, sort_keys=True)
+    pretty_str += "\n\n"
+
+    return pretty_str
 
 
-def pretty_print_except(json_object, except_keys=[]):
+def pretty_json_string_except(json_object, except_keys=[]) -> str:
     if json_object is None:
         return
 
@@ -43,7 +45,11 @@ def pretty_print_except(json_object, except_keys=[]):
     for key in except_keys:
         if key in json_object_copy:
             del json_object_copy[key]
-    pretty_print(json_object_copy)
+
+    pretty_json_str = pretty_json_string(json_object_copy)
+    pretty_json_str += "\n"
+
+    return pretty_json_str
 
 
 def base64_url_encode(data):
