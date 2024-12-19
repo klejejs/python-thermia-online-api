@@ -2,6 +2,8 @@ from collections import ChainMap
 from datetime import datetime
 import logging
 import sys
+
+from ThermiaOnlineAPI.model.Schedule import Schedule
 from ..utils.utils import pretty_json_string_except
 
 from typing import TYPE_CHECKING, Dict, List, Optional
@@ -943,6 +945,48 @@ class ThermiaHeatPump:
                 historical_data["data"],
             )
         )
+    ###########################################################################
+    # Schedules
+    ###########################################################################
+
+        
+
+    def get_schedules(self) -> List[Schedule]:
+        """
+        Retrieve the schedules for the heat pump installation.
+
+        This method fetches the schedules associated with the heat pump installation
+        identified by the instance's ID.
+
+        Returns:
+            list: A list of schedules for the heat pump installation.
+        """
+        installation_id = self.id
+        data = self.__api_interface.get_schedules(installation_id)
+        schedules = []
+        for entry in data:
+            schedules.append(Schedule.fromJSON(entry))
+       
+        return schedules
+      
+
+    
+    def add_new_schedule(self, schedule: Schedule) -> Schedule:
+        """
+        Adds a new schedule to the heat pump installation.
+
+        Args:
+            schedule (Schedule): The schedule to be added.
+
+        Returns:
+            Schedule: The newly added schedule with updated information from the API.
+        """
+        installation_id = self.id
+        schedule.installationId = installation_id
+
+        data= self.__api_interface.add_new_schedule(installation_id, schedule.toJSON())
+        return Schedule.fromJSON(data)
+        
 
     ###########################################################################
     # Print debug data
