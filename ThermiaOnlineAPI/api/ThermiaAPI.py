@@ -542,6 +542,44 @@ class ThermiaAPI:
         return utils.get_response_json_or_log_and_raise_exception(
             request, "Error in adding device schedule."
         )
+    def delete_schedule(self, installation_id: str, data: dict):
+        """
+        Deletes a schedule for a given installation.
+       
+        Args:
+            installation_id (str): The ID of the installation from which the schedule will be removed.
+            data (dict): The schedule data to be removed.
+
+        Returns:
+            dict: The response from the API if the schedule is removed successfully.
+
+        Raises:
+            Exception: If there is an error in the API request.
+        """
+
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/installations/"
+            + str(installation_id)
+            + "/schedules/"
+            + str(data["id"])
+        )
+
+        request = self.__session.delete(url, headers=self.__default_request_headers)
+        
+        status = request.status_code
+        if status != 204:
+            _LOGGER.error(
+                "Error deleting schedule "
+                + str(data["id"])
+                + " value. Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
+        return    
 
     def __set_register_value(
         self, device: ThermiaHeatPump, register_index: int, register_value: int

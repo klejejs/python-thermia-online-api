@@ -990,6 +990,22 @@ class ThermiaHeatPump:
 
         data= self.__api_interface.add_new_schedule(installation_id, schedule.toJSON())
         return Schedule.fromJSON(data)
+    
+    def delete_schedule(self, schedule: Schedule):
+        """
+        deletes a given schedule from the heat pump installation.
+
+        Args:
+            schedule (Schedule): The schedule to be deleted.
+
+        Returns:
+            Schedule: The removed schedule with updated information from the API.
+        """
+        installation_id = self.id
+        schedule.installationId = installation_id
+
+        data= self.__api_interface.delete_schedule(installation_id, schedule.toJSON())
+        return 
         
 
     ###########################################################################
