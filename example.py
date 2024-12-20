@@ -190,7 +190,7 @@ schedules=heat_pump.get_schedules()
 for schedule in schedules:
     print(schedule)
     print("\n")
-if True:
+if CHANGE_HEAT_PUMP_DATA_DURING_TEST:
     start_time = datetime.now() + timedelta(hours=1)
     end_time = datetime.now() + timedelta(hours=2)
     planned_schedule = Schedule(start=start_time, end=end_time, functionId=CAL_FUNCTION_REDUCED_HEATING_EFFECT, value=18)
