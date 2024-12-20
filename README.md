@@ -101,7 +101,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `set_hot_water_boost_switch_state()` | Set the hot water boost switch state to 0 (off) or 1 (on) for the Heat Pump |
 | --- | --- |
 | Schedule management | |
-| `create_schedule(type, active, start_time, end_time, repeat_days)` | Create a new schedule (water block, EVU, reduced heat, silent mode) with specified parameters. Type should be one of the available schedule types, start_time and end_time in HH:MM format, repeat_days as list of weekdays (0-6) |
+| `create_schedule(type, active, start_time, end_time, repeat_days)` | Create a new schedule (water block, EVU, reduced heat, silent mode) with specified parameters. Se separate section below. |
 | `delete_schedule(schedule_id)` | Delete a specific schedule by its ID from the Heat Pump |
 
 | --- | --- |
