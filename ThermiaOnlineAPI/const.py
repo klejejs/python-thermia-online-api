@@ -103,3 +103,11 @@ REG_OPER_TIME_HOT_WATER = "REG_OPER_TIME_HOT_WATER"
 ###############################################################################
 
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
+###############################################################################
+# calendar functions
+###############################################################################
+CAL_FUNCTION_REDUCED_HEATING_EFFECT = "15001"
+CAL_FUNCTION_HOT_WATER_BLOCK= "15002"
+CAL_FUNCTION_SILENT_MODE = "15003"
+CAL_FUNCTION_EVU_MODE = "15004"

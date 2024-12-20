@@ -480,20 +480,106 @@ class ThermiaAPI:
         request = self.__session.get(url, headers=self.__default_request_headers)
         status = request.status_code
 
-        if status != 200:
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in getting device's register group: " + register_group
+        )
+
+    def get_schedules(self, installation_id: str) -> list:
+        """
+        Retrieves the schedules for a given installation.
+
+        Args:
+            installation_id (str): The ID of the installation for which to retrieve schedules.
+
+        Returns:
+            list: A list of schedules for the specified installation.
+
+        Raises:
+            Exception: If there is an error in getting the device's schedule.
+        """
+
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/installations/"
+            + str(installation_id)
+            + "/schedules"
+        )
+
+        request = self.__session.get(url, headers=self.__default_request_headers)
+        
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in getting device's schedule."
+        )
+    
+    def add_new_schedule(self, installation_id: str, data: dict) -> dict:
+        """
+        Adds a new schedule for a given installation.
+
+        Args:
+            installation_id (str): The ID of the installation to which the schedule will be added.
+            data (dict): The schedule data to be added.
+
+        Returns:
+            dict: The response from the API if the schedule is added successfully.
+
+        Raises:
+            Exception: If there is an error in the API request.
+        """
+
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/installations/"
+            + str(installation_id)
+            + "/schedules"
+        )
+
+        request = self.__session.post(url, headers=self.__default_request_headers, json=data)
+        
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in adding device schedule."
+        )
+    def delete_schedule(self, installation_id: str, data: dict):
+        """
+        Deletes a schedule for a given installation.
+       
+        Args:
+            installation_id (str): The ID of the installation from which the schedule will be removed.
+            data (dict): The schedule data to be removed.
+
+        Returns:
+            dict: The response from the API if the schedule is removed successfully.
+
+        Raises:
+            Exception: If there is an error in the API request.
+        """
+
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/installations/"
+            + str(installation_id)
+            + "/schedules/"
+            + str(data["id"])
+        )
+
+        request = self.__session.delete(url, headers=self.__default_request_headers)
+        
+        status = request.status_code
+        if status != 204:
             _LOGGER.error(
-                "Error in getting device's register group: "
-                + register_group
-                + ", Status: "
+                "Error deleting schedule "
+                + str(data["id"])
+                + " value. Status: "
                 + str(status)
                 + ", Response: "
                 + request.text
             )
-            return []
-
-        return utils.get_response_json_or_log_and_raise_exception(
-            request, "Error in getting device's register group: " + register_group
-        )
+        return    
 
     def __set_register_value(
         self, device: ThermiaHeatPump, register_index: int, register_value: int
