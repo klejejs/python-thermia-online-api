@@ -25,7 +25,7 @@ def get_pytz_timezone(windows_tz_name):
     Returns:
         str: The corresponding pytz time zone name.
     """
-    return WINDOWS_TO_PYTZ.get(windows_tz_name)
+    return WINDOWS_TO_PYTZ_MAPPING.get(windows_tz_name)
 
 
 def adjust_times_for_timezone(timestamp: datetime, time_zone_name: str) -> datetime:
