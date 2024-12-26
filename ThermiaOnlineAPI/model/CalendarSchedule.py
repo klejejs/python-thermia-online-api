@@ -4,17 +4,19 @@ from datetime import datetime
 
 from ThermiaOnlineAPI.const import DATETIME_FORMAT
 
+
 @dataclass
 class CalendarSchedule:
     """
     CalendarSchedule class represents a schedule with various attributes such as start time, end time, recurrence, and status indicators.
-    
+
     Methods:
         __init__(self, functionId: int, start: datetime, end: datetime, installationId: int = 0, isRunning: Optional[bool] = None, isFaulty: Optional[bool] = None, id: Optional[int] = None, recurringType: int = 0, recurringOccurrence: int = 1, value: Optional[float] = None, isPaused: Optional[bool] = None):
             Initializes a CalendarSchedule object with the provided attributes.
         toJSON(self) -> dict:
         fromJSON(data: dict) -> CalendarSchedule:
-    """  
+    """
+
     __isRunning: Optional[bool]
     __isFaulty: Optional[bool]
     __id: Optional[int]
@@ -26,18 +28,21 @@ class CalendarSchedule:
     __recurringOccurrence: int
     __value: Optional[float]
     __isPaused: Optional[bool]
-    def __init__(self, 
-                 functionId: int,
-                 start: datetime, 
-                 end: datetime, 
-                 installationId: int = 0, 
-                 isRunning: Optional[bool] = None, 
-                 isFaulty: Optional[bool] = None, 
-                 id: Optional[int] = None, 
-                 recurringType: int = 0, 
-                 recurringOccurrence: int = 1, 
-                 value: Optional[float] = None, 
-                 isPaused: Optional[bool] = None):
+
+    def __init__(
+        self,
+        functionId: int,
+        start: datetime,
+        end: datetime,
+        installationId: int = 0,
+        isRunning: Optional[bool] = None,
+        isFaulty: Optional[bool] = None,
+        id: Optional[int] = None,
+        recurringType: int = 0,
+        recurringOccurrence: int = 1,
+        value: Optional[float] = None,
+        isPaused: Optional[bool] = None,
+    ):
         """
         Initialize a Schedule object.
 
@@ -73,8 +78,7 @@ class CalendarSchedule:
         Only available for schedules fetched from the API.
         """
         return self.__isRunning
-    
-    
+
     @property
     def isFaulty(self) -> Optional[bool]:
         """
@@ -148,7 +152,7 @@ class CalendarSchedule:
         Only available for schedules fetched from the API.
         """
         return self.__isPaused
-    
+
     def set_installationId(self, installationId: int):
         """
         Set the installation ID for the schedule.
@@ -184,7 +188,7 @@ class CalendarSchedule:
         if self.isPaused is not None:
             json_dict["isPaused"] = self.isPaused
         return json_dict
-    
+
     @staticmethod
     def fromJSON(data: dict):
         """
@@ -202,8 +206,16 @@ class CalendarSchedule:
             id=data.get("id"),
             installationId=data["installationId"],
             functionId=data["functionId"],
-            start=datetime.strptime(data["start"], DATETIME_FORMAT) if data.get("start") else None,
-            end=datetime.strptime(data["end"], DATETIME_FORMAT) if data.get("end") else None,
+            start=(
+                datetime.strptime(data["start"], DATETIME_FORMAT)
+                if data.get("start")
+                else None
+            ),
+            end=(
+                datetime.strptime(data["end"], DATETIME_FORMAT)
+                if data.get("end")
+                else None
+            ),
             recurringType=data["recurringType"],
             recurringOccurrence=data["recurringOccurrence"],
             value=data.get("value"),

@@ -578,7 +578,7 @@ class ThermiaHeatPump:
     @property
     def last_online(self):
         return get_dict_value_or_none(self.__info, "lastOnline")
-    
+
     @property
     def installation_timezone(self) -> str:
         return get_dict_value_or_none(self.__info, "timeZoneId")
@@ -950,11 +950,11 @@ class ThermiaHeatPump:
                 historical_data["data"],
             )
         )
+
     ###########################################################################
     # Schedules and Calendar functions
     ###########################################################################
 
-        
     def get_supported_calendar_functions(self) -> List[str]:
         """
         Retrieve the supported calendar functions for the heat pump installation.
@@ -970,7 +970,6 @@ class ThermiaHeatPump:
         functions = [CalendarFunction.fromJSON(entry) for entry in data]
         return functions
 
-
     def get_schedules(self) -> List[CalendarSchedule]:
         """
         Retrieve the schedules for the heat pump installation.
@@ -984,10 +983,9 @@ class ThermiaHeatPump:
         installation_id = self.id
         data = self.__api_interface.get_schedules(installation_id)
         schedules = [CalendarSchedule.fromJSON(entry) for entry in data]
-       
+
         return schedules
-      
-    
+
     def add_new_schedule(self, schedule: CalendarSchedule) -> CalendarSchedule:
         """
         Adds a new schedule to the heat pump installation.
@@ -1001,9 +999,9 @@ class ThermiaHeatPump:
         installation_id = self.id
         schedule.set_installationId(installation_id)
 
-        data= self.__api_interface.add_new_schedule(installation_id, schedule.toJSON())
+        data = self.__api_interface.add_new_schedule(installation_id, schedule.toJSON())
         return CalendarSchedule.fromJSON(data)
-    
+
     def delete_schedule(self, schedule: CalendarSchedule):
         """
         deletes a given schedule from the heat pump installation.
@@ -1017,9 +1015,8 @@ class ThermiaHeatPump:
         installation_id = self.id
         schedule.set_installationId(installation_id)
 
-        data= self.__api_interface.delete_schedule(installation_id, schedule.id)
-        return 
-        
+        data = self.__api_interface.delete_schedule(installation_id, schedule.id)
+        return
 
     ###########################################################################
     # Print debug data

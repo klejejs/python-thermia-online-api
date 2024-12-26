@@ -467,7 +467,6 @@ class ThermiaAPI:
     ):
         self.__set_register_value(device, register_index, value)
 
-
     def get_schedules(self, installation_id: str) -> list:
         """
         Retrieves the schedules for a given installation.
@@ -492,11 +491,11 @@ class ThermiaAPI:
         )
 
         request = self.__session.get(url, headers=self.__default_request_headers)
-        
+
         return utils.get_success_response_json_or_log_and_raise_exception(
             request, "Error in getting device's schedule."
         )
-    
+
     def get_supported_calendar_functions(self, installation_id: str) -> list:
         """
         Retrieves the supported calendar functions for a given installation.
@@ -518,12 +517,11 @@ class ThermiaAPI:
         )
 
         request = self.__session.get(url, headers=self.__default_request_headers)
-        
+
         return utils.get_success_response_json_or_log_and_raise_exception(
             request, "Error in getting device's calendar functions."
         )
-    
-    
+
     def add_new_schedule(self, installation_id: str, data: dict) -> dict:
         """
         Adds a new schedule for a given installation.
@@ -548,16 +546,18 @@ class ThermiaAPI:
             + "/schedules"
         )
 
-        request = self.__session.post(url, headers=self.__default_request_headers, json=data)
-        
+        request = self.__session.post(
+            url, headers=self.__default_request_headers, json=data
+        )
+
         return utils.get_success_response_json_or_log_and_raise_exception(
             request, "Error in adding device schedule."
         )
-    
+
     def delete_schedule(self, installation_id: str, schedule_id: int):
         """
         Deletes a schedule for a given installation.
-       
+
         Args:
             installation_id (str): The ID of the installation from which the schedule will be removed.
             data (dict): The schedule data to be removed.
@@ -580,7 +580,7 @@ class ThermiaAPI:
         )
 
         request = self.__session.delete(url, headers=self.__default_request_headers)
-        
+
         status = request.status_code
         if status != 204:
             _LOGGER.error(
@@ -591,8 +591,8 @@ class ThermiaAPI:
                 + ", Response: "
                 + request.text
             )
-        return    
-    
+        return
+
     def __get_register_group(self, device_id: str, register_group: str) -> list:
         self.__check_token_validity()
 

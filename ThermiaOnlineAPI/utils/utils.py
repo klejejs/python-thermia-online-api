@@ -15,7 +15,6 @@ T = TypeVar("T")
 _LOGGER = logging.getLogger(__name__)
 
 
-
 def get_pytz_timezone(windows_tz_name):
     """
     Get the corresponding pytz time zone for a given Windows time zone name.
@@ -28,15 +27,18 @@ def get_pytz_timezone(windows_tz_name):
     """
     return WINDOWS_TO_PYTZ.get(windows_tz_name)
 
+
 def adjust_times_for_timezone(timestamp: datetime, time_zone_name: str) -> datetime:
-        
-        pytz_tz_name = get_pytz_timezone(time_zone_name)
-        if pytz_tz_name:
-            heatpump_timezone = pytz.timezone(pytz_tz_name)
-            timestamp = timestamp.astimezone(heatpump_timezone)
-            return timestamp
-        else:
-            raise ValueError(f"No corresponding pytz time zone found for '{time_zone_name}'")
+
+    pytz_tz_name = get_pytz_timezone(time_zone_name)
+    if pytz_tz_name:
+        heatpump_timezone = pytz.timezone(pytz_tz_name)
+        timestamp = timestamp.astimezone(heatpump_timezone)
+        return timestamp
+    else:
+        raise ValueError(
+            f"No corresponding pytz time zone found for '{time_zone_name}'"
+        )
 
 
 def get_dict_value_or_none(dictionary, key) -> Any:
@@ -89,6 +91,7 @@ def generate_challenge(length):
     challenge = "".join(random.choice(characters) for _ in range(length))
     return challenge
 
+
 def get_success_response_json_or_log_and_raise_exception(response, message: str):
     """
     Processes an HTTP response and returns its JSON content if the status code indicates success.
@@ -104,7 +107,7 @@ def get_success_response_json_or_log_and_raise_exception(response, message: str)
     Raises:
         Exception: If the status code indicates failure or if JSON parsing fails.
     """
-    if response.status_code >100 and response.status_code < 300:
+    if response.status_code > 100 and response.status_code < 300:
         try:
             return response.json()
         except Exception as e:

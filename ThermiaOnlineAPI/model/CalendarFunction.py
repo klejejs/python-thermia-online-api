@@ -12,7 +12,17 @@ class CalendarFunction:
     __properties_type: str
     __properties_value: str
 
-    def __init__(self, id: int, name: str, recurringEnabled: bool, canBePaused: bool, hasFunctionBasedValue: bool, isTemperatureOverriden: bool, properties_type:str, properties_value:str):
+    def __init__(
+        self,
+        id: int,
+        name: str,
+        recurringEnabled: bool,
+        canBePaused: bool,
+        hasFunctionBasedValue: bool,
+        isTemperatureOverriden: bool,
+        properties_type: str,
+        properties_value: str,
+    ):
         """
         Initialize a CalendarFunction instance.
 
@@ -75,7 +85,6 @@ class CalendarFunction:
         """Get the value of the properties associated with the calendar function."""
         return self.__properties_value
 
-   
     @staticmethod
     def fromJSON(data: dict):
         """
@@ -88,12 +97,12 @@ class CalendarFunction:
             CalendarFunction: An instance of CalendarFunction created from the provided data.
         """
         return CalendarFunction(
-            id=data['id'],
-            name=data['name'],
-            recurringEnabled=data['recurringEnabled'],
-            canBePaused=data['canBePaused'],
-            hasFunctionBasedValue=data['hasFunctionBasedValue'],
-            isTemperatureOverriden=data['isTemperatureOverriden'],
-            properties_type=data['properties']['type'],
-            properties_value=data['properties']['value']
+            id=data["id"],
+            name=data["name"],
+            recurringEnabled=data["recurringEnabled"],
+            canBePaused=data["canBePaused"],
+            hasFunctionBasedValue=data["hasFunctionBasedValue"],
+            isTemperatureOverriden=data["isTemperatureOverriden"],
+            properties_type=data["properties"]["type"],
+            properties_value=data["properties"]["value"],
         )

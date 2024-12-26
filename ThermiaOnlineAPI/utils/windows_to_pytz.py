@@ -148,5 +148,5 @@ WINDOWS_TO_PYTZ_MAPPING = {
     "UTC+13": "Etc/GMT-13",
     "Tonga Standard Time": "Pacific/Tongatapu",
     "Samoa Standard Time": "Pacific/Apia",
-    "Line Islands Standard Time": "Pacific/Kiritimati"
+    "Line Islands Standard Time": "Pacific/Kiritimati",
 }
