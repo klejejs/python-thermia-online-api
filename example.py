@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from ThermiaOnlineAPI import Thermia
 from ThermiaOnlineAPI.const import CAL_FUNCTION_REDUCED_HEATING_EFFECT
-from ThermiaOnlineAPI.model.Schedule import Schedule
+from ThermiaOnlineAPI.model.CalendarSchedule import CalendarSchedule
 
 CHANGE_HEAT_PUMP_DATA_DURING_TEST = (
     False  # Set to True if you want to change heat pump data during test
@@ -185,6 +185,8 @@ print("Available Operation Modes: " + str(heat_pump.available_operation_modes))
 print("Hot Water Switch State: " + str(heat_pump.hot_water_switch_state))
 print("Hot Water Boost Switch State: " + str(heat_pump.hot_water_boost_switch_state))
 
+print("supported Calendar functions: " + str(heat_pump.get_supported_calendar_functions()))
+
 print("heat pump current schedules:\n")
 schedules=heat_pump.get_schedules()
 for schedule in schedules:
@@ -193,7 +195,7 @@ for schedule in schedules:
 if CHANGE_HEAT_PUMP_DATA_DURING_TEST:
     start_time = datetime.now() + timedelta(hours=1)
     end_time = datetime.now() + timedelta(hours=2)
-    planned_schedule = Schedule(start=start_time, end=end_time, functionId=CAL_FUNCTION_REDUCED_HEATING_EFFECT, value=18)
+    planned_schedule = CalendarSchedule(start=start_time, end=end_time, functionId=CAL_FUNCTION_REDUCED_HEATING_EFFECT, value=18)
     print("Planned schedule: " + str(planned_schedule))
     created_schedule = heat_pump.add_new_schedule(planned_schedule)
     print("Created schedule: " + str(created_schedule))
