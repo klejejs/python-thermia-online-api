@@ -3,7 +3,8 @@ from datetime import datetime
 import logging
 import sys
 
-from ThermiaOnlineAPI.model.Schedule import Schedule
+from ThermiaOnlineAPI.model.CalendarFunction import CalendarFunction
+from ThermiaOnlineAPI.model.CalendarSchedule import CalendarSchedule
 from ..utils.utils import pretty_json_string_except
 
 from typing import TYPE_CHECKING, Dict, List, Optional
@@ -950,12 +951,27 @@ class ThermiaHeatPump:
             )
         )
     ###########################################################################
-    # Schedules
+    # Schedules and Calendar functions
     ###########################################################################
 
         
+    def get_supported_calendar_functions(self) -> List[str]:
+        """
+        Retrieve the supported calendar functions for the heat pump installation.
 
-    def get_schedules(self) -> List[Schedule]:
+        This method fetches the supported calendar functions associated with the heat pump installation
+        identified by the instance's ID.
+
+        Returns:
+            list: A list of supported calendar functions for the heat pump installation.
+        """
+        installation_id = self.id
+        data = self.__api_interface.get_supported_calendar_functions(installation_id)
+        functions = [CalendarFunction.fromJSON(entry) for entry in data]
+        return functions
+
+
+    def get_schedules(self) -> List[CalendarSchedule]:
         """
         Retrieve the schedules for the heat pump installation.
 
@@ -967,15 +983,12 @@ class ThermiaHeatPump:
         """
         installation_id = self.id
         data = self.__api_interface.get_schedules(installation_id)
-        schedules = []
-        for entry in data:
-            schedules.append(Schedule.fromJSON(entry))
+        schedules = [CalendarSchedule.fromJSON(entry) for entry in data]
        
         return schedules
       
-
     
-    def add_new_schedule(self, schedule: Schedule) -> Schedule:
+    def add_new_schedule(self, schedule: CalendarSchedule) -> CalendarSchedule:
         """
         Adds a new schedule to the heat pump installation.
 
@@ -986,12 +999,12 @@ class ThermiaHeatPump:
             Schedule: The newly added schedule with updated information from the API.
         """
         installation_id = self.id
-        schedule.installationId = installation_id
+        schedule.set_installationId(installation_id)
 
         data= self.__api_interface.add_new_schedule(installation_id, schedule.toJSON())
-        return Schedule.fromJSON(data)
+        return CalendarSchedule.fromJSON(data)
     
-    def delete_schedule(self, schedule: Schedule):
+    def delete_schedule(self, schedule: CalendarSchedule):
         """
         deletes a given schedule from the heat pump installation.
 
@@ -1002,9 +1015,9 @@ class ThermiaHeatPump:
             Schedule: The removed schedule with updated information from the API.
         """
         installation_id = self.id
-        schedule.installationId = installation_id
+        schedule.set_installationId(installation_id)
 
-        data= self.__api_interface.delete_schedule(installation_id, schedule.toJSON())
+        data= self.__api_interface.delete_schedule(installation_id, schedule.id)
         return 
         
 
