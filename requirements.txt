@@ -1,2 +1,2 @@
 requests >= 2.32.3
-pytz
+pytz >= 2023.3
