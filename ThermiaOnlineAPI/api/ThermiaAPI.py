@@ -467,22 +467,6 @@ class ThermiaAPI:
     ):
         self.__set_register_value(device, register_index, value)
 
-    def __get_register_group(self, device_id: str, register_group: str) -> list:
-        self.__check_token_validity()
-
-        url = (
-            self.configuration["apiBaseUrl"]
-            + THERMIA_INSTALLATION_PATH
-            + str(device_id)
-            + "/Groups/"
-            + register_group
-        )
-        request = self.__session.get(url, headers=self.__default_request_headers)
-        status = request.status_code
-
-        return utils.get_response_json_or_log_and_raise_exception(
-            request, "Error in getting device's register group: " + register_group
-        )
 
     def get_schedules(self, installation_id: str) -> list:
         """
@@ -509,9 +493,36 @@ class ThermiaAPI:
 
         request = self.__session.get(url, headers=self.__default_request_headers)
         
-        return utils.get_response_json_or_log_and_raise_exception(
+        return utils.get_success_response_json_or_log_and_raise_exception(
             request, "Error in getting device's schedule."
         )
+    
+    def get_supported_calendar_functions(self, installation_id: str) -> list:
+        """
+        Retrieves the supported calendar functions for a given installation.
+        Args:
+            installation_id (str): The ID of the installation for which to retrieve calendar functions.
+        Returns:
+            list: A list of supported calendar functions and their meaning and characteristics for the specified installation.
+        Raises:
+            Exception: If there is an error in getting the device's calendar functions.
+        """
+
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + "/api/v1/installations/"
+            + str(installation_id)
+            + "/calendarFunctions"
+        )
+
+        request = self.__session.get(url, headers=self.__default_request_headers)
+        
+        return utils.get_success_response_json_or_log_and_raise_exception(
+            request, "Error in getting device's calendar functions."
+        )
+    
     
     def add_new_schedule(self, installation_id: str, data: dict) -> dict:
         """
@@ -539,10 +550,11 @@ class ThermiaAPI:
 
         request = self.__session.post(url, headers=self.__default_request_headers, json=data)
         
-        return utils.get_response_json_or_log_and_raise_exception(
+        return utils.get_success_response_json_or_log_and_raise_exception(
             request, "Error in adding device schedule."
         )
-    def delete_schedule(self, installation_id: str, data: dict):
+    
+    def delete_schedule(self, installation_id: str, schedule_id: int):
         """
         Deletes a schedule for a given installation.
        
@@ -564,7 +576,7 @@ class ThermiaAPI:
             + "/api/v1/installations/"
             + str(installation_id)
             + "/schedules/"
-            + str(data["id"])
+            + str(schedule_id)
         )
 
         request = self.__session.delete(url, headers=self.__default_request_headers)
@@ -573,13 +585,41 @@ class ThermiaAPI:
         if status != 204:
             _LOGGER.error(
                 "Error deleting schedule "
-                + str(data["id"])
+                + str(schedule_id)
                 + " value. Status: "
                 + str(status)
                 + ", Response: "
                 + request.text
             )
         return    
+    
+    def __get_register_group(self, device_id: str, register_group: str) -> list:
+        self.__check_token_validity()
+
+        url = (
+            self.configuration["apiBaseUrl"]
+            + THERMIA_INSTALLATION_PATH
+            + str(device_id)
+            + "/Groups/"
+            + register_group
+        )
+        request = self.__session.get(url, headers=self.__default_request_headers)
+        status = request.status_code
+
+        if status != 200:
+            _LOGGER.error(
+                "Error in getting device's register group: "
+                + register_group
+                + ", Status: "
+                + str(status)
+                + ", Response: "
+                + request.text
+            )
+            return []
+
+        return utils.get_response_json_or_log_and_raise_exception(
+            request, "Error in getting device's register group: " + register_group
+        )
 
     def __set_register_value(
         self, device: ThermiaHeatPump, register_index: int, register_value: int
