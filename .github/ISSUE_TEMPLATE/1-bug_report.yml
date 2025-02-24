@@ -45,7 +45,7 @@ body:
       options:
         - label: I have checked and am running the latest version of the package
           required: true
-        - label: I have checked and the issue I am reporting is not listed under the [common issues section in README.md](https://github.com/klejejs/python-thermia-online-api/tree/main?tab=readme-ov-file#common-issues), or the fix listed there does not work
+        - label: I have checked and the issue I am reporting is not listed under the [common issues section in README.md](https://github.com/klejejs/python-thermia-online-api?tab=readme-ov-file#common-issues), or the fix listed there does not work
           required: true
 
   - type: textarea
