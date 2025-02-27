@@ -2,6 +2,9 @@ from collections import ChainMap
 from datetime import datetime
 import logging
 import sys
+
+from ThermiaOnlineAPI.model.CalendarFunction import CalendarFunction
+from ThermiaOnlineAPI.model.CalendarSchedule import CalendarSchedule
 from ..utils.utils import pretty_json_string_except
 
 from typing import TYPE_CHECKING, Dict, List, Optional
@@ -577,6 +580,10 @@ class ThermiaHeatPump:
         return get_dict_value_or_none(self.__info, "lastOnline")
 
     @property
+    def installation_timezone(self) -> str:
+        return get_dict_value_or_none(self.__info, "timeZoneId")
+
+    @property
     def model(self):
         return get_dict_value_or_default(self.__device_data, "profile", {}).get(
             "thermiaName"
@@ -943,6 +950,73 @@ class ThermiaHeatPump:
                 historical_data["data"],
             )
         )
+
+    ###########################################################################
+    # Schedules and Calendar functions
+    ###########################################################################
+
+    def get_supported_calendar_functions(self) -> List[str]:
+        """
+        Retrieve the supported calendar functions for the heat pump installation.
+
+        This method fetches the supported calendar functions associated with the heat pump installation
+        identified by the instance's ID.
+
+        Returns:
+            list: A list of supported calendar functions for the heat pump installation.
+        """
+        installation_id = self.id
+        data = self.__api_interface.get_supported_calendar_functions(installation_id)
+        functions = [CalendarFunction.fromJSON(entry) for entry in data]
+        return functions
+
+    def get_schedules(self) -> List[CalendarSchedule]:
+        """
+        Retrieve the schedules for the heat pump installation.
+
+        This method fetches the schedules associated with the heat pump installation
+        identified by the instance's ID.
+
+        Returns:
+            list: A list of schedules for the heat pump installation.
+        """
+        installation_id = self.id
+        data = self.__api_interface.get_schedules(installation_id)
+        schedules = [CalendarSchedule.fromJSON(entry) for entry in data]
+
+        return schedules
+
+    def add_new_schedule(self, schedule: CalendarSchedule) -> CalendarSchedule:
+        """
+        Adds a new schedule to the heat pump installation.
+
+        Args:
+            schedule (Schedule): The schedule to be added.
+
+        Returns:
+            Schedule: The newly added schedule with updated information from the API.
+        """
+        installation_id = self.id
+        schedule.set_installationId(installation_id)
+
+        data = self.__api_interface.add_new_schedule(installation_id, schedule.toJSON())
+        return CalendarSchedule.fromJSON(data)
+
+    def delete_schedule(self, schedule: CalendarSchedule):
+        """
+        deletes a given schedule from the heat pump installation.
+
+        Args:
+            schedule (Schedule): The schedule to be deleted.
+
+        Returns:
+            Schedule: The removed schedule with updated information from the API.
+        """
+        installation_id = self.id
+        schedule.set_installationId(installation_id)
+
+        data = self.__api_interface.delete_schedule(installation_id, schedule.id)
+        return
 
     ###########################################################################
     # Print debug data

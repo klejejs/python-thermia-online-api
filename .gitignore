@@ -21,3 +21,5 @@ debug.txt
 .DS_Store
 
 .env
+## REST API example files
+*.json

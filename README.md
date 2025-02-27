@@ -98,6 +98,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `get_available_registers_for_group(register_group)` | Return a list of all available registers for specified register group |
 | `get_register_data_by_register_group_and_name(register_group, register_name)` | Return data for specified register group and name |
 | `set_register_data_by_register_group_and_name(register_group, register_name, value)` | Set register value for specified register group and name |
+| `get_schedules()` | Fetch the schedules (water block, EVU, reduced heat, silent mode,...) currently set on the Heat Pump |
 | --- | --- |
 | Change heat pump state | |
 | `set_temperature()` | Set the target temperature for the Heat Pump |
@@ -105,8 +106,55 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `set_hot_water_switch_state()` | Set the hot water switch state to 0 (off) or 1 (on) for the Heat Pump |
 | `set_hot_water_boost_switch_state()` | Set the hot water boost switch state to 0 (off) or 1 (on) for the Heat Pump |
 | --- | --- |
+| Schedule management | |
+| `create_schedule(type, active, start_time, end_time, repeat_days)` | Create a new schedule (water block, EVU, reduced heat, silent mode) with specified parameters. See separate section below. |
+| `delete_schedule(schedule_id)` | Delete a specific schedule by its ID from the Heat Pump |
+
+| --- | --- |
 | Fetch historical data | |
 | `get_historical_data_for_register()` | Fetch historical data by using register name from `historical_data_registers` together with start_time and end_time of the data in Python datatime format. Returns list of dictionaries which contains data in format `{ "time": datetime, "value": int }` |
 | --- | --- |
 | Fetch debug data | |
 | `debug()` | Fetch debug data from Thermia API and save it to `debug.txt` file |
+
+
+## Schedule Types and CAL_FUNCTION_ Values
+
+### Schedule Types
+Schedules allow you to automate the operation of your Thermia heat pump. You can create, delete, and manage schedules for various functions such as water block, EVU, reduced heat, and silent mode.
+
+### Function Input and Output
+When creating a schedule, you need to provide the following parameters:
+- `type`: The type of schedule (e.g., water block, EVU, reduced heat, silent mode).
+- `active`: Boolean indicating if the schedule is active.
+- `start`: The start time of the schedule as `datetime`.
+- `end`: The end time of the schedule as `datetime`.
+
+The output of schedule-related functions typically includes the schedule ID and the status of the operation.
+
+### CAL_FUNCTION_ Values for functionId
+The `functionId` parameter in schedule-related functions corresponds to specific CAL_FUNCTION_ values. These values define the type of schedule being created or managed. Below are some common CAL_FUNCTION_ values:
+
+- `CAL_FUNCTION_WATER_BLOCK`: Used for water block schedules.
+- `CAL_FUNCTION_EVU`: Used for EVU schedules.
+- `CAL_FUNCTION_REDUCED_HEAT`: Used for reduced heat schedules.
+- `CAL_FUNCTION_SILENT_MODE`: Used for silent mode schedules.
+
+Example code for reading, creating and deleting schedule
+```
+schedules=heat_pump.get_schedules()
+for schedule in schedules:
+    print(schedule)
+
+if CHANGE_HEAT_PUMP_DATA_DURING_TEST:
+    start_time = datetime.now() + timedelta(hours=1)
+    end_time = datetime.now() + timedelta(hours=2)
+    planned_schedule = Schedule(start=start_time, end=end_time, functionId=CAL_FUNCTION_REDUCED_HEATING_EFFECT, value=18)
+    print("Planned schedule: " + str(planned_schedule))
+    created_schedule = heat_pump.add_new_schedule(planned_schedule)
+    print("Created schedule: " + str(created_schedule))
+    ### deleting schedule again
+    heat_pump.delete_schedule(created_schedule)
+    print("Deleted schedule: " + str(created_schedule))
+
+```
