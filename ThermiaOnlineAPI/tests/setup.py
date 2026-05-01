@@ -75,9 +75,23 @@ def __mock_data_requests(requests_mock, test_data_file: str):
         json=test_data["groups"]["REG_GROUP_HOT_WATER"],
     )
     requests_mock.get(
+        f"{THERMIA_TEST_URL}/api/v1/Registers/Installations/test-id/Groups/REG_GROUP_POOL",
+        json=test_data["groups"]["REG_GROUP_POOL"],
+    )
+    requests_mock.get(
         f"{THERMIA_TEST_URL}/api/v1/installation/test-id/events?onlyActiveAlarms=false",
         json=[],
     )
+
+
+def setup_thermia(requests_mock, test_data_file: str):
+    __mock_auth_requests(requests_mock)
+    __mock_data_requests(requests_mock, test_data_file)
+
+    thermia = Thermia("username", "password")
+    assert thermia.connected == True
+
+    return thermia, thermia.heat_pumps[0]
 
 
 def setup_thermia_and_perform_basic_tests(
@@ -90,15 +104,10 @@ def setup_thermia_and_perform_basic_tests(
     expected_available_power_statuses: List[str],
     expected_is_operation_mode_read_only: bool = False,
     expected_operational_status_pid_value: int | None = None,
+    expected_pool_temperature_setpoint: float | None = None,
+    expected_is_pool_active: bool | None = None,
 ) -> ThermiaHeatPump:
-    __mock_auth_requests(requests_mock)
-    __mock_data_requests(requests_mock, test_data_file)
-
-    thermia = Thermia("username", "password")
-
-    assert thermia.connected == True
-
-    heat_pump = thermia.heat_pumps[0]
+    _, heat_pump = setup_thermia(requests_mock, test_data_file)
 
     assert (
         heat_pump.model == expected_model
@@ -129,5 +138,13 @@ def setup_thermia_and_perform_basic_tests(
     assert (
         heat_pump.operational_status_pid == expected_operational_status_pid_value
     ), f"Operational status PID - expected: {expected_operational_status_pid_value}, got: {heat_pump.operational_status_pid}"
+
+    assert (
+        heat_pump.pool_temperature_setpoint == expected_pool_temperature_setpoint
+    ), f"Pool temperature setpoint - expected: {expected_pool_temperature_setpoint}, got: {heat_pump.pool_temperature_setpoint}"
+
+    assert (
+        heat_pump.is_pool_active == expected_is_pool_active
+    ), f"Is pool active - expected: {expected_is_pool_active}, got: {heat_pump.is_pool_active}"
 
     return heat_pump

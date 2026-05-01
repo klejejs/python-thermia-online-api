@@ -13,6 +13,7 @@ from ThermiaOnlineAPI.const import (
     REG_GROUP_OPERATIONAL_OPERATION,
     REG_GROUP_OPERATIONAL_STATUS,
     REG_GROUP_OPERATIONAL_TIME,
+    REG_GROUP_POOL,
     REG_GROUP_TEMPERATURES,
     REG_HOT_WATER_STATUS,
     REG__HOT_WATER_BOOST,
@@ -390,6 +391,9 @@ class ThermiaAPI:
             "hot_water_switch": hot_water_switch_data["registerValue"],
             "hot_water_boost_switch": hot_water_boost_switch_data["registerValue"],
         }
+
+    def get_group_pool(self, device_id: str):
+        return self.__get_register_group(device_id, REG_GROUP_POOL)
 
     def set_temperature(self, device: ThermiaHeatPump, temperature):
         device_temperature_register_index = device.get_register_indexes()["temperature"]
