@@ -22,6 +22,7 @@ REG_GROUP_OPERATIONAL_STATUS = "REG_GROUP_OPERATIONAL_STATUS"
 REG_GROUP_OPERATIONAL_TIME = "REG_GROUP_OPERATIONAL_TIME"
 REG_GROUP_OPERATIONAL_OPERATION = "REG_GROUP_OPERATIONAL_OPERATION"
 REG_GROUP_HOT_WATER = "REG_GROUP_HOT_WATER"
+REG_GROUP_POOL = "REG_GROUP_POOL"
 
 ###############################################################################
 # Temperature registers
@@ -86,6 +87,13 @@ COMP_POWER_STATUS = "COMP_POWER_STATUS"
 
 REG_HOT_WATER_STATUS = "REG_HOT_WATER_STATUS"
 REG__HOT_WATER_BOOST = "REG__HOT_WATER_BOOST"
+
+###############################################################################
+# Pool registers
+###############################################################################
+
+REG_DESIRED_POOL = "REG_DESIRED_POOL"
+REG_ACTIVATE_POOL = "REG_ACTIVATE_POOL"
 
 ###############################################################################
 # Operational time registers

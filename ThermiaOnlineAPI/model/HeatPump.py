@@ -7,11 +7,14 @@ from ..utils.utils import pretty_json_string_except
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from ThermiaOnlineAPI.const import (
+    REG_ACTIVATE_POOL,
     REG_BRINE_IN,
     REG_BRINE_OUT,
     REG_ACTUAL_POOL_TEMP,
     REG_COOL_SENSOR_SUPPLY,
     REG_COOL_SENSOR_TANK,
+    REG_DESIRED_POOL,
+    REG_GROUP_POOL,
     REG_DESIRED_SUPPLY_LINE,
     REG_DESIRED_SUPPLY_LINE_TEMP,
     REG_DESIRED_SYS_SUPPLY_LINE_TEMP,
@@ -77,6 +80,7 @@ class ThermiaHeatPump:
             "hot_water_switch": None,
             "hot_water_boost_switch": None,
         }
+        self.__group_pool = None
 
         self.__alarms = None
         self.__historical_data_registers_map = None
@@ -120,6 +124,7 @@ class ThermiaHeatPump:
             self.__api_interface.get_group_operational_operation_from_status(self)
         )
         self.__group_hot_water = self.__api_interface.get_group_hot_water(self)
+        self.__group_pool = self.__api_interface.get_group_pool(self.__device_id)
 
         self.__alarms = self.__api_interface.get_all_alarms(self.__device_id)
 
@@ -198,6 +203,12 @@ class ThermiaHeatPump:
         )
         self.__api_interface.set_hot_water_boost_switch_state(self, state)
         self.update_data()
+
+    def set_pool_temperature(self, temperature: int):
+        self._LOGGER.info("Setting pool temperature to " + str(temperature))
+        self.set_register_data_by_register_group_and_name(
+            REG_GROUP_POOL, REG_DESIRED_POOL, temperature
+        )
 
     def get_all_available_register_groups(self):
         installation_profile_id = get_dict_value_or_none(
@@ -304,6 +315,14 @@ class ThermiaHeatPump:
 
         return self.__get_data_from_group_by_register_name(
             self.__group_operational_time, register_name
+        )
+
+    def __get_pool_data_by_register_name(self, register_name: str):
+        if self.__group_pool is None:
+            return None
+
+        return self.__get_data_from_group_by_register_name(
+            self.__group_pool, register_name
         )
 
     def __get_data_from_group_by_register_name(self, group: list, register_name: str):
@@ -695,6 +714,19 @@ class ThermiaHeatPump:
         return get_dict_value_or_none(
             self.__get_temperature_data_by_register_name(REG_ACTUAL_POOL_TEMP), "value"
         )
+
+    @property
+    def pool_temperature_setpoint(self):
+        return get_dict_value_or_none(
+            self.__get_pool_data_by_register_name(REG_DESIRED_POOL), "value"
+        )
+
+    @property
+    def is_pool_active(self):
+        value = get_dict_value_or_none(
+            self.__get_pool_data_by_register_name(REG_ACTIVATE_POOL), "value"
+        )
+        return None if value is None else bool(value)
 
     @property
     def brine_in_temperature(self):

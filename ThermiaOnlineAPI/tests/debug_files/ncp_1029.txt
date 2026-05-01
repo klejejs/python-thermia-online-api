@@ -1,0 +1,1204 @@
+########## DEBUG START ##########
+self.__info:
+{
+    "createdWhen": "2021-10-15T17:38:15.228",
+    "deviceConnectionType": "Genesis",
+    "gatewaySerialNumber": null,
+    "hasLinkUnit": false,
+    "installationProfileId": 1029,
+    "isOnline": true,
+    "lastOnline": "2026-05-01T08:06:20.357",
+    "model": "Atlas 12",
+    "operationManualUrl": "https://thermia.com/products/thermia-online/",
+    "serialNumber": null
+}
+
+
+self.__status:
+{
+    "activeInternetConnection": null,
+    "dcmVersion": null,
+    "deviceConnectionType": "Genesis",
+    "hasIndoorTempSensor": true,
+    "heatingEffect": 20,
+    "heatingEffectRegisters": [
+        null,
+        40717
+    ],
+    "hotWaterRegistryName": "UI_TAP_WATER",
+    "hotWaterTemperature": 62.0,
+    "indoorTemperature": 21.0,
+    "isGaugeDifferenciated": false,
+    "isHeatingEffectSetByUser": false,
+    "isHotWaterActive": true,
+    "isOutdoorTempSensorFunctioning": true,
+    "isReducedHeatingEffectSetByUser": null,
+    "linkIntegrationStatus": false,
+    "outdoorTemperature": 8.0,
+    "programVersion": "15.0.6",
+    "reducedHeatingEffect": null,
+    "reducedHeatingEffectRegisters": [
+        null,
+        null
+    ],
+    "roomFactor": 3,
+    "tcVersion": null
+}
+
+
+self.__device_data:
+{
+    "activeInternetConnection": null,
+    "deviceConnectionType": "Genesis",
+    "firmwareVersion": "15.0.6",
+    "isOnline": true,
+    "lastOnline": "2026-05-01T06:06:20.357",
+    "model": "Atlas 12",
+    "profile": {
+        "icon": 3,
+        "id": 1029,
+        "name": "NCP 1029",
+        "thermiaName": "NCP 1029"
+    },
+    "serialNumber": null
+}
+
+
+All available groups:
+[
+    {
+        "id": 36,
+        "name": "REG_GROUP_OUTDOOR_UNIT_1",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 37,
+        "name": "REG_GROUP_OUTDOOR_UNIT_2",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 38,
+        "name": "REG_GROUP_OUTDOOR_UNIT_3",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 39,
+        "name": "REG_GROUP_OUTDOOR_UNIT_4",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 11,
+        "name": "UNDEFINED",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 12,
+        "name": "REG_GROUP_PASSIVE_COOLING",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 14,
+        "name": "REG_GROUP_OPERATIONAL_OPERATION",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 2,
+        "name": "REG_GROUP_OPERATIONAL_STATUS",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 3,
+        "name": "REG_GROUP_TEMPERATURES",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 10,
+        "name": "REG_GROUP_OPERATIONAL_TIME",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 7,
+        "name": "REG_GROUP_POOL",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 19,
+        "name": "REG_GROUP_HEATING_CURVE",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 18,
+        "name": "REG_GROUP_ROOM_SENSOR",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 9,
+        "name": "REG_GROUP_COMPRESSOR",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 15,
+        "name": "REG_GROUP_HEATING_CURVE1",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 23,
+        "name": "REG_GROUP_HOT_WATER",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 24,
+        "name": "TWC",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 25,
+        "name": "REG_GROUP_DEFROSTS",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 26,
+        "name": "REG_GROUP_SMART_GRID",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 27,
+        "name": "REG_GROUP_IMMERSION_HEATER",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 17,
+        "name": "REG_GROUP_OPERATIONAL_DIAGNOSTICS",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 16,
+        "name": "REG_GROUP_SOFTWARE_VERSIONS",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 21,
+        "name": "REG_GROUP_IMMERSION_HEATER_AUX",
+        "parentId": null,
+        "visibility": 1
+    },
+    {
+        "id": 28,
+        "name": "Clear",
+        "parentId": null,
+        "visibility": 1
+    }
+]
+
+
+Group REG_GROUP_OUTDOOR_UNIT_1:
+[]
+
+
+Group REG_GROUP_OUTDOOR_UNIT_2:
+[]
+
+
+Group REG_GROUP_OUTDOOR_UNIT_3:
+[]
+
+
+Group REG_GROUP_OUTDOOR_UNIT_4:
+[]
+
+
+Group UNDEFINED:
+[]
+
+
+Group REG_GROUP_PASSIVE_COOLING:
+[]
+
+
+Group REG_GROUP_OPERATIONAL_OPERATION:
+[]
+
+
+Group REG_GROUP_OPERATIONAL_STATUS:
+[
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40762,
+        "groupId": 2,
+        "groupItemId": 23295,
+        "groupItemOrder": 10000,
+        "groupName": "REG_GROUP_OPERATIONAL_STATUS",
+        "groupOrder": 10010,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": null,
+        "minValue": null,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "Enumeration",
+        "registerId": 40762,
+        "registerIndex": 151,
+        "registerName": "REG_OPERATIONMODE",
+        "registerValue": 3.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2024-09-09T07:06:31.575",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": [
+            {
+                "confirmation": "UI_OPERATION_MODE_CHANGE_WARNING",
+                "isReadonly": true,
+                "name": "REG_VALUE_OPERATION_MODE_OFF",
+                "value": 1,
+                "visible": true
+            },
+            {
+                "confirmation": "UI_OPERATION_MODE_CHANGE_WARNING",
+                "isReadonly": false,
+                "name": "REG_VALUE_OPERATION_MODE_SERVICE",
+                "value": 2,
+                "visible": false
+            },
+            {
+                "confirmation": "UI_OPERATION_MODE_CHANGE_WARNING",
+                "isReadonly": false,
+                "name": "REG_VALUE_OPERATION_MODE_AUX_HEATER_ONLY",
+                "value": 2,
+                "visible": true
+            },
+            {
+                "confirmation": "UI_OPERATION_MODE_CHANGE_WARNING",
+                "isReadonly": false,
+                "name": "REG_VALUE_OPERATION_MODE_AUTO",
+                "value": 3,
+                "visible": true
+            }
+        ]
+    },
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40767,
+        "groupId": 2,
+        "groupItemId": 23290,
+        "groupItemOrder": 10002,
+        "groupName": "REG_GROUP_OPERATIONAL_STATUS",
+        "groupOrder": 10010,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": null,
+        "minValue": null,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "MultipleStatusFlags",
+        "registerId": 40767,
+        "registerIndex": 1987,
+        "registerName": "REG_OPERATIONAL_STATUS_PRIORITY_BITMASK",
+        "registerValue": 32.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T06:38:00.659",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": [
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_MANUAL",
+                "value": 1,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_DEFROST",
+                "value": 2,
+                "visible": false
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_HOTWATER",
+                "value": 4,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_HEAT",
+                "value": 8,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_COOL",
+                "value": 16,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_POOL",
+                "value": 32,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_LEGIONELLA",
+                "value": 64,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_PASSIVE_COOL",
+                "value": 128,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_STANDBY",
+                "value": 512,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_NO_DEMAND",
+                "value": 1024,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_OPERATION_MODE_OFF",
+                "value": 2048,
+                "visible": true
+            }
+        ]
+    }
+]
+
+
+Group REG_GROUP_TEMPERATURES:
+[
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40742,
+        "groupId": 3,
+        "groupItemId": 23300,
+        "groupItemOrder": 11002,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": null,
+        "minValue": null,
+        "modifier": 8,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40742,
+        "registerIndex": 2060,
+        "registerName": "REG_INDOOR_TEMPERATURE",
+        "registerValue": 21.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T04:13:14.336",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40736,
+        "groupId": 3,
+        "groupItemId": 23297,
+        "groupItemOrder": 11003,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 150.0,
+        "minValue": -50.0,
+        "modifier": 8,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40736,
+        "registerIndex": 2000,
+        "registerName": "REG_OUTDOOR_TEMPERATURE",
+        "registerValue": 8.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T03:37:00.695",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40718,
+        "groupId": 3,
+        "groupItemId": 23301,
+        "groupItemOrder": 11004,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": null,
+        "minValue": null,
+        "modifier": 12,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40718,
+        "registerIndex": 5,
+        "registerName": "REG_SUPPLY_LINE",
+        "registerValue": 40.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T07:40:00.653",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40737,
+        "groupId": 3,
+        "groupItemId": 23311,
+        "groupItemOrder": 11005,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 150.0,
+        "minValue": -50.0,
+        "modifier": 8,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40737,
+        "registerIndex": 2002,
+        "registerName": "REG_OPER_DATA_RETURN",
+        "registerValue": 35.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T07:46:00.655",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40720,
+        "groupId": 3,
+        "groupItemId": 23302,
+        "groupItemOrder": 11009,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 150.0,
+        "minValue": -50.0,
+        "modifier": 12,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40720,
+        "registerIndex": 9,
+        "registerName": "REG_BRINE_IN",
+        "registerValue": 2.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T06:58:00.646",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40719,
+        "groupId": 3,
+        "groupItemId": 23309,
+        "groupItemOrder": 11010,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 150.0,
+        "minValue": -50.0,
+        "modifier": 12,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40719,
+        "registerIndex": 8,
+        "registerName": "REG_BRINE_OUT",
+        "registerValue": -3.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T07:37:00.734",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40738,
+        "groupId": 3,
+        "groupItemId": 23306,
+        "groupItemOrder": 11016,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 150.0,
+        "minValue": -50.0,
+        "modifier": 8,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40738,
+        "registerIndex": 2003,
+        "registerName": "REG_HOT_WATER_TEMPERATURE",
+        "registerValue": 62.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T07:49:00.659",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40744,
+        "groupId": 3,
+        "groupItemId": 23304,
+        "groupItemOrder": 11024,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": null,
+        "minValue": null,
+        "modifier": 8,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40744,
+        "registerIndex": 2122,
+        "registerName": "REG_DESIRED_SYS_SUPPLY_LINE_TEMP",
+        "registerValue": 31.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T06:37:00.736",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40764,
+        "groupId": 3,
+        "groupItemId": 23303,
+        "groupItemOrder": 12002,
+        "groupName": "REG_GROUP_TEMPERATURES",
+        "groupOrder": 11000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 220.0,
+        "minValue": -50.0,
+        "modifier": 8,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40764,
+        "registerIndex": 1698,
+        "registerName": "REG_ACTUAL_POOL_TEMP",
+        "registerValue": 29.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-04-30T16:07:00.596",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    }
+]
+
+
+Group REG_GROUP_OPERATIONAL_TIME:
+[
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40749,
+        "groupId": 10,
+        "groupItemId": 23334,
+        "groupItemOrder": 11505,
+        "groupName": "REG_GROUP_OPERATIONAL_TIME",
+        "groupOrder": 11500,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 2147483647.0,
+        "minValue": 0.0,
+        "modifier": 16,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40749,
+        "registerIndex": 2167,
+        "registerName": "REG_OPER_TIME_IMM1",
+        "registerValue": 7.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-01-31T00:08:45.879",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40750,
+        "groupId": 10,
+        "groupItemId": 23337,
+        "groupItemOrder": 11506,
+        "groupName": "REG_GROUP_OPERATIONAL_TIME",
+        "groupOrder": 11500,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 2147483647.0,
+        "minValue": 0.0,
+        "modifier": 16,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40750,
+        "registerIndex": 2168,
+        "registerName": "REG_OPER_TIME_IMM2",
+        "registerValue": 10.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-01-01T18:12:23.374",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40751,
+        "groupId": 10,
+        "groupItemId": 23342,
+        "groupItemOrder": 11507,
+        "groupName": "REG_GROUP_OPERATIONAL_TIME",
+        "groupOrder": 11500,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 2147483647.0,
+        "minValue": 0.0,
+        "modifier": 16,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40751,
+        "registerIndex": 2169,
+        "registerName": "REG_OPER_TIME_IMM3",
+        "registerValue": 27.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-04-20T14:13:45.342",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40747,
+        "groupId": 10,
+        "groupItemId": 23340,
+        "groupItemOrder": 11508,
+        "groupName": "REG_GROUP_OPERATIONAL_TIME",
+        "groupOrder": 11500,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 2147483647.0,
+        "minValue": 0.0,
+        "modifier": 16,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40747,
+        "registerIndex": 2160,
+        "registerName": "REG_OPER_TIME_COMPRESSOR",
+        "registerValue": 17398.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T06:18:00.333",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    },
+    {
+        "canBeShownInGraph": true,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40748,
+        "groupId": 10,
+        "groupItemId": 23336,
+        "groupItemOrder": 11510,
+        "groupName": "REG_GROUP_OPERATIONAL_TIME",
+        "groupOrder": 11500,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 2147483648.0,
+        "minValue": 0.0,
+        "modifier": 16,
+        "precision": null,
+        "presentation": "Integer",
+        "registerId": 40748,
+        "registerIndex": 2166,
+        "registerName": "REG_OPER_TIME_HOT_WATER",
+        "registerValue": 1242.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-04-30T01:10:40.09",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    }
+]
+
+
+Group REG_GROUP_POOL:
+[
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40756,
+        "groupId": 7,
+        "groupItemId": 23323,
+        "groupItemOrder": 12000,
+        "groupName": "REG_GROUP_POOL",
+        "groupOrder": 12000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 1.0,
+        "minValue": 0.0,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "Enumeration",
+        "registerId": 40756,
+        "registerIndex": 1217,
+        "registerName": "REG_ACTIVATE_POOL",
+        "registerValue": 1.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-04-21T12:54:55.505",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": [
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_OFF",
+                "value": 0,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_ON",
+                "value": 1,
+                "visible": true
+            }
+        ]
+    },
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40755,
+        "groupId": 7,
+        "groupItemId": 23326,
+        "groupItemOrder": 12001,
+        "groupName": "REG_GROUP_POOL",
+        "groupOrder": 12000,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": false,
+        "maxValue": 45.0,
+        "minValue": 5.0,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "Slider",
+        "registerId": 40755,
+        "registerIndex": 1216,
+        "registerName": "REG_DESIRED_POOL",
+        "registerValue": 30.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2026-05-01T07:45:00.655",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": null
+    }
+]
+
+
+Group REG_GROUP_HEATING_CURVE:
+[]
+
+
+Group REG_GROUP_ROOM_SENSOR:
+[
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40724,
+        "groupId": 18,
+        "groupItemId": 24633,
+        "groupItemOrder": 12004,
+        "groupName": "REG_GROUP_ROOM_SENSOR",
+        "groupOrder": 12030,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": true,
+        "maxValue": 1.0,
+        "minValue": 0.0,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "Enumeration",
+        "registerId": 40724,
+        "registerIndex": 122,
+        "registerName": "REG_ROOM_SENSOR_ENABLE",
+        "registerValue": 1.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2023-12-14T11:46:37.043",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": [
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_OFF",
+                "value": 0,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_ON",
+                "value": 1,
+                "visible": true
+            }
+        ]
+    },
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40725,
+        "groupId": 18,
+        "groupItemId": 24630,
+        "groupItemOrder": 12005,
+        "groupName": "REG_GROUP_ROOM_SENSOR",
+        "groupOrder": 12030,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": false,
+        "maxValue": 1.0,
+        "minValue": 0.0,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "Enumeration",
+        "registerId": 40725,
+        "registerIndex": 123,
+        "registerName": "REG_ROOM_SENSOR_ACTIVE",
+        "registerValue": 1.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2023-12-14T11:46:37.043",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": [
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_OFF",
+                "value": 0,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_ON",
+                "value": 1,
+                "visible": true
+            }
+        ]
+    }
+]
+
+
+Group REG_GROUP_COMPRESSOR:
+[]
+
+
+Group REG_GROUP_HEATING_CURVE1:
+[]
+
+
+Group REG_GROUP_HOT_WATER:
+[
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40735,
+        "groupId": 23,
+        "groupItemId": 24675,
+        "groupItemOrder": 13500,
+        "groupName": "REG_GROUP_HOT_WATER",
+        "groupOrder": 13500,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": false,
+        "maxValue": 1.0,
+        "minValue": 0.0,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "Enumeration",
+        "registerId": 40735,
+        "registerIndex": 1059,
+        "registerName": "REG_HOT_WATER_STATUS",
+        "registerValue": 1.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2023-12-14T11:46:37.043",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": [
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_OFF",
+                "value": 0,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_ON",
+                "value": 1,
+                "visible": true
+            }
+        ]
+    },
+    {
+        "canBeShownInGraph": false,
+        "canBeShownInHistory": true,
+        "collapsible": false,
+        "disabledByLink": false,
+        "falseText": null,
+        "graphRegisterIndex": 40754,
+        "groupId": 23,
+        "groupItemId": 24668,
+        "groupItemOrder": 13509,
+        "groupName": "REG_GROUP_HOT_WATER",
+        "groupOrder": 13500,
+        "groupParentId": null,
+        "isComputedRegister": false,
+        "isInvisible": false,
+        "isReadOnly": false,
+        "maxValue": 1.0,
+        "minValue": 0.0,
+        "modifier": 0,
+        "precision": null,
+        "presentation": "Enumeration",
+        "registerId": 40754,
+        "registerIndex": 926,
+        "registerName": "REG__HOT_WATER_BOOST",
+        "registerValue": 0.0,
+        "step": 1.0,
+        "stringRegisterValue": null,
+        "timeStamp": "2023-12-14T11:46:37.043",
+        "trueText": null,
+        "unit": "NotSpecified",
+        "valueNames": [
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_OFF",
+                "value": 0,
+                "visible": true
+            },
+            {
+                "confirmation": null,
+                "isReadonly": false,
+                "name": "REG_VALUE_STATUS_ON",
+                "value": 1,
+                "visible": true
+            }
+        ]
+    }
+]
+
+
+Group TWC:
+[]
+
+
+Group REG_GROUP_DEFROSTS:
+[]
+
+
+Group REG_GROUP_SMART_GRID:
+[]
+
+
+Group REG_GROUP_IMMERSION_HEATER:
+[]
+
+
+Group REG_GROUP_OPERATIONAL_DIAGNOSTICS:
+[]
+
+
+Group REG_GROUP_SOFTWARE_VERSIONS:
+[]
+
+
+Group REG_GROUP_IMMERSION_HEATER_AUX:
+[]
+
+
+Group Clear:
+[]
+
+
+########## DEBUG END ##########
