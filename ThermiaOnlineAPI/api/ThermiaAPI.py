@@ -65,21 +65,102 @@ class ThermiaAPI:
             "Access-Control-Allow-Origin": "*",
         }
 
-        self.__session = requests.Session()
-        retry = Retry(
-            total=20, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
-        )
-        adapter = HTTPAdapter(max_retries=retry)
-        self.__session.mount("https://", adapter)
+        self.__session = self._create_session()
 
         self.configuration = self.__fetch_configuration()
         self.authenticated = self.__authenticate()
+
+    def _create_session(self) -> requests.Session:
+        """Create a configured requests session with retries for transient errors."""
+        session = requests.Session()
+        retry = Retry(
+            total=3,
+            backoff_factor=0.5,
+            status_forcelist=[500, 502, 503, 504],
+            allowed_methods=frozenset(
+                ["GET", "HEAD", "PUT", "DELETE", "OPTIONS", "TRACE"]
+            ),
+            raise_on_status=False,
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+        return session
+
+    def _request_with_retry(
+        self,
+        method: str,
+        url: str,
+        max_retries: int = 3,
+        timeout: int = 15,
+        **kwargs,
+    ) -> requests.Response:
+        """Execute an HTTP request with automatic retry, timeout, and session recovery."""
+        kwargs.setdefault("timeout", timeout)
+        last_exception = None
+
+        for attempt in range(max_retries):
+            try:
+                if method.upper() == "GET":
+                    return self.__session.get(url, **kwargs)
+                elif method.upper() == "POST":
+                    return self.__session.post(url, **kwargs)
+                else:
+                    return self.__session.request(method, url, **kwargs)
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ChunkedEncodingError,
+                ConnectionResetError,
+                TimeoutError,
+                OSError,
+            ) as exc:
+                last_exception = exc
+                _LOGGER.warning(
+                    "Network error (%s) on %s %s (attempt %d/%d). Resetting session and retrying...",
+                    type(exc).__name__,
+                    method,
+                    url,
+                    attempt + 1,
+                    max_retries,
+                )
+                try:
+                    self.__session.close()
+                except Exception:
+                    pass
+                self.__session = self._create_session()
+
+                # Re-authenticate if session was previously authenticated and this isn't an auth endpoint
+                if (
+                    hasattr(self, "authenticated")
+                    and self.authenticated
+                    and "oauth2" not in url
+                    and "SelfAsserted" not in url
+                    and "CombinedSigninAndSignup" not in url
+                ):
+                    try:
+                        self.__check_token_validity()
+                    except Exception as auth_exc:
+                        _LOGGER.warning(
+                            "Re-authentication during retry failed: %s", auth_exc
+                        )
+
+        _LOGGER.error(
+            "Failed %s request to %s after %d attempts: %s",
+            method,
+            url,
+            max_retries,
+            last_exception,
+        )
+        raise NetworkException(f"Network error during {method} {url}: {last_exception}")
 
     def get_devices(self):
         self.__check_token_validity()
 
         url = self.configuration["apiBaseUrl"] + "/api/v1/installationsInfo"
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -114,7 +195,9 @@ class ThermiaAPI:
         self.__check_token_validity()
 
         url = self.configuration["apiBaseUrl"] + "/api/v1/installations/" + device_id
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -139,7 +222,9 @@ class ThermiaAPI:
             + device_id
             + "/status"
         )
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -164,7 +249,9 @@ class ThermiaAPI:
             + str(device_id)
             + "/events?onlyActiveAlarms=false"
         )
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -188,7 +275,9 @@ class ThermiaAPI:
             + "/api/v1/DataHistory/installation/"
             + str(device_id)
         )
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -220,7 +309,9 @@ class ThermiaAPI:
             + "&periodEnd="
             + end_date_str
         )
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -246,7 +337,9 @@ class ThermiaAPI:
             + "/groups"
         )
 
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -477,7 +570,9 @@ class ThermiaAPI:
             + "/Groups/"
             + register_group
         )
-        request = self.__session.get(url, headers=self.__default_request_headers)
+        request = self._request_with_retry(
+            "GET", url, headers=self.__default_request_headers
+        )
         status = request.status_code
 
         if status != 200:
@@ -512,8 +607,8 @@ class ThermiaAPI:
             "clientUuid": "api-client-uuid",
         }
 
-        request = self.__session.post(
-            url, headers=self.__default_request_headers, json=body
+        request = self._request_with_retry(
+            "POST", url, headers=self.__default_request_headers, json=body
         )
 
         status = request.status_code
@@ -526,9 +621,13 @@ class ThermiaAPI:
                 + ", Response: "
                 + request.text
             )
+            raise NetworkException(
+                f"Error setting register {register_index} value. Status: {status}",
+                status,
+            )
 
     def __fetch_configuration(self):
-        request = self.__session.get(THERMIA_CONFIG_URL)
+        request = self._request_with_retry("GET", THERMIA_CONFIG_URL)
         status = request.status_code
 
         if status != 200:
@@ -553,7 +652,8 @@ class ThermiaAPI:
             "grant_type": "refresh_token",
         }
 
-        request_token = self.__session.post(
+        request_token = self._request_with_retry(
+            "POST",
             AZURE_AUTH_GET_TOKEN_URL,
             headers=azure_auth_request_headers,
             data=request_token__data,
@@ -605,8 +705,8 @@ class ThermiaAPI:
                 "code_challenge_method": "S256",
             }
 
-            request_auth = self.__session.get(
-                AZURE_AUTH_AUTHORIZE_URL, data=request_auth__data
+            request_auth = self._request_with_retry(
+                "GET", AZURE_AUTH_AUTHORIZE_URL, data=request_auth__data
             )
 
             state_code = ""
@@ -653,7 +753,8 @@ class ThermiaAPI:
                 "p": "B2C_1A_SignUpOrSigninOnline",
             }
 
-            request_self_asserted = self.__session.post(
+            request_self_asserted = self._request_with_retry(
+                "POST",
                 AZURE_SELF_ASSERTED_URL,
                 cookies=request_auth.cookies,
                 data=request_self_asserted__data,
@@ -686,7 +787,8 @@ class ThermiaAPI:
                 "p": "B2C_1A_SignUpOrSigninOnline",
             }
 
-            request_confirmed = self.__session.get(
+            request_confirmed = self._request_with_retry(
+                "GET",
                 AZURE_AUTH_CONFIRM_URL,
                 cookies=request_confirmed__cookies,
                 params=request_confirmed__params,
@@ -703,7 +805,8 @@ class ThermiaAPI:
                 "grant_type": "authorization_code",
             }
 
-            request_token = self.__session.post(
+            request_token = self._request_with_retry(
+                "POST",
                 AZURE_AUTH_GET_TOKEN_URL,
                 headers=azure_auth_request_headers,
                 data=request_token__data,
