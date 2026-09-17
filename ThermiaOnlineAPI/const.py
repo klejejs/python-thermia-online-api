@@ -85,7 +85,7 @@ COMP_POWER_STATUS = "COMP_POWER_STATUS"
 ###############################################################################
 
 REG_HOT_WATER_STATUS = "REG_HOT_WATER_STATUS"
-REG__HOT_WATER_BOOST = "REG__HOT_WATER_BOOST"
+REG__HOT_WATER_BOOST = "REG_HOT_WATER_BOOST"
 
 ###############################################################################
 # Operational time registers
