@@ -48,6 +48,17 @@ azure_auth_request_headers = {
 # Fix for multiple operation modes with the same value
 REG_OPERATIONMODE_SKIP_VALUES = ["REG_VALUE_OPERATION_MODE_SERVICE"]
 
+# Default (connect, read) timeout in seconds for every request
+DEFAULT_REQUEST_TIMEOUT = (10, 30)
+
+
+class ThermiaSession(requests.Session):
+    """Session that applies a default timeout to every request."""
+
+    def request(self, *args, **kwargs):
+        kwargs.setdefault("timeout", DEFAULT_REQUEST_TIMEOUT)
+        return super().request(*args, **kwargs)
+
 
 class ThermiaAPI:
     def __init__(self, email, password):
@@ -65,9 +76,9 @@ class ThermiaAPI:
             "Access-Control-Allow-Origin": "*",
         }
 
-        self.__session = requests.Session()
+        self.__session = ThermiaSession()
         retry = Retry(
-            total=20, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
+            total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
         )
         adapter = HTTPAdapter(max_retries=retry)
         self.__session.mount("https://", adapter)
