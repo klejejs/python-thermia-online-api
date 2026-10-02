@@ -512,9 +512,17 @@ class ThermiaAPI:
             "clientUuid": "api-client-uuid",
         }
 
-        request = self.__session.post(
-            url, headers=self.__default_request_headers, json=body
-        )
+        try:
+            request = self.__session.post(
+                url, headers=self.__default_request_headers, json=body
+            )
+        except requests.exceptions.RequestException as exc:
+            _LOGGER.error(
+                "Error setting register %s value: %s", register_index, exc
+            )
+            raise NetworkException(
+                f"Error setting register {register_index} value: {exc}"
+            ) from exc
 
         status = request.status_code
         if status != 200:
@@ -525,6 +533,10 @@ class ThermiaAPI:
                 + str(status)
                 + ", Response: "
                 + request.text
+            )
+            raise NetworkException(
+                f"Error setting register {register_index} value. Status: {status}",
+                status,
             )
 
     def __fetch_configuration(self):
