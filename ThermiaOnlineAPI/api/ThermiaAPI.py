@@ -15,6 +15,7 @@ from ThermiaOnlineAPI.const import (
     REG_GROUP_OPERATIONAL_TIME,
     REG_GROUP_TEMPERATURES,
     REG_HOT_WATER_STATUS,
+    REG_HOT_WATER_BOOST,
     REG__HOT_WATER_BOOST,
     REG_OPERATIONMODE,
     THERMIA_CONFIG_URL,
@@ -376,9 +377,15 @@ class ThermiaAPI:
         )
         hot_water_boost_switch_data = (
             self.__get_switch_register_index_and_value_from_group_by_register_name(
-                register_data, REG__HOT_WATER_BOOST
+                register_data, REG_HOT_WATER_BOOST
             )
         )
+        if hot_water_boost_switch_data["registerId"] is None:
+            hot_water_boost_switch_data = (
+                self.__get_switch_register_index_and_value_from_group_by_register_name(
+                    register_data, REG__HOT_WATER_BOOST
+                )
+            )
 
         device.set_register_index_hot_water_switch(hot_water_switch_data["registerId"])
 
