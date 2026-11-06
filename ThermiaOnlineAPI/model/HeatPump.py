@@ -64,7 +64,6 @@ class ThermiaHeatPump:
         self.__device_config: Dict[str, Optional[str]] = {
             "operational_status_register": None,
             "operational_status_valueNamePrefix": None,
-            "operational_status_minRegisterValue": None,
         }
 
         # GROUPS
@@ -411,9 +410,6 @@ class ThermiaHeatPump:
         if data is not None:
             self.__device_config["operational_status_register"] = COMP_STATUS
             self.__device_config["operational_status_valueNamePrefix"] = "COMP_VALUE_"
-            self.__device_config["operational_status_minRegisterValue"] = (
-                "4"  # 4 is OFF
-            )
             return data.get("valueNames", [])
 
         return None
@@ -448,48 +444,28 @@ class ThermiaHeatPump:
             self.__device_config["operational_status_register"]
         )
 
-        if data is None:
+        return self.__get_running_statuses_from_register(
+            data, self.__all_operational_statuses_map
+        )
+
+    @staticmethod
+    def __get_running_statuses_from_register(
+        register: Dict, statuses_map: Optional[ChainMap]
+    ) -> List[str]:
+        # Decoded the way Thermia Online does: a "StatusFlags" register holds one
+        # value, every other status presentation is a bitmask of the flag values.
+        register_value = get_dict_value_or_none(register, "registerValue")
+
+        if register_value is None or not statuses_map:
             return []
 
-        current_register_value = get_dict_value_or_none(data, "registerValue")
+        register_value = int(register_value)
+        statuses = sorted(statuses_map.items())
 
-        data = self.__all_operational_statuses_map
+        if register.get("presentation") == "StatusFlags":
+            return [name for value, name in statuses if value == register_value]
 
-        if data is None:
-            return []
-
-        data_items_list = list(data.items())
-
-        current_operation_mode = [
-            value for key, value in data_items_list if key == current_register_value
-        ]
-
-        if len(current_operation_mode) == 1:
-            return current_operation_mode
-
-        if (
-            len(current_operation_mode) != 1
-            and current_register_value > 0
-            and len(data_items_list) > 1
-        ):
-            # Attempt to get multiple statuses by binary sum of the values
-            data_items_list.sort(key=lambda x: x[0], reverse=True)
-            list_of_current_operation_statuses = []
-
-            if self.__device_config["operational_status_minRegisterValue"] is not None:
-                current_register_value -= int(
-                    self.__device_config["operational_status_minRegisterValue"]
-                )
-
-            for key, value in data_items_list:
-                if key <= current_register_value:
-                    current_register_value -= key
-                    list_of_current_operation_statuses.append(value)
-
-            if current_register_value == 0:
-                return list_of_current_operation_statuses
-
-        return []
+        return [name for value, name in statuses if register_value & value == value]
 
     def __get_power_statuses_from_operational_status(self) -> Optional[Dict]:
         data = self.__get_register_from_operational_status(COMP_POWER_STATUS)
@@ -525,40 +501,9 @@ class ThermiaHeatPump:
         if data is None:
             return []
 
-        current_register_value = get_dict_value_or_none(data, "registerValue")
-
-        data = self.__all_power_statuses_map
-
-        if data is None:
-            return []
-
-        data_items_list = list(data.items())
-
-        current_power_status = [
-            value for key, value in data_items_list if key == current_register_value
-        ]
-
-        if len(current_power_status) == 1:
-            return current_power_status
-
-        if (
-            len(current_power_status) != 1
-            and current_register_value > 0
-            and len(data_items_list) > 1
-        ):
-            # Attempt to get multiple statuses by binary sum of the values
-            data_items_list.sort(key=lambda x: x[0], reverse=True)
-            list_of_current_power_statuses = []
-
-            for key, value in data_items_list:
-                if key <= current_register_value:
-                    current_register_value -= key
-                    list_of_current_power_statuses.append(value)
-
-            if current_register_value == 0:
-                return list_of_current_power_statuses
-
-        return []
+        return self.__get_running_statuses_from_register(
+            data, self.__all_power_statuses_map
+        )
 
     @property
     def name(self):
