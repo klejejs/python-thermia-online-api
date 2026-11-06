@@ -110,3 +110,9 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | --- | --- |
 | Fetch debug data | |
 | `debug()` | Fetch debug data from Thermia API and save it to `debug.txt` file |
+
+## Checking against the Thermia Online web app
+The web app at [https://online.thermia.se](https://online.thermia.se) reads the same registers as this library, and its code is public: no login is needed to download it. Only register values need an account. To compare how the library and the web app decode register data:
+
+- `python scripts/fetch_thermia_web_app.py` saves the web app's HTML, configuration and JavaScript to `.thermia-web/` to search through.
+- `PYTHONPATH=. python scripts/compare_operational_status_with_web.py [debug_file ...]` decodes every operational status value with the library and with the web app's rule, and lists where they disagree. With no arguments it uses the debug files in `ThermiaOnlineAPI/tests/debug_files`. It needs `pip install -r requirements_testing.txt`.
