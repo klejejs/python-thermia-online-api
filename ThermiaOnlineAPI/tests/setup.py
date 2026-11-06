@@ -10,6 +10,7 @@ from ..api.ThermiaAPI import (
     AZURE_AUTH_CONFIRM_URL,
     AZURE_AUTH_GET_TOKEN_URL,
     AZURE_SELF_ASSERTED_URL,
+    DEFAULT_REQUEST_TIMEOUT,
 )
 from ..const import THERMIA_CONFIG_URL
 from ..model.HeatPump import ThermiaHeatPump
@@ -129,5 +130,10 @@ def setup_thermia_and_perform_basic_tests(
     assert (
         heat_pump.operational_status_pid == expected_operational_status_pid_value
     ), f"Operational status PID - expected: {expected_operational_status_pid_value}, got: {heat_pump.operational_status_pid}"
+
+    request_timeouts = [request.timeout for request in requests_mock.request_history]
+    assert all(
+        timeout == DEFAULT_REQUEST_TIMEOUT for timeout in request_timeouts
+    ), f"Request timeouts - expected: {DEFAULT_REQUEST_TIMEOUT}, got: {request_timeouts}"
 
     return heat_pump
