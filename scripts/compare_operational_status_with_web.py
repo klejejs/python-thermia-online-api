@@ -85,7 +85,9 @@ def compare(debug_file: Path) -> int:
     for flag in flags:
         all_flags |= flag["value"]
 
-    print(f"\n=== {debug_file.name}: {register['registerName']} ({register['presentation']})")
+    print(
+        f"\n=== {debug_file.name}: {register['registerName']} ({register['presentation']})"
+    )
     print(
         "flags: "
         + ", ".join(
