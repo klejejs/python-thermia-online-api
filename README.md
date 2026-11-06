@@ -86,6 +86,11 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `hot_water_switch_state` | Int value indicating the Heat Pump hot water switch state (0 or 1) or None if not available |
 | `hot_water_boost_switch_state` | Int value indicating the Heat Pump hot water boost switch state (0 or 1) or None if not available |
 | --- | --- |
+| Pool data | |
+| `pool_temperature` | Measured pool temperature in Celsius |
+| `pool_temperature_setpoint` | Target pool temperature in Celsius, or None if pool is not configured |
+| `is_pool_active` | Boolean value indicating if pool heating is enabled, or None if pool is not configured |
+| --- | --- |
 | Historical data | |
 | `historical_data_registers` | List of available registers to use for historical data fetching |
 
@@ -104,6 +109,7 @@ To execute the example file, first run `pip install -r requirements.txt` to inst
 | `set_operation_mode()` | Set the operation mode for the Heat Pump |
 | `set_hot_water_switch_state()` | Set the hot water switch state to 0 (off) or 1 (on) for the Heat Pump |
 | `set_hot_water_boost_switch_state()` | Set the hot water boost switch state to 0 (off) or 1 (on) for the Heat Pump |
+| `set_pool_temperature()` | Set the target pool temperature in Celsius for the Heat Pump |
 | --- | --- |
 | Fetch historical data | |
 | `get_historical_data_for_register()` | Fetch historical data by using register name from `historical_data_registers` together with start_time and end_time of the data in Python datatime format. Returns list of dictionaries which contains data in format `{ "time": datetime, "value": int }` |
