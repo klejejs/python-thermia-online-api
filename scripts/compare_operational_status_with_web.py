@@ -1,8 +1,9 @@
 """Compare the library's operational status decoding with Thermia Online's.
 
-The web app shows a status flag as running when (registerValue & flag) == flag,
-for both the StatusFlagsTextInd and MultipleStatusFlags presentations, and lists
-only flags with visible: true. Run fetch_thermia_web_app.py to re-check that rule.
+The web app shows a status flag as running when (registerValue & flag) == flag
+for the StatusFlagsTextInd and MultipleStatusFlags presentations, and when
+registerValue == flag for StatusFlags. It lists only flags with visible: true.
+Run fetch_thermia_web_app.py to re-check those rules.
 
 This loads each debug file through the real library (HTTP mocked, no login),
 sets the operational status register to every value its flags can form, and
@@ -64,12 +65,14 @@ def library_running_statuses(data: dict) -> list:
         return sorted(heat_pump.running_operational_statuses)
 
 
-def web_running_statuses(value: int, flags: list, prefix: str) -> list:
-    return sorted(
-        flag_label(flag["name"], prefix)
-        for flag in flags
-        if (value & flag["value"]) == flag["value"]
-    )
+def web_running_statuses(
+    value: int, flags: list, prefix: str, presentation: str
+) -> list:
+    if presentation == "StatusFlags":
+        running = [flag for flag in flags if value == flag["value"]]
+    else:
+        running = [flag for flag in flags if (value & flag["value"]) == flag["value"]]
+    return sorted(flag_label(flag["name"], prefix) for flag in running)
 
 
 def compare(debug_file: Path) -> int:
@@ -103,7 +106,7 @@ def compare(debug_file: Path) -> int:
         data = copy.deepcopy(base)
         find_status_register(data)["registerValue"] = float(value)
         library = library_running_statuses(data)
-        web = web_running_statuses(value, flags, prefix)
+        web = web_running_statuses(value, flags, prefix, register.get("presentation"))
         if library != web:
             known_flags_only = value & ~all_flags == 0 and all(
                 value & bit == 0 or any(flag["value"] == bit for flag in flags)
