@@ -51,13 +51,19 @@ def main() -> None:
         if script.startswith("manifest."):
             chunk_map = JS_CHUNK_MAP.search(fetch(session, script))
             if chunk_map is None:
-                sys.exit(f"No JS chunk map found in {script}; the webpack runtime has changed.")
-            files.update(f"{chunk}.{h}.js" for chunk, h in CHUNK_HASH.findall(chunk_map[1]))
+                sys.exit(
+                    f"No JS chunk map found in {script}; the webpack runtime has changed."
+                )
+            files.update(
+                f"{chunk}.{h}.js" for chunk, h in CHUNK_HASH.findall(chunk_map[1])
+            )
 
     for name in sorted(files):
         (output_dir / name).write_text(fetch(session, name))
 
-    print(f"Saved index.html, configuration.json and {len(files)} scripts to {output_dir}/")
+    print(
+        f"Saved index.html, configuration.json and {len(files)} scripts to {output_dir}/"
+    )
     print(f"API base URL: {configuration.get('apiBaseUrl')}")
 
 
