@@ -21,3 +21,6 @@ debug.txt
 .DS_Store
 
 .env
+
+# Thermia Online web app downloaded by scripts/fetch_thermia_web_app.py
+.thermia-web/
