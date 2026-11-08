@@ -80,6 +80,8 @@ def __mock_data_requests(requests_mock, test_data_file: str):
         json=[],
     )
 
+    return test_data
+
 
 def setup_thermia_and_perform_basic_tests(
     requests_mock,
@@ -93,7 +95,7 @@ def setup_thermia_and_perform_basic_tests(
     expected_operational_status_pid_value: int | None = None,
 ) -> ThermiaHeatPump:
     __mock_auth_requests(requests_mock)
-    __mock_data_requests(requests_mock, test_data_file)
+    test_data = __mock_data_requests(requests_mock, test_data_file)
 
     thermia = Thermia("username", "password")
 
@@ -130,6 +132,16 @@ def setup_thermia_and_perform_basic_tests(
     assert (
         heat_pump.operational_status_pid == expected_operational_status_pid_value
     ), f"Operational status PID - expected: {expected_operational_status_pid_value}, got: {heat_pump.operational_status_pid}"
+
+    expected_last_online = test_data["info"].get("lastOnline")
+    assert (
+        heat_pump.last_online == expected_last_online
+    ), f"Last online - expected: {expected_last_online}, got: {heat_pump.last_online}"
+
+    expected_last_online_utc = test_data["device_data"].get("lastOnline")
+    assert (
+        heat_pump.last_online_utc == expected_last_online_utc
+    ), f"Last online UTC - expected: {expected_last_online_utc}, got: {heat_pump.last_online_utc}"
 
     request_timeouts = [request.timeout for request in requests_mock.request_history]
     assert all(
