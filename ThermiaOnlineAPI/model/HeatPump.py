@@ -519,7 +519,13 @@ class ThermiaHeatPump:
 
     @property
     def last_online(self):
+        """Last online time in the installation's local time zone (naive ISO string)."""
         return get_dict_value_or_none(self.__info, "lastOnline")
+
+    @property
+    def last_online_utc(self):
+        """Last online time in UTC (naive ISO string)."""
+        return get_dict_value_or_none(self.__device_data, "lastOnline")
 
     @property
     def model(self):
